@@ -15,8 +15,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
   import { KeyboardEditorKeyboard } from "$lib/components/keyboard-editor"
+  import EncoderWidget from "$lib/components/keyboard-editor/encoder-widget.svelte"
   import * as KeycodeButton from "$lib/components/keycode-button"
   import { Keycode } from "$lib/libhmk/keycodes"
+  import { getKeycodeMetadata } from "$lib/keycodes"
   import { numberNullable, stringNullable } from "$lib/utils"
   import { ToggleGroup } from "bits-ui"
   import { remapStateContext } from "../context.svelte"
@@ -57,6 +59,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             {/snippet}
           </ToggleGroup.Item>
         {/if}
+      {/snippet}
+      {#snippet encoderGenerator(encoder)}
+        <EncoderWidget 
+          {...encoder}
+          interactive
+          leftSelected={remapState.key === encoder.keys[0]}
+          rightSelected={remapState.key === encoder.keys[1]}
+          buttonSelected={remapState.key === encoder.buttonKey}
+          ccwKeycode={keymap ? keymap[layer][encoder.keys[0]] : undefined}
+          cwKeycode={keymap ? keymap[layer][encoder.keys[1]] : undefined}
+          btnKeycode={keymap && encoder.buttonKey !== undefined ? keymap[layer][encoder.buttonKey] : undefined}
+          onclick={(k) => {
+            if (remapState.key === k) remapState.key = null
+            else remapState.key = k
+          }}
+        />
       {/snippet}
     </KeyboardEditorKeyboard>
   {/snippet}

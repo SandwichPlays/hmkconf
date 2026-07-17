@@ -22,15 +22,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { cn, type WithoutChildren } from "$lib/utils"
   import type { Snippet } from "svelte"
   import type { HTMLAttributes } from "svelte/elements"
+  import EncoderWidget from "./encoder-widget.svelte"
+
+  import type { DisplayLayoutEncoder } from "$lib/configurator/context.svelte"
 
   const {
     class: className,
     displayLayout = displayLayoutContext.get(),
     keyGenerator,
+    encoderGenerator,
     ...props
   }: WithoutChildren<HTMLAttributes<HTMLDivElement>> & {
     displayLayout?: DisplayLayout
     keyGenerator?: Snippet<[number]>
+    encoderGenerator?: Snippet<[DisplayLayoutEncoder]>
   } = $props()
 
   let containerWidth = $state(0)
@@ -61,6 +66,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             <div class="absolute p-0.5" style={unitToStyle(w, h, x, y)}>
               {@render keyGenerator?.(key)}
             </div>
+          {/each}
+          {#each displayLayout.displayEncoders as encoder, i (i)}
+            {#if encoderGenerator}
+              {@render encoderGenerator(encoder)}
+            {:else}
+              <EncoderWidget {...encoder} />
+            {/if}
           {/each}
         </div>
       </div>

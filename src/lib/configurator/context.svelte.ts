@@ -218,6 +218,15 @@ export type DisplayLayoutKey = {
   y: number
 }
 
+export type DisplayLayoutEncoder = {
+  keys: [number, number]
+  buttonKey?: number
+  w: number
+  h: number
+  x: number
+  y: number
+}
+
 function getKeyCoordinates({ keymap }: KeyboardLayout) {
   const coordinates: [number, number][] = []
   const position = [0, 0]
@@ -240,6 +249,7 @@ export class DisplayLayout {
   width: number
   height: number
   displayKeys: DisplayLayoutKey[]
+  displayEncoders: DisplayLayoutEncoder[]
 
   #layout = keyboardContext.get().metadata.layout
   #layoutOptions = $derived(persistedStateContext.get().current.layoutOptions)
@@ -289,6 +299,16 @@ export class DisplayLayout {
         acc.push({ key, w, h, x, y })
         return acc
       }, [] as DisplayLayoutKey[]),
+    )
+    this.displayEncoders = $derived.by(() =>
+      (this.#layout.encoders ?? []).map(({ keys, buttonKey, w, h, x, y }) => ({
+        keys: [keys[0], keys[1]],
+        buttonKey,
+        w: w ?? 1,
+        h: h ?? 1,
+        x,
+        y,
+      })),
     )
   }
 }

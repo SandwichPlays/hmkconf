@@ -15,7 +15,7 @@
 
 import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE } from "./libhmk"
 
-export const SWITCH_DISTANCE_UNIT = 80
+export const SWITCH_DISTANCE_UNIT = 200
 export const SWITCH_DISTANCE_MM = 4
 
 export function unitToDistance(v: number) {
