@@ -194,6 +194,7 @@ export const oldDemoMetadata = keyboardMetadataSchema.parse({
   usbHighSpeed: true,
 
   adcResolution: 12,
+  switchTravel: 3.6,
   numProfiles: 4,
   numLayers: 4,
   numKeys: 7,
@@ -234,6 +235,7 @@ export const demoMetadata = keyboardMetadataSchema.parse({
   "productId": "0x0004",
   "usbHighSpeed": true,
   "adcResolution": 12,
+  "switchTravel": 3.6,
   "numProfiles": 4,
   "numLayers": 4,
   "numKeys": 7,
