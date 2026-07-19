@@ -107,6 +107,7 @@ export class DemoKeyboard implements Keyboard {
     return {
       initialRestValue: (1 << adcResolution) - 1,
       initialBottomOutThreshold: (1 << adcResolution) - 1,
+      switchTravel: Array(numKeys).fill(40),
     }
   }
   async setCalibration() {}

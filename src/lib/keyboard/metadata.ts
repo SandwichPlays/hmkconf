@@ -112,6 +112,7 @@ export const keyboardMetadataSchema = z
     usbHighSpeed: z.boolean().default(false),
 
     adcResolution: z.int().min(1).max(16),
+    switchTravel: z.number().min(1.0).max(10.0).default(4.0),
     numProfiles: z.int().min(1).max(HMK_MAX_NUM_PROFILES),
     numLayers: z.int().min(1).max(HMK_MAX_NUM_LAYERS),
     numKeys: z.int().min(1).max(HMK_MAX_NUM_KEYS),

@@ -20,6 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { ToggleGroup } from "bits-ui"
   import { performanceStateContext } from "../context.svelte"
   import { actuationQueryContext } from "../queries/actuation-query.svelte"
+  import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { keymapQueryContext } from "../queries/keymap-query.svelte"
   import PerformanceKeyButton from "./performance-key-button.svelte"
 
@@ -29,6 +30,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const { current: keymap } = $derived(keymapQueryContext.get().keymap)
   const { current: actuationMap } = $derived(
     actuationQueryContext.get().actuationMap,
+  )
+  const { current: calibration } = $derived(
+    calibrationQueryContext.get().calibration,
   )
 
   let isDragging = $state(false)
@@ -74,6 +78,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 {:else}
                   <PerformanceKeyButton
                     actuation={actuationMap[key]}
+                    keyIndex={key}
+                    calibration={calibration}
                     {...props}
                   />
                 {/if}

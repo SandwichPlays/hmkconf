@@ -13,10 +13,22 @@
  * this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE } from "./libhmk"
+import { keyboardContext } from "./keyboard"
+import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE, type HMK_Calibration } from "./libhmk"
 
 export const SWITCH_DISTANCE_UNIT = 200
-export const SWITCH_DISTANCE_MM = 4
+
+export function getSwitchDistanceMM(keyIndex?: number, calibration?: HMK_Calibration) {
+  try {
+    const kb = keyboardContext.get()
+    if (keyIndex !== undefined && calibration?.switchTravel?.[keyIndex] !== undefined) {
+      return calibration.switchTravel[keyIndex] / 10
+    }
+    return kb?.metadata?.switchTravel ?? 4.0
+  } catch {
+    return 4.0
+  }
+}
 
 export function unitToDistance(v: number) {
   return Math.max(
@@ -29,10 +41,10 @@ export function distanceToUnit(v: number) {
   return Math.round((v * SWITCH_DISTANCE_UNIT) / HMK_MAX_DISTANCE)
 }
 
-export function displayUnitDistance(v: number, decimal = 2) {
-  return ((v * SWITCH_DISTANCE_MM) / SWITCH_DISTANCE_UNIT).toFixed(decimal)
+export function displayUnitDistance(v: number, keyIndex?: number, calibration?: HMK_Calibration, decimal = 2) {
+  return ((v * getSwitchDistanceMM(keyIndex, calibration)) / SWITCH_DISTANCE_UNIT).toFixed(decimal)
 }
 
-export function displayDistance(v: number, decimal = 2) {
-  return displayUnitDistance(distanceToUnit(v), decimal)
+export function displayDistance(v: number, keyIndex?: number, calibration?: HMK_Calibration, decimal = 2) {
+  return displayUnitDistance(distanceToUnit(v), keyIndex, calibration, decimal)
 }

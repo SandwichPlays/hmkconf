@@ -16,6 +16,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
   import { displayDistance } from "$lib/distance"
   import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE } from "$lib/libhmk"
+  import { gamepadStateContext } from "$lib/configurator/context.svelte"
+  import { calibrationQueryContext } from "$lib/configurator/queries/calibration.query.svelte"
+
+  const gamepadState = gamepadStateContext.get()
+  const calibrationQuery = calibrationQueryContext.get()
+  const { current: calibration } = $derived(calibrationQuery.calibration)
+  const key = $derived(gamepadState.key)
 </script>
 
 <div
@@ -40,7 +47,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   class="flex items-center text-sm text-muted-foreground"
   style="grid-area: switch-min"
 >
-  {displayDistance(HMK_MIN_DISTANCE)}mm
+  {displayDistance(HMK_MIN_DISTANCE, key ?? undefined, calibration)}mm
 </div>
 <div
   class="flex items-center justify-center text-sm text-muted-foreground"
@@ -52,5 +59,5 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   class="flex items-center justify-end text-sm text-muted-foreground"
   style="grid-area: switch-max"
 >
-  {displayDistance(HMK_MAX_DISTANCE)}mm
+  {displayDistance(HMK_MAX_DISTANCE, key ?? undefined, calibration)}mm
 </div>

@@ -15,17 +15,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
   import * as Tooltip from "$lib/components/ui/tooltip"
+  import { gamepadStateContext } from "$lib/configurator/context.svelte"
   import {
     CURVE_VIEW_HEIGHT,
     CURVE_VIEW_WIDTH,
     viewCurveToAnalog,
   } from "$lib/configurator/lib/gamepad"
+  import { calibrationQueryContext } from "$lib/configurator/queries/calibration.query.svelte"
   import { gamepadQueryContext } from "$lib/configurator/queries/gamepad-query.svelte"
   import { displayDistance } from "$lib/distance"
   import { clamp } from "$lib/utils"
   import { analogCurveStateContext } from "./context.svelte"
 
   const { index }: { index: number } = $props()
+
+  const gamepadState = gamepadStateContext.get()
+  const calibrationQuery = calibrationQueryContext.get()
+  const { current: calibration } = $derived(calibrationQuery.calibration)
+  const key = $derived(gamepadState.key)
 
   const analogCurveState = analogCurveStateContext.get()
   const { viewCurve } = $derived(analogCurveState)
@@ -73,6 +80,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ></div>
   </Tooltip.Trigger>
   <Tooltip.Content>
-    ({displayDistance(analogCurve[index].x)}mm, {analogCurve[index].y})
+    ({displayDistance(analogCurve[index].x, key ?? undefined, calibration)}mm, {analogCurve[index].y})
   </Tooltip.Content>
 </Tooltip.Root>

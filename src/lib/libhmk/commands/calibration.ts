@@ -26,28 +26,39 @@ export async function recalibrate(commander: Commander) {
 
 export async function getCalibration(
   commander: Commander,
+  numKeys: number,
 ): Promise<HMK_Calibration> {
   const reader = new DataViewReader(
     await commander.sendCommand({ command: HMK_Command.GET_CALIBRATION }),
   )
 
+  const initialRestValue = reader.uint16()
+  const initialBottomOutThreshold = reader.uint16()
+  const switchTravel: number[] = []
+  for (let i = 0; i < numKeys; i++) {
+    switchTravel.push(reader.uint8())
+  }
+
   return {
-    initialRestValue: reader.uint16(),
-    initialBottomOutThreshold: reader.uint16(),
+    initialRestValue,
+    initialBottomOutThreshold,
+    switchTravel,
   }
 }
 
 export async function setCalibration(
   commander: Commander,
   {
-    data: { initialRestValue, initialBottomOutThreshold },
+    data: { initialRestValue, initialBottomOutThreshold, switchTravel },
   }: SetCalibrationParams,
+  numKeys: number,
 ) {
   await commander.sendCommand({
     command: HMK_Command.SET_CALIBRATION,
     payload: [
       ...uint16ToUInt8s(initialRestValue),
       ...uint16ToUInt8s(initialBottomOutThreshold),
+      ...switchTravel.slice(0, numKeys),
     ],
   })
 }

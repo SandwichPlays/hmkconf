@@ -136,10 +136,10 @@ class HMKKeyboard implements Keyboard {
     return analogInfo(this.commander, this.metadata)
   }
   getCalibration() {
-    return getCalibration(this.commander)
+    return getCalibration(this.commander, this.metadata.numKeys)
   }
   setCalibration(params: SetCalibrationParams) {
-    return setCalibration(this.commander, params)
+    return setCalibration(this.commander, params, this.metadata.numKeys)
   }
   getProfile() {
     return getProfile(this.commander)

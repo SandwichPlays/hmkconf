@@ -18,9 +18,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { KeyboardEditorKeyboard } from "$lib/components/keyboard-editor"
   import { displayDistance } from "$lib/distance"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
+  import { calibrationQueryContext } from "../queries/calibration.query.svelte"
 
   const { current: analogInfo } = $derived(
     analogInfoQueryContext.get().analogInfo,
+  )
+  const { current: calibration } = $derived(
+    calibrationQueryContext.get().calibration,
   )
 </script>
 
@@ -31,7 +35,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {:else}
       <KeyButton.Root>
         <span>{analogInfo[key].adcValue}</span>
-        <span>{displayDistance(analogInfo[key].distance)}</span>
+        <span>{displayDistance(analogInfo[key].distance, key, calibration)}</span>
       </KeyButton.Root>
     {/if}
   {/snippet}

@@ -38,6 +38,7 @@ export const HMK_MAX_DISTANCE = 255
 export const hmkCalibrationSchema = z.object({
   initialRestValue: uint16Schema,
   initialBottomOutThreshold: uint16Schema,
+  switchTravel: z.array(uint8Schema),
 })
 
 export type HMK_Calibration = z.infer<typeof hmkCalibrationSchema>

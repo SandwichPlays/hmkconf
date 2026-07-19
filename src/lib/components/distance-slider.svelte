@@ -20,6 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     SWITCH_DISTANCE_UNIT,
     unitToDistance,
   } from "$lib/distance"
+  import type { HMK_Calibration } from "$lib/libhmk"
   import { optMap } from "$lib/utils"
   import type { ComponentProps } from "svelte"
   import CommitSlider from "./commit-slider.svelte"
@@ -29,8 +30,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     min = 1,
     max = SWITCH_DISTANCE_UNIT,
     onCommit,
+    keyIndex,
+    calibration,
     ...props
-  }: ComponentProps<typeof CommitSlider> = $props()
+  }: ComponentProps<typeof CommitSlider> & {
+    keyIndex?: number
+    calibration?: HMK_Calibration
+  } = $props()
 </script>
 
 <CommitSlider
@@ -38,7 +44,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     () => optMap(committed, distanceToUnit),
     (v) => (committed = optMap(v, unitToDistance))
   }
-  display={(v) => `${displayUnitDistance(v)}mm`}
+  display={(v) => `${displayUnitDistance(v, keyIndex, calibration)}mm`}
   {min}
   {max}
   onCommit={(v) => onCommit?.(unitToDistance(v))}

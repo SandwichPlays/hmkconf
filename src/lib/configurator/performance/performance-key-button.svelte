@@ -16,15 +16,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
   import { KeyButton } from "$lib/components/key-button"
   import { displayDistance } from "$lib/distance"
+  import type { HMK_Calibration } from "$lib/libhmk"
   import type { HMK_Actuation } from "$lib/libhmk/actuation"
   import type { WithoutChildrenOrChild } from "$lib/utils"
   import type { ComponentProps } from "svelte"
 
   const {
     actuation,
+    keyIndex,
+    calibration,
     ...props
   }: WithoutChildrenOrChild<ComponentProps<typeof KeyButton>> & {
     actuation: HMK_Actuation
+    keyIndex?: number
+    calibration?: HMK_Calibration
   } = $props()
 
   const { actuationPoint, rtDown, rtUp, continuous } = $derived(actuation)
@@ -32,11 +37,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <KeyButton size="sm" {...props}>
-  <span>{displayDistance(actuationPoint)}{continuousLabel}</span>
+  <span>{displayDistance(actuationPoint, keyIndex, calibration)}{continuousLabel}</span>
   {#if rtDown > 0}
-    <span>{displayDistance(rtDown)}{continuousLabel}</span>
+    <span>{displayDistance(rtDown, keyIndex, calibration)}{continuousLabel}</span>
   {/if}
   {#if rtUp > 0}
-    <span>{displayDistance(rtUp)}{continuousLabel}</span>
+    <span>{displayDistance(rtUp, keyIndex, calibration)}{continuousLabel}</span>
   {/if}
 </KeyButton>

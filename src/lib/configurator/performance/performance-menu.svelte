@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+  import CommitSlider from "$lib/components/commit-slider.svelte"
   import DistanceSlider from "$lib/components/distance-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import Switch from "$lib/components/switch.svelte"
@@ -25,13 +26,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { setToIntervals } from "$lib/utils"
   import { performanceStateContext } from "../context.svelte"
   import { actuationQueryContext } from "../queries/actuation-query.svelte"
+  import { calibrationQueryContext } from "../queries/calibration.query.svelte"
 
   const { keys } = $derived(performanceStateContext.get())
 
   const actuationQuery = actuationQueryContext.get()
   const { current: actuationMap } = $derived(actuationQuery.actuationMap)
 
-  const { disabled, currentActuation, rtEnabled, separatedRT } = $derived.by(
+  const calibrationQuery = calibrationQueryContext.get()
+  const { current: calibration } = $derived(calibrationQuery.calibration)
+
+  const { disabled, firstKey, currentActuation, rtEnabled, separatedRT } = $derived.by(
     () => {
       if (keys.size === 0 || !actuationMap) {
         return { disabled: true } as const
@@ -41,12 +46,32 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       const currentActuation = actuationMap[firstKey]
       return {
         disabled: false,
+        firstKey,
         currentActuation,
         rtEnabled: currentActuation.rtDown > 0,
         separatedRT: currentActuation.rtUp > 0,
       } as const
     },
   )
+
+  const currentTravel = $derived.by(() => {
+    if (disabled || !calibration?.switchTravel || firstKey === undefined) return 40
+    return calibration.switchTravel[firstKey] ?? 40
+  })
+
+  const updateTravel = (v: number) => {
+    if (disabled || !calibration?.switchTravel) return
+    const newSwitchTravel = [...calibration.switchTravel]
+    for (const key of keys) {
+      newSwitchTravel[key] = v
+    }
+    calibrationQuery.set({
+      data: {
+        ...calibration,
+        switchTravel: newSwitchTravel,
+      }
+    })
+  }
 
   const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) =>
     !disabled &&
@@ -60,12 +85,27 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <div class="grid size-full grid-cols-[minmax(0,1fr)_24rem]">
   <FixedScrollArea class="flex flex-col gap-4 p-4">
+    <CommitSlider
+      bind:committed={
+        () => currentTravel,
+        (v) => updateTravel(v)
+      }
+      display={(v) => `${(v / 10).toFixed(1)}mm`}
+      min={10}
+      max={100}
+      step={1}
+      disabled={disabled || !calibration}
+      title="Switch Travel Depth"
+      description="Set the physical travel depth of the switch. This adjusts how millimeter values are displayed and interpreted for this key."
+    />
     <DistanceSlider
       bind:committed={
         () => currentActuation?.actuationPoint ?? DEFAULT_ACTUATION_POINT,
         (v) =>
           updateActuation((actuation) => ({ ...actuation, actuationPoint: v }))
       }
+      keyIndex={firstKey}
+      calibration={calibration}
       description={rtEnabled
         ? "Set the specific distance at which Rapid Trigger activates and deactivates."
         : "Set the specific distance at which a key press and release is registered."}
@@ -77,6 +117,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         () => currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
         (v) => updateActuation((actuation) => ({ ...actuation, rtDown: v }))
       }
+      keyIndex={firstKey}
+      calibration={calibration}
       description={separatedRT
         ? "Set the minimum distance change required for Rapid Trigger to register a key press."
         : "Set the minimum distance change required for Rapid Trigger to register a key press or release."}
@@ -91,6 +133,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           () => currentActuation?.rtUp ?? DEFAULT_RT_SENSITIVITY,
           (v) => updateActuation((actuation) => ({ ...actuation, rtUp: v }))
         }
+        keyIndex={firstKey}
+        calibration={calibration}
         description="Set the minimum distance change required for Rapid Trigger to register a key release."
         disabled={disabled || !rtEnabled}
         title="Rapid Trigger Release Sensitivity"
