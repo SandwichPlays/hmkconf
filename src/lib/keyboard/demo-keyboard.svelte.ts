@@ -14,7 +14,7 @@
  */
 
 import { analogCurvePresets } from "$lib/configurator/lib/gamepad"
-import { HMK_FIRMWARE_MAX_VERSION, type HMK_Options } from "$lib/libhmk"
+import { HMK_FIRMWARE_MAX_VERSION, type HMK_Options, type HMK_Calibration } from "$lib/libhmk"
 import { defaultActuation, type HMK_Actuation } from "$lib/libhmk/actuation"
 import {
   DEFAULT_TICK_RATE,
@@ -34,6 +34,7 @@ import type {
   ResetProfileParams,
   SetActuationMapParams,
   SetAdvancedKeysParams,
+  SetCalibrationParams,
   SetGamepadButtonsParams,
   SetGamepadOptionsParams,
   SetKeymapParams,
@@ -74,6 +75,7 @@ function defaultProfile(profile: number): DemoKeyboardProfileState {
 type DemoKeyboardState = {
   options: HMK_Options
   profiles: DemoKeyboardProfileState[]
+  calibration: HMK_Calibration
 }
 
 export class DemoKeyboard implements Keyboard {
@@ -91,6 +93,11 @@ export class DemoKeyboard implements Keyboard {
     profiles: [...Array(numProfiles)].map((_, i) =>
       structuredClone(defaultProfile(i)),
     ),
+    calibration: {
+      initialRestValue: (1 << adcResolution) - 1,
+      initialBottomOutThreshold: (1 << adcResolution) - 1,
+      switchTravel: Array(numKeys).fill(40),
+    },
   }
 
   async disconnect() {}
@@ -104,13 +111,11 @@ export class DemoKeyboard implements Keyboard {
     return Array(numKeys).fill({ adcValue: 0, distance: 0 })
   }
   async getCalibration() {
-    return {
-      initialRestValue: (1 << adcResolution) - 1,
-      initialBottomOutThreshold: (1 << adcResolution) - 1,
-      switchTravel: Array(numKeys).fill(40),
-    }
+    return this.#state.calibration
   }
-  async setCalibration() {}
+  async setCalibration({ data }: SetCalibrationParams) {
+    this.#state.calibration = data
+  }
   async getProfile() {
     return 0
   }
