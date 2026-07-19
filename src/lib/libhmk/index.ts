@@ -13,7 +13,7 @@
  * this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { uint16Schema } from "$lib/integer"
+import { uint8Schema, uint16Schema } from "$lib/integer"
 import z from "zod"
 
 export const HMK_FIRMWARE_MIN_VERSION = 0x0104
