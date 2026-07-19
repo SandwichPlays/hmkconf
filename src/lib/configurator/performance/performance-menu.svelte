@@ -28,7 +28,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { actuationQueryContext } from "../queries/actuation-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
 
-  const { keys } = $derived(performanceStateContext.get())
+  const performanceState = performanceStateContext.get()
+  const { keys } = $derived(performanceState)
 
   const actuationQuery = actuationQueryContext.get()
   const { current: actuationMap } = $derived(actuationQuery.actuationMap)

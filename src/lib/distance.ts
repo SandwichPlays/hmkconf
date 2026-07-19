@@ -13,8 +13,8 @@
  * this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { keyboardContext } from "./keyboard"
-import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE, type HMK_Calibration } from "./libhmk"
+import { keyboardContext } from "$lib/keyboard"
+import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE, type HMK_Calibration } from "$lib/libhmk"
 
 export const SWITCH_DISTANCE_UNIT = 200
 

@@ -25,14 +25,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import PerformanceKeyButton from "./performance-key-button.svelte"
 
   const performanceState = performanceStateContext.get()
-  const { keys, showKeymap } = $derived(performanceState)
+  const keymapQuery = keymapQueryContext.get()
+  const actuationQuery = actuationQueryContext.get()
+  const calibrationQuery = calibrationQueryContext.get()
 
-  const { current: keymap } = $derived(keymapQueryContext.get().keymap)
+  const { keys, showKeymap } = $derived(performanceState)
+  const { current: keymap } = $derived(keymapQuery.keymap)
   const { current: actuationMap } = $derived(
-    actuationQueryContext.get().actuationMap,
+    actuationQuery.actuationMap,
   )
   const { current: calibration } = $derived(
-    calibrationQueryContext.get().calibration,
+    calibrationQuery.calibration,
   )
 
   let isDragging = $state(false)

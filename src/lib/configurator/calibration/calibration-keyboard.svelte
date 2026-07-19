@@ -20,12 +20,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
 
-  const { current: analogInfo } = $derived(
-    analogInfoQueryContext.get().analogInfo,
-  )
-  const { current: calibration } = $derived(
-    calibrationQueryContext.get().calibration,
-  )
+  const analogInfoQuery = analogInfoQueryContext.get()
+  const calibrationQuery = calibrationQueryContext.get()
+
+  const { current: analogInfo } = $derived(analogInfoQuery.analogInfo)
+  const { current: calibration } = $derived(calibrationQuery.calibration)
 </script>
 
 <KeyboardEditorKeyboard>
