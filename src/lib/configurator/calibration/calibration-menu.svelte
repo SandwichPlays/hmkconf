@@ -60,6 +60,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="Periodically save the per-key bottom-out threshold values after some inactivity to be restored on next boot. The saved values will only be cleared on recalibration. This setting applies globally across all profiles."
       />
     {/if}
+    <!--
     <CommitSlider
       bind:committed={
         () => calibration?.initialRestValue ?? 0,
@@ -99,6 +100,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       step={10}
       title="Initial Bottom Out Threshold"
     />
+    -->
     <div class="flex flex-col gap-3 rounded-lg border p-4 bg-muted/30">
       <div class="font-medium text-sm">Manual Press Calibration Mode</div>
       <div class="text-xs text-muted-foreground">

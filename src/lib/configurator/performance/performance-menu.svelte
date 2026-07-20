@@ -93,7 +93,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       }
       display={(v) => `${(v / 10).toFixed(1)}mm`}
       min={10}
-      max={100}
+      max={40}
       step={1}
       disabled={disabled || !calibration}
       title="Switch Travel Depth"
