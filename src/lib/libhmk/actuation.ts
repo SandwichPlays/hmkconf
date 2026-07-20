@@ -13,20 +13,20 @@
  * this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { uint8Schema } from "$lib/integer"
+import { uint16Schema } from "$lib/integer"
 import z from "zod"
 
 export const hmkActuationSchema = z.object({
-  actuationPoint: uint8Schema,
-  rtDown: uint8Schema,
-  rtUp: uint8Schema,
+  actuationPoint: uint16Schema,
+  rtDown: uint16Schema,
+  rtUp: uint16Schema,
   continuous: z.boolean(),
 })
 
 export type HMK_Actuation = z.infer<typeof hmkActuationSchema>
 
-export const DEFAULT_ACTUATION_POINT = 128
-export const DEFAULT_RT_SENSITIVITY = 32
+export const DEFAULT_ACTUATION_POINT = 5000
+export const DEFAULT_RT_SENSITIVITY = 1000
 
 export const defaultActuation: HMK_Actuation = {
   actuationPoint: DEFAULT_ACTUATION_POINT,

@@ -54,7 +54,7 @@ export const HMK_RAW_HID_EP_SIZE = 64
 
 export const hmkAnalogInfoSchema = z.object({
   adcValue: uint16Schema,
-  distance: uint8Schema,
+  distance: uint16Schema,
 })
 
 export type HMK_AnalogInfo = z.infer<typeof hmkAnalogInfoSchema>

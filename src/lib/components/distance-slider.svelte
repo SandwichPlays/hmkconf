@@ -15,10 +15,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
   import {
-    displayUnitDistance,
-    distanceToUnit,
-    SWITCH_DISTANCE_UNIT,
-    unitToDistance,
+    distanceToMM,
+    getSwitchDistanceMM,
+    mmToDistance,
   } from "$lib/distance"
   import type { HMK_Calibration } from "$lib/libhmk"
   import { optMap } from "$lib/utils"
@@ -27,8 +26,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   let {
     committed = $bindable(),
-    min = 1,
-    max = SWITCH_DISTANCE_UNIT,
+    min,
+    max,
+    step = 0.01,
     onCommit,
     keyIndex,
     calibration,
@@ -37,16 +37,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     keyIndex?: number
     calibration?: HMK_Calibration
   } = $props()
+
+  const travel = $derived(getSwitchDistanceMM(keyIndex, calibration))
+  const sliderMin = $derived(min ?? 0.01)
+  const sliderMax = $derived(max ?? travel)
 </script>
 
 <CommitSlider
   bind:committed={
-    () => optMap(committed, distanceToUnit),
-    (v) => (committed = optMap(v, unitToDistance))
+    () => optMap(committed, (v) => distanceToMM(v, keyIndex, calibration)),
+    (v) => (committed = optMap(v, (m) => mmToDistance(m, keyIndex, calibration)))
   }
-  display={(v) => `${displayUnitDistance(v, keyIndex, calibration)}mm`}
-  {min}
-  {max}
-  onCommit={(v) => onCommit?.(unitToDistance(v))}
+  display={(v) => `${v.toFixed(2)}mm`}
+  min={sliderMin}
+  max={sliderMax}
+  {step}
+  onCommit={(v) => onCommit?.(mmToDistance(v, keyIndex, calibration))}
   {...props}
 />

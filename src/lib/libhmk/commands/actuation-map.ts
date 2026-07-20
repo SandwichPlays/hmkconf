@@ -14,6 +14,7 @@
  */
 
 import { DataViewReader } from "$lib/data-view-reader"
+import { uint16ToUInt8s } from "$lib/integer"
 import type {
   GetActuationMapParams,
   SetActuationMapParams,
@@ -23,7 +24,7 @@ import type { KeyboardMetadata } from "$lib/keyboard/metadata"
 import { HMK_Command } from "."
 import type { HMK_Actuation } from "../actuation"
 
-const GET_ACTUATION_MAP_MAX_ENTRIES = 15
+const GET_ACTUATION_MAP_MAX_ENTRIES = 8
 
 export async function getActuationMap(
   commander: Commander,
@@ -41,9 +42,9 @@ export async function getActuationMap(
 
     for (let j = 0; j < GET_ACTUATION_MAP_MAX_ENTRIES && i + j < numKeys; j++) {
       ret.push({
-        actuationPoint: reader.uint8(),
-        rtDown: reader.uint8(),
-        rtUp: reader.uint8(),
+        actuationPoint: reader.uint16(),
+        rtDown: reader.uint16(),
+        rtUp: reader.uint16(),
         continuous: reader.uint8() !== 0,
       })
     }
@@ -52,7 +53,7 @@ export async function getActuationMap(
   return ret
 }
 
-const SET_ACTUATION_MAP_MAX_ENTRIES = 15
+const SET_ACTUATION_MAP_MAX_ENTRIES = 8
 
 export async function setActuationMap(
   commander: Commander,
@@ -67,9 +68,9 @@ export async function setActuationMap(
         offset + i,
         part.length,
         ...part.flatMap(({ actuationPoint, rtDown, rtUp, continuous }) => [
-          actuationPoint,
-          rtDown,
-          rtUp,
+          ...uint16ToUInt8s(actuationPoint),
+          ...uint16ToUInt8s(rtDown),
+          ...uint16ToUInt8s(rtUp),
           continuous ? 1 : 0,
         ]),
       ],

@@ -18,7 +18,7 @@ import type { Commander } from "$lib/keyboard/commander"
 import type { KeyboardMetadata } from "$lib/keyboard/metadata"
 import { HMK_Command, type HMK_AnalogInfo } from "."
 
-const ANALOG_INFO_MAX_ENTRIES = 21
+const ANALOG_INFO_MAX_ENTRIES = 15
 
 export async function analogInfo(
   commander: Commander,
@@ -36,7 +36,7 @@ export async function analogInfo(
     for (let j = 0; j < ANALOG_INFO_MAX_ENTRIES && i + j < numKeys; j++) {
       ret.push({
         adcValue: reader.uint16(),
-        distance: reader.uint8(),
+        distance: reader.uint16(),
       })
     }
   }

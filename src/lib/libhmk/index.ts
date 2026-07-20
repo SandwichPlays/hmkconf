@@ -33,7 +33,7 @@ export const HMK_MAX_NUM_KEYS = 256
 export const HMK_MAX_NUM_ADVANCED_KEYS = 64
 
 export const HMK_MIN_DISTANCE = 1
-export const HMK_MAX_DISTANCE = 255
+export const HMK_MAX_DISTANCE = 10000
 
 export const hmkCalibrationSchema = z.object({
   initialRestValue: uint16Schema,
