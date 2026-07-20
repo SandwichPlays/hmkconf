@@ -97,7 +97,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       step={1}
       disabled={disabled || !calibration}
       title="Switch Travel Depth"
-      description="Set the physical travel depth of the switch. This adjusts how millimeter values are displayed and interpreted for this key."
+      description="Set the physical travel depth of the switch"
     />
     <DistanceSlider
       bind:committed={
@@ -107,22 +107,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       }
       keyIndex={firstKey}
       calibration={calibration}
-      description={rtEnabled
-        ? "Set the specific distance at which Rapid Trigger activates and deactivates."
-        : "Set the specific distance at which a key press and release is registered."}
+      description="Set the point at which a key press and release is registered."
       {disabled}
       title="Actuation Point"
     />
     <DistanceSlider
       bind:committed={
         () => currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
-        (v) => updateActuation((actuation) => ({ ...actuation, rtDown: v }))
+        (v) =>
+          updateActuation((actuation) => ({
+            ...actuation,
+            rtDown: v,
+            rtUp: separatedRT && actuation.rtUp > 0 && actuation.rtUp < v ? v : actuation.rtUp,
+          }))
       }
       keyIndex={firstKey}
       calibration={calibration}
       description={separatedRT
-        ? "Set the minimum distance change required for Rapid Trigger to register a key press."
-        : "Set the minimum distance change required for Rapid Trigger to register a key press or release."}
+        ? "Set the distance for Rapid Trigger to register a key press."
+        : "Set the distance for Rapid Trigger to register a key press or release."}
       disabled={disabled || !rtEnabled}
       title={separatedRT
         ? "Rapid Trigger Press Sensitivity"
@@ -131,12 +134,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {#if separatedRT}
       <DistanceSlider
         bind:committed={
-          () => currentActuation?.rtUp ?? DEFAULT_RT_SENSITIVITY,
-          (v) => updateActuation((actuation) => ({ ...actuation, rtUp: v }))
+          () => Math.max(currentActuation?.rtUp ?? DEFAULT_RT_SENSITIVITY, currentActuation?.rtDown ?? 0),
+          (v) =>
+            updateActuation((actuation) => ({
+              ...actuation,
+              rtUp: Math.max(v, actuation.rtDown),
+            }))
         }
+        min={currentActuation?.rtDown}
         keyIndex={firstKey}
         calibration={calibration}
-        description="Set the minimum distance change required for Rapid Trigger to register a key release."
+        description="Set the distance for Rapid Trigger to register a key release."
         disabled={disabled || !rtEnabled}
         title="Rapid Trigger Release Sensitivity"
       />
@@ -169,7 +177,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             rtUp: v ? DEFAULT_RT_SENSITIVITY : 0,
           }))
       }
-      description="Configure sensitivity for key presses and releases independently."
+      description="Configure Rapid Trigger sensitivity for key presses and releases independently."
       disabled={disabled || !rtEnabled}
       id="separate-rt"
       title="Separate Press/Release Sensitivity"
