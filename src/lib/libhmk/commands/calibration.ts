@@ -69,3 +69,23 @@ export async function saveCalibrationThreshold(commander: Commander) {
     payload: [],
   })
 }
+
+export async function startManualCalibration(
+  commander: Commander,
+  keys: number[] = [],
+) {
+  await commander.sendCommand({
+    command: HMK_Command.START_MANUAL_CALIBRATION,
+    payload: [keys.length, ...keys],
+  })
+}
+
+export async function finishManualCalibration(
+  commander: Commander,
+  save = true,
+) {
+  await commander.sendCommand({
+    command: HMK_Command.FINISH_MANUAL_CALIBRATION,
+    payload: [save ? 1 : 0],
+  })
+}

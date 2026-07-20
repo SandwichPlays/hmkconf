@@ -38,6 +38,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const optionsQuery = optionsQueryContext.get()
   const { current: calibration } = $derived(calibrationQuery.calibration)
   const { current: options } = $derived(optionsQuery.options)
+
+  let isCalibrating = $state(false)
 </script>
 
 <div class="grid size-full grid-cols-[minmax(0,1fr)_24rem]">
@@ -97,6 +99,65 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       step={10}
       title="Initial Bottom Out Threshold"
     />
+    <div class="flex flex-col gap-3 rounded-lg border p-4 bg-muted/30">
+      <div class="font-medium text-sm">Manual Press Calibration Mode</div>
+      <div class="text-xs text-muted-foreground">
+        Press keys all the way down to record and lock static 100% bottom-out baselines.
+      </div>
+      {#if isCalibrating}
+        <div class="flex flex-col gap-2 rounded-md bg-background p-3 border">
+          <div class="flex items-center gap-2 text-xs font-semibold text-amber-400">
+            <span class="size-2 rounded-full bg-amber-400 animate-ping"></span>
+            Calibration Active
+          </div>
+          <div class="text-xs space-y-1 text-muted-foreground">
+            <div>🟡 <b>Amber:</b> Press key down firmly to the bottom.</div>
+            <div>🔵 <b>Blue:</b> Measuring maximum bottom-out ADC.</div>
+            <div>🟢 <b>Green:</b> Locked! Release key.</div>
+          </div>
+          <div class="flex gap-2 mt-2">
+            <Button
+              disabled={demo}
+              onclick={async () => {
+                await keyboard.finishManualCalibration(true)
+                isCalibrating = false
+                toast.success("Saved static calibration thresholds!")
+              }}
+              size="sm"
+            >
+              Finish & Save
+            </Button>
+            <Button
+              disabled={demo}
+              onclick={async () => {
+                await keyboard.finishManualCalibration(false)
+                isCalibrating = false
+                toast.info("Cancelled calibration.")
+              }}
+              size="sm"
+              variant="outline"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      {:else}
+        <div class="flex flex-wrap gap-2">
+          <Button
+            disabled={demo}
+            onclick={async () => {
+              await keyboard.startManualCalibration([])
+              isCalibrating = true
+              toast.info("Press keys to calibrate bottom-out threshold.")
+            }}
+            size="sm"
+          >
+            Calibrate All Keys
+          </Button>
+        </div>
+      {/if}
+    </div>
+
     <div class="flex gap-2">
       <Button
         disabled={demo}

@@ -33,6 +33,8 @@ export enum HMK_Command {
   GET_METADATA,
   GET_SERIAL,
   SAVE_CALIBRATION_THRESHOLD,
+  START_MANUAL_CALIBRATION,
+  FINISH_MANUAL_CALIBRATION,
 
   GET_KEYMAP = 128,
   SET_KEYMAP,
@@ -55,6 +57,7 @@ export const HMK_RAW_HID_EP_SIZE = 64
 export const hmkAnalogInfoSchema = z.object({
   adcValue: uint16Schema,
   distance: uint16Schema,
+  status: uint8Schema,
 })
 
 export type HMK_AnalogInfo = z.infer<typeof hmkAnalogInfoSchema>

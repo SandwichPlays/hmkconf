@@ -32,7 +32,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {#if !analogInfo}
       <KeyButton.Skeleton />
     {:else}
-      <KeyButton.Root>
+      {@const status = analogInfo[key]?.status ?? 0}
+      {@const statusClass =
+        status === 1
+          ? "border-amber-400 bg-amber-500/20 text-amber-300 ring-2 ring-amber-400/50 animate-pulse"
+          : status === 2
+            ? "border-blue-400 bg-blue-500/40 text-blue-200 ring-2 ring-blue-400"
+            : status === 3
+              ? "border-emerald-400 bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-400"
+              : ""}
+      <KeyButton.Root class={statusClass}>
         <span>{analogInfo[key].adcValue}</span>
         <span>{displayDistance(analogInfo[key].distance, key, calibration)}</span>
       </KeyButton.Root>

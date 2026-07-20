@@ -30,10 +30,12 @@ import {
 import { analogInfo } from "$lib/libhmk/commands/analog-info"
 import { bootloader } from "$lib/libhmk/commands/bootloader"
 import {
+  finishManualCalibration,
   getCalibration,
   recalibrate,
   saveCalibrationThreshold,
   setCalibration,
+  startManualCalibration,
 } from "$lib/libhmk/commands/calibration"
 import { factoryReset } from "$lib/libhmk/commands/factory-reset"
 import { firmwareVersion } from "$lib/libhmk/commands/firmware-version"
@@ -158,6 +160,12 @@ class HMKKeyboard implements Keyboard {
   }
   saveCalibrationThreshold() {
     return saveCalibrationThreshold(this.commander)
+  }
+  startManualCalibration(keys?: number[]) {
+    return startManualCalibration(this.commander, keys)
+  }
+  finishManualCalibration(save?: boolean) {
+    return finishManualCalibration(this.commander, save)
   }
 
   getKeymap(params: GetKeymapParams) {

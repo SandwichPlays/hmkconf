@@ -108,7 +108,7 @@ export class DemoKeyboard implements Keyboard {
   async factoryReset() {}
   async recalibrate() {}
   async analogInfo() {
-    return Array(numKeys).fill({ adcValue: 0, distance: 0 })
+    return Array(numKeys).fill({ adcValue: 0, distance: 0, status: 0 })
   }
   async getCalibration() {
     return this.#state.calibration
@@ -136,6 +136,8 @@ export class DemoKeyboard implements Keyboard {
   async saveCalibrationThreshold() {
     return
   }
+  async startManualCalibration() {}
+  async finishManualCalibration() {}
 
   async getKeymap({ profile }: GetKeymapParams) {
     return this.#state.profiles[profile].keymap

@@ -75,6 +75,8 @@ export type KeyboardAction = {
   resetProfile(params: ResetProfileParams): Promise<void>
   duplicateProfile(params: DuplicateProfileParams): Promise<void>
   saveCalibrationThreshold(): Promise<void>
+  startManualCalibration(keys?: number[]): Promise<void>
+  finishManualCalibration(save?: boolean): Promise<void>
 
   getKeymap(params: GetKeymapParams): Promise<number[][]>
   setKeymap(params: SetKeymapParams): Promise<void>
