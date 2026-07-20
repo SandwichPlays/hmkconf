@@ -163,24 +163,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <div class="flex gap-2">
       <Button
         disabled={demo}
-        onclick={() => analogInfoQuery.recalibrate()}
+        onclick={() => {
+          analogInfoQuery.recalibrate()
+          toast.success("Rest positions re-zeroed.")
+        }}
         size="sm"
         variant="destructive"
       >
-        Recalibrate
+        Re-zero Rest Values
       </Button>
-      {#if isFeatureAvailable("saveCalibrationThreshold", version)}
-        <Button
-          disabled={demo}
-          onclick={async () => {
-            await keyboard.saveCalibrationThreshold()
-            toast.success("Successfully saved calibration threshold.")
-          }}
-          size="sm"
-        >
-          Save Current Threshold
-        </Button>
-      {/if}
     </div>
   </FixedScrollArea>
   <FixedScrollArea class="flex flex-col gap-4 p-4">
