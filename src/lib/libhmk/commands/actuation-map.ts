@@ -24,7 +24,7 @@ import type { KeyboardMetadata } from "$lib/keyboard/metadata"
 import { HMK_Command } from "."
 import type { HMK_Actuation } from "../actuation"
 
-const GET_ACTUATION_MAP_MAX_ENTRIES = 8
+const GET_ACTUATION_MAP_MAX_ENTRIES = 5
 
 export async function getActuationMap(
   commander: Commander,
@@ -46,6 +46,8 @@ export async function getActuationMap(
         rtDown: reader.uint16(),
         rtUp: reader.uint16(),
         continuous: reader.uint8() !== 0,
+        rtDeadzoneTop: reader.uint16(),
+        rtDeadzoneBottom: reader.uint16(),
       })
     }
   }
@@ -53,7 +55,7 @@ export async function getActuationMap(
   return ret
 }
 
-const SET_ACTUATION_MAP_MAX_ENTRIES = 8
+const SET_ACTUATION_MAP_MAX_ENTRIES = 5
 
 export async function setActuationMap(
   commander: Commander,
@@ -67,11 +69,13 @@ export async function setActuationMap(
         profile,
         offset + i,
         part.length,
-        ...part.flatMap(({ actuationPoint, rtDown, rtUp, continuous }) => [
+        ...part.flatMap(({ actuationPoint, rtDown, rtUp, continuous, rtDeadzoneTop = 0, rtDeadzoneBottom = 0 }) => [
           ...uint16ToUInt8s(actuationPoint),
           ...uint16ToUInt8s(rtDown),
           ...uint16ToUInt8s(rtUp),
           continuous ? 1 : 0,
+          ...uint16ToUInt8s(rtDeadzoneTop),
+          ...uint16ToUInt8s(rtDeadzoneBottom),
         ]),
       ],
     })

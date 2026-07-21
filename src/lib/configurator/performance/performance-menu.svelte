@@ -18,12 +18,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import DistanceSlider from "$lib/components/distance-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import Switch from "$lib/components/switch.svelte"
+  import { distanceToMM } from "$lib/distance"
   import {
     DEFAULT_ACTUATION_POINT,
     DEFAULT_RT_SENSITIVITY,
     type HMK_Actuation,
   } from "$lib/libhmk/actuation"
-  import { setToIntervals } from "$lib/utils"
+  import { optMap, setToIntervals } from "$lib/utils"
   import { performanceStateContext } from "../context.svelte"
   import { actuationQueryContext } from "../queries/actuation-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
@@ -141,12 +142,44 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               rtUp: Math.max(v, actuation.rtDown),
             }))
         }
-        min={currentActuation?.rtDown}
+        min={optMap(currentActuation?.rtDown, (v) => distanceToMM(v, firstKey, calibration))}
         keyIndex={firstKey}
         calibration={calibration}
         description="Set the distance for Rapid Trigger to register a key release."
         disabled={disabled || !rtEnabled}
         title="Rapid Trigger Release Sensitivity"
+      />
+    {/if}
+    {#if rtEnabled}
+      <DistanceSlider
+        bind:committed={
+          () => currentActuation?.rtDeadzoneTop ?? 0,
+          (v) =>
+            updateActuation((actuation) => ({
+              ...actuation,
+              rtDeadzoneTop: v,
+            }))
+        }
+        keyIndex={firstKey}
+        calibration={calibration}
+        description="Set the Top Rapid Trigger deadzone distance to prevent micro-tremors near rest."
+        disabled={disabled || !rtEnabled}
+        title="Top RT Deadzone"
+      />
+      <DistanceSlider
+        bind:committed={
+          () => currentActuation?.rtDeadzoneBottom ?? 0,
+          (v) =>
+            updateActuation((actuation) => ({
+              ...actuation,
+              rtDeadzoneBottom: v,
+            }))
+        }
+        keyIndex={firstKey}
+        calibration={calibration}
+        description="Set the Bottom Rapid Trigger deadzone distance to prevent accidental release resets at bottom-out."
+        disabled={disabled || !rtEnabled}
+        title="Bottom RT Deadzone"
       />
     {/if}
   </FixedScrollArea>

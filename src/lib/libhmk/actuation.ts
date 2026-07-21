@@ -21,6 +21,8 @@ export const hmkActuationSchema = z.object({
   rtDown: uint16Schema,
   rtUp: uint16Schema,
   continuous: z.boolean(),
+  rtDeadzoneTop: uint16Schema,
+  rtDeadzoneBottom: uint16Schema,
 })
 
 export type HMK_Actuation = z.infer<typeof hmkActuationSchema>
@@ -33,4 +35,6 @@ export const defaultActuation: HMK_Actuation = {
   rtDown: 0,
   rtUp: 0,
   continuous: false,
+  rtDeadzoneTop: 0,
+  rtDeadzoneBottom: 0,
 }
