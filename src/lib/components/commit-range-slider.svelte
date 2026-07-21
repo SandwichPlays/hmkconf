@@ -147,14 +147,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         style="left: {leftPct}%; width: {widthPct}%;"
       ></div>
     </div>
-    <!-- Left Thumb (Press / Top Deadzone) -->
+    <!-- Left Stick Thumb (Press / Top Deadzone) -->
     <button
       type="button"
       tabindex="0"
       aria-label="Left Thumb"
       class={cn(
-        "absolute size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[box-shadow,transform] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden cursor-grab active:cursor-grabbing",
-        isTouching ? "-translate-x-full" : "-translate-x-1/2",
+        "absolute w-2 h-4 shrink-0 rounded-l-xs border border-primary bg-white shadow-xs ring-ring/50 transition-[box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden -translate-x-full cursor-grab active:cursor-grabbing",
         activeThumb === 0 && "ring-4 z-10"
       )}
       style="left: {leftPct}%;"
@@ -163,14 +162,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       onpointerup={(e) => handlePointerUp(0, e)}
       onpointercancel={(e) => handlePointerUp(0, e)}
     ></button>
-    <!-- Right Thumb (Release / Bottom Deadzone) -->
+    <!-- Right Stick Thumb (Release / Bottom Deadzone) -->
     <button
       type="button"
       tabindex="0"
       aria-label="Right Thumb"
       class={cn(
-        "absolute size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[box-shadow,transform] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden cursor-grab active:cursor-grabbing",
-        isTouching ? "translate-x-0" : "-translate-x-1/2",
+        "absolute w-2 h-4 shrink-0 rounded-r-xs border border-primary bg-white shadow-xs ring-ring/50 transition-[box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden translate-x-0 cursor-grab active:cursor-grabbing",
         activeThumb === 1 && "ring-4 z-10"
       )}
       style="left: {rightPct}%;"
