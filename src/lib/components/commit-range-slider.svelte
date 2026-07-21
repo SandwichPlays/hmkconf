@@ -49,13 +49,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       value = [committed[0], committed[1]]
     }
   })
-  function clampValues(v: number[]): [number, number] {
-    if (!Array.isArray(v) || v.length < 2) return [value[0], value[1]]
+  function handleValueChange(v: number[]) {
+    if (!Array.isArray(v) || v.length < 2) return
+    const prevLeft = value[0]
+    const prevRight = value[1]
 
-    let v0 = Math.max(min, Math.min(v[0], value[1]))
-    let v1 = Math.max(value[0], Math.min(v[1], max))
+    let nextLeft = Math.max(min, Math.min(v[0], prevRight))
+    let nextRight = Math.max(prevLeft, Math.min(v[1], max))
 
-    return [v0, v1]
+    value = [nextLeft, nextRight]
   }
 </script>
 
@@ -70,17 +72,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   </div>
   <Slider
     value={value}
-    onValueChange={(v) => {
-      value = clampValues(v)
-    }}
+    onValueChange={handleValueChange}
     class="mt-3"
     {disabled}
     {min}
     {max}
-    onValueCommit={(v) => {
-      const clamped = clampValues(v)
-      committed = clamped
-      onCommit?.(clamped)
+    onValueCommit={() => {
+      committed = [value[0], value[1]]
+      onCommit?.([value[0], value[1]])
     }}
     {step}
     type="multiple"
