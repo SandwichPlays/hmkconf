@@ -49,6 +49,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       value = committed
     }
   })
+  // Invert value for vertical slider so 0 starts at the TOP of the track
+  let internalSliderValue = $derived((min ?? 0) + (max ?? 4.0) - value)
 </script>
 
 <div class={cn("flex flex-col items-center gap-3 size-full border rounded-lg p-4 bg-card/50", className)} {...props}>
@@ -81,14 +83,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   </div>
   <div class="flex-1 flex items-center justify-center min-h-36 h-40 py-1">
     <Slider
-      bind:value
+      value={internalSliderValue}
+      onValueChange={(v) => {
+        const inv = (min ?? 0) + (max ?? 4.0) - v
+        value = Number(inv.toFixed(4))
+      }}
       class="h-full"
       {disabled}
       {min}
       {max}
       onValueCommit={(v) => {
-        committed = v
-        onCommit?.(v)
+        const inv = (min ?? 0) + (max ?? 4.0) - v
+        const clamped = Number(inv.toFixed(4))
+        value = clamped
+        committed = clamped
+        onCommit?.(clamped)
       }}
       orientation="vertical"
       {step}
