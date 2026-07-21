@@ -34,15 +34,17 @@ export function getSwitchDistanceMM(keyIndex?: number, calibration?: HMK_Calibra
 }
 
 export function distanceToMM(v: number, keyIndex?: number, calibration?: HMK_Calibration): number {
+  if (v <= 0) return 0
   const travel = getSwitchDistanceMM(keyIndex, calibration)
   return Number(((v / HMK_MAX_DISTANCE) * travel).toFixed(2))
 }
 
 export function mmToDistance(mm: number, keyIndex?: number, calibration?: HMK_Calibration): number {
+  if (mm <= 0) return 0
   const travel = getSwitchDistanceMM(keyIndex, calibration)
-  if (travel <= 0) return HMK_MIN_DISTANCE
+  if (travel <= 0) return 0
   return Math.max(
-    HMK_MIN_DISTANCE,
+    0,
     Math.min(HMK_MAX_DISTANCE, Math.round((mm / travel) * HMK_MAX_DISTANCE))
   )
 }

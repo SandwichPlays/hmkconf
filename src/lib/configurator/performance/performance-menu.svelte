@@ -82,18 +82,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const newTravelMM = v / 10
     if (currentActuation && firstKey !== undefined) {
       const actPointMM = distanceToMM(currentActuation.actuationPoint, firstKey, calibration)
-      const rtDownMM = distanceToMM(currentActuation.rtDown, firstKey, calibration)
-      const rtUpMM = distanceToMM(currentActuation.rtUp, firstKey, calibration)
-      const topMM = distanceToMM(currentActuation.rtDeadzoneTop ?? 0, firstKey, calibration)
-      const botMM = distanceToMM(currentActuation.rtDeadzoneBottom ?? 0, firstKey, calibration)
+      const rtDownMM = currentActuation.rtDown > 0 ? distanceToMM(currentActuation.rtDown, firstKey, calibration) : 0
+      const rtUpMM = currentActuation.rtUp > 0 ? distanceToMM(currentActuation.rtUp, firstKey, calibration) : 0
+      const topMM = (currentActuation.rtDeadzoneTop ?? 0) > 0 ? distanceToMM(currentActuation.rtDeadzoneTop ?? 0, firstKey, calibration) : 0
+      const botMM = (currentActuation.rtDeadzoneBottom ?? 0) > 0 ? distanceToMM(currentActuation.rtDeadzoneBottom ?? 0, firstKey, calibration) : 0
 
       const updatedActuation: HMK_Actuation = {
         ...currentActuation,
         actuationPoint: mmToDistance(Math.min(actPointMM, newTravelMM), firstKey, newCalibration),
-        rtDown: mmToDistance(Math.min(rtDownMM, newTravelMM), firstKey, newCalibration),
-        rtUp: mmToDistance(Math.min(rtUpMM, newTravelMM), firstKey, newCalibration),
-        rtDeadzoneTop: mmToDistance(Math.min(topMM, newTravelMM), firstKey, newCalibration),
-        rtDeadzoneBottom: mmToDistance(Math.min(botMM, newTravelMM), firstKey, newCalibration),
+        rtDown: rtDownMM > 0 ? mmToDistance(Math.min(rtDownMM, newTravelMM), firstKey, newCalibration) : 0,
+        rtUp: rtUpMM > 0 ? mmToDistance(Math.min(rtUpMM, newTravelMM), firstKey, newCalibration) : 0,
+        rtDeadzoneTop: topMM > 0 ? mmToDistance(Math.min(topMM, newTravelMM), firstKey, newCalibration) : 0,
+        rtDeadzoneBottom: botMM > 0 ? mmToDistance(Math.min(botMM, newTravelMM), firstKey, newCalibration) : 0,
       }
 
       setToIntervals(keys).map(([offset, len]) =>
