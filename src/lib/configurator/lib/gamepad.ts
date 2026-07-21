@@ -123,19 +123,14 @@ export const analogCurvePresets: GamepadAnalogCurvePreset[] = [
 
 export function analogCurveToView(v: HMK_GamepadAnalogCurve) {
   return v.map(({ x, y }) => ({
-    x:
-      ((x - HMK_MIN_DISTANCE) * CURVE_VIEW_WIDTH) /
-      (HMK_MAX_DISTANCE - HMK_MIN_DISTANCE),
-    y: CURVE_VIEW_HEIGHT - (y * CURVE_VIEW_HEIGHT) / 255,
+    x: Math.round((x * CURVE_VIEW_WIDTH) / 255),
+    y: Math.round(CURVE_VIEW_HEIGHT - (y * CURVE_VIEW_HEIGHT) / 255),
   }))
 }
 
 export function viewCurveToAnalog(v: HMK_GamepadAnalogCurve) {
   return v.map(({ x, y }) => ({
-    x:
-      Math.round(
-        (x * (HMK_MAX_DISTANCE - HMK_MIN_DISTANCE)) / CURVE_VIEW_WIDTH,
-      ) + HMK_MIN_DISTANCE,
-    y: Math.round((255 * (CURVE_VIEW_HEIGHT - y)) / CURVE_VIEW_HEIGHT),
+    x: Math.max(0, Math.min(255, Math.round((x * 255) / CURVE_VIEW_WIDTH))),
+    y: Math.max(0, Math.min(255, Math.round((255 * (CURVE_VIEW_HEIGHT - y)) / CURVE_VIEW_HEIGHT))),
   }))
 }
