@@ -52,13 +52,33 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <div class={cn("flex flex-col", className)} {...props}>
-  <div class={cn("grid text-sm text-wrap", disabled && "opacity-50")}>
-    <span class="font-medium">
-      {title}: {display?.(value) ?? value}
-    </span>
-    {#if description}
-      <span class="text-muted-foreground">{description}</span>
-    {/if}
+  <div class={cn("flex items-center justify-between text-sm gap-2", disabled && "opacity-50")}>
+    <div class="flex flex-col text-wrap">
+      <span class="font-medium">{title}</span>
+      {#if description}
+        <span class="text-xs text-muted-foreground">{description}</span>
+      {/if}
+    </div>
+    <div class="flex items-center gap-1 shrink-0 bg-muted/40 border rounded-md px-1.5 py-0.5">
+      <input
+        type="number"
+        step={step ?? 0.01}
+        min={min ?? 0}
+        max={max ?? 100}
+        {disabled}
+        value={value}
+        onchange={(e) => {
+          const num = parseFloat((e.currentTarget as HTMLInputElement).value)
+          if (!isNaN(num)) {
+            const clamped = Math.max(min ?? 0, Math.min(num, max ?? 100))
+            value = Number(clamped.toFixed(4))
+            committed = value
+            onCommit?.(value)
+          }
+        }}
+        class="w-14 text-right bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+    </div>
   </div>
   <Slider
     bind:value

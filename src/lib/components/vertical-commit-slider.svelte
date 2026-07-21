@@ -54,9 +54,27 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <div class={cn("flex flex-col items-center gap-3 size-full border rounded-lg p-4 bg-card/50", className)} {...props}>
   <div class={cn("flex flex-col items-center text-center text-sm", disabled && "opacity-50")}>
     <span class="font-semibold text-base">{title}</span>
-    <span class="text-sm font-medium text-primary mt-1">
-      {display?.(value) ?? value}
-    </span>
+    <div class="flex items-center gap-1 mt-1 bg-muted/40 border rounded-md px-2 py-0.5">
+      <input
+        type="number"
+        step={step ?? 0.01}
+        min={min ?? 0}
+        max={max ?? 100}
+        {disabled}
+        value={value}
+        onchange={(e) => {
+          const num = parseFloat((e.currentTarget as HTMLInputElement).value)
+          if (!isNaN(num)) {
+            const clamped = Math.max(min ?? 0, Math.min(num, max ?? 100))
+            value = Number(clamped.toFixed(4))
+            committed = value
+            onCommit?.(value)
+          }
+        }}
+        class="w-14 text-center bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+      <span class="text-xs text-muted-foreground font-medium">mm</span>
+    </div>
     {#if description}
       <span class="text-xs text-muted-foreground mt-1 max-w-40">{description}</span>
     {/if}

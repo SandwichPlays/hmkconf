@@ -28,21 +28,24 @@ export async function getOptions(commander: Commander): Promise<HMK_Options> {
     xInputEnabled: ((optionsRaw >> 0) & 1) !== 0,
     saveBottomOutThreshold: ((optionsRaw >> 1) & 1) !== 0,
     highPollingRateEnabled: ((optionsRaw >> 2) & 1) !== 0,
+    debounceMs: (optionsRaw >> 3) & 0xf,
   }
 }
 
 export async function setOptions(
   commander: Commander,
   {
-    data: { xInputEnabled, saveBottomOutThreshold, highPollingRateEnabled },
+    data: { xInputEnabled, saveBottomOutThreshold, highPollingRateEnabled, debounceMs = 2 },
   }: SetOptionsParams,
 ) {
+  const raw =
+    ((xInputEnabled ? 1 : 0) << 0) |
+    ((saveBottomOutThreshold ? 1 : 0) << 1) |
+    ((highPollingRateEnabled ? 1 : 0) << 2) |
+    ((debounceMs & 0xf) << 3)
+
   await commander.sendCommand({
     command: HMK_Command.SET_OPTIONS,
-    payload: [
-      ((xInputEnabled ? 1 : 0) << 0) |
-        ((saveBottomOutThreshold ? 1 : 0) << 1) |
-        ((highPollingRateEnabled ? 1 : 0) << 2),
-    ],
+    payload: [raw & 0xff, (raw >> 8) & 0xff],
   })
 }

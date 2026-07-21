@@ -14,6 +14,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+  import CommitSlider from "$lib/components/commit-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import Switch from "$lib/components/switch.svelte"
   import { Button } from "$lib/components/ui/button"
@@ -46,6 +47,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   {...props}
 >
   <FixedScrollArea class="flex flex-col gap-4 p-4">
+    <CommitSlider
+      min={0}
+      max={10}
+      step={1}
+      committed={options?.debounceMs ?? 2}
+      onCommit={(v) =>
+        options &&
+        optionsQuery.set({
+          data: { ...options, debounceMs: v },
+        })
+      }
+      title="Debounce Duration"
+      description="Set lockout debounce time (0ms - 10ms) to prevent double-clicking and key chatter while preserving instant 0ms actuation latency."
+      display={(v) => `${v}ms`}
+    />
     {#if usbHighSpeed && isFeatureAvailable("pollingRateSwitch", version)}
       <Switch
         bind:checked={

@@ -123,13 +123,58 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <div class={cn("flex flex-col", className)} {...props}>
-  <div class={cn("grid text-sm text-wrap", disabled && "opacity-50")}>
-    <span class="font-medium">
-      {title}: {display?.(value) ?? `${value[0].toFixed(2)}mm - ${value[1].toFixed(2)}mm`}
-    </span>
-    {#if description}
-      <span class="text-muted-foreground">{description}</span>
-    {/if}
+  <div class={cn("flex items-center justify-between text-sm gap-2", disabled && "opacity-50")}>
+    <div class="flex flex-col text-wrap">
+      <span class="font-medium">{title}</span>
+      {#if description}
+        <span class="text-xs text-muted-foreground">{description}</span>
+      {/if}
+    </div>
+    <div class="flex items-center gap-1.5 shrink-0 text-xs font-medium">
+      <div class="flex items-center gap-1 bg-muted/40 border rounded-md px-1.5 py-0.5">
+        <input
+          type="number"
+          step={step}
+          min={min}
+          max={value[1]}
+          {disabled}
+          value={value[0]}
+          onchange={(e) => {
+            const num = parseFloat((e.currentTarget as HTMLInputElement).value)
+            if (!isNaN(num)) {
+              const clamped = Math.max(min, Math.min(num, value[1]))
+              value = [Number(clamped.toFixed(4)), value[1]]
+              committed = [value[0], value[1]]
+              onCommit?.([value[0], value[1]])
+            }
+          }}
+          class="w-12 text-right bg-transparent text-xs font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        />
+        <span class="text-muted-foreground">mm</span>
+      </div>
+      <span class="text-muted-foreground">-</span>
+      <div class="flex items-center gap-1 bg-muted/40 border rounded-md px-1.5 py-0.5">
+        <input
+          type="number"
+          step={step}
+          min={value[0]}
+          max={max}
+          {disabled}
+          value={value[1]}
+          onchange={(e) => {
+            const num = parseFloat((e.currentTarget as HTMLInputElement).value)
+            if (!isNaN(num)) {
+              const clamped = Math.max(value[0], Math.min(num, max))
+              value = [value[0], Number(clamped.toFixed(4))]
+              committed = [value[0], value[1]]
+              onCommit?.([value[0], value[1]])
+            }
+          }}
+          class="w-12 text-right bg-transparent text-xs font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        />
+        <span class="text-muted-foreground">mm</span>
+      </div>
+    </div>
   </div>
   <!-- Custom Dual Thumb Range Slider Track -->
   <div
