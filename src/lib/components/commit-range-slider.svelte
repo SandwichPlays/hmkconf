@@ -95,18 +95,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     if (mode === "deadzone") {
       if (thumbIndex === 0) {
-        const nextV0 = Math.min(stepped, max - value[1])
+        const nextV0 = getSteppedValue(Math.min(stepped, max - value[1]))
         if (nextV0 !== value[0]) value = [nextV0, value[1]]
       } else {
-        const nextV1 = Math.min(max - stepped, max - value[0])
+        const rawRightVal = getSteppedValue(max - stepped)
+        const nextV1 = getSteppedValue(Math.min(rawRightVal, max - value[0]))
         if (nextV1 !== value[1]) value = [value[0], nextV1]
       }
     } else {
       if (thumbIndex === 0) {
-        const nextV0 = Math.min(stepped, value[1])
+        const nextV0 = getSteppedValue(Math.min(stepped, value[1]))
         if (nextV0 !== value[0]) value = [nextV0, value[1]]
       } else {
-        const nextV1 = Math.max(stepped, value[0])
+        const nextV1 = getSteppedValue(Math.max(stepped, value[0]))
         if (nextV1 !== value[1]) value = [value[0], nextV1]
       }
     }
@@ -129,22 +130,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     if (mode === "deadzone") {
       const distTo0 = Math.abs(clickedVal - value[0])
-      const distTo1 = Math.abs((max - clickedVal) - value[1])
+      const distTo1 = Math.abs(getSteppedValue(max - clickedVal) - value[1])
       if (distTo0 <= distTo1) {
-        const nextV0 = Math.min(clickedVal, max - value[1])
+        const nextV0 = getSteppedValue(Math.min(clickedVal, max - value[1]))
         value = [nextV0, value[1]]
       } else {
-        const nextV1 = Math.min(max - clickedVal, max - value[0])
+        const nextV1 = getSteppedValue(Math.min(getSteppedValue(max - clickedVal), max - value[0]))
         value = [value[0], nextV1]
       }
     } else {
       const distTo0 = Math.abs(clickedVal - value[0])
       const distTo1 = Math.abs(clickedVal - value[1])
       if (distTo0 <= distTo1) {
-        const nextV0 = Math.min(clickedVal, value[1])
+        const nextV0 = getSteppedValue(Math.min(clickedVal, value[1]))
         value = [nextV0, value[1]]
       } else {
-        const nextV1 = Math.max(clickedVal, value[0])
+        const nextV1 = getSteppedValue(Math.max(clickedVal, value[0]))
         value = [value[0], nextV1]
       }
     }
