@@ -43,14 +43,60 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } = $props()
 
   let value = $state(0)
+  let trackRef = $state<HTMLDivElement | null>(null)
+  let isDragging = $state(false)
 
   $effect(() => {
     if (committed !== undefined) {
       value = committed
     }
   })
-  // Invert value for vertical slider so 0 starts at the TOP of the track
-  let internalSliderValue = $derived((min ?? 0) + (max ?? 4.0) - value)
+
+  const minVal = $derived(min ?? 0)
+  const maxVal = $derived(max ?? 4.0)
+  const stepVal = $derived(step ?? 0.01)
+
+  const range = $derived(maxVal > minVal ? maxVal - minVal : 1)
+  const pct = $derived(Math.max(0, Math.min(100, ((value - minVal) / range) * 100)))
+
+  function getSteppedValue(raw: number): number {
+    const clamped = Math.max(minVal, Math.min(raw, maxVal))
+    const steps = Math.round((clamped - minVal) / stepVal)
+    return Number((minVal + steps * stepVal).toFixed(4))
+  }
+
+  function handlePointerDown(e: PointerEvent) {
+    if (disabled || !trackRef) return
+    e.preventDefault()
+    isDragging = true
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    updateFromPointer(e)
+  }
+
+  function handlePointerMove(e: PointerEvent) {
+    if (!isDragging || !trackRef || disabled) return
+    updateFromPointer(e)
+  }
+
+  function updateFromPointer(e: PointerEvent) {
+    if (!trackRef) return
+    const rect = trackRef.getBoundingClientRect()
+    if (rect.height <= 0) return
+    const topPct = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
+    const rawVal = minVal + topPct * range
+    const stepped = getSteppedValue(rawVal)
+    if (stepped !== value) {
+      value = stepped
+    }
+  }
+
+  function handlePointerUp(e: PointerEvent) {
+    if (isDragging) {
+      isDragging = false
+      committed = value
+      onCommit?.(value)
+    }
+  }
 </script>
 
 <div class={cn("flex flex-col items-center gap-3 size-full border rounded-lg p-4 bg-card/50", className)} {...props}>
@@ -59,15 +105,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <div class="flex items-center gap-1 mt-1 bg-muted/40 border rounded-md px-2 py-0.5">
       <input
         type="number"
-        step={step ?? 0.01}
-        min={min ?? 0}
-        max={max ?? 100}
+        step={stepVal}
+        min={minVal}
+        max={maxVal}
         {disabled}
         value={value}
         onchange={(e) => {
           const num = parseFloat((e.currentTarget as HTMLInputElement).value)
           if (!isNaN(num)) {
-            const clamped = Math.max(min ?? 0, Math.min(num, max ?? 100))
+            const clamped = Math.max(minVal, Math.min(num, maxVal))
             value = Number(clamped.toFixed(4))
             committed = value
             onCommit?.(value)
@@ -82,26 +128,34 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {/if}
   </div>
   <div class="flex-1 flex items-center justify-center min-h-36 h-40 py-1">
-    <Slider
-      value={internalSliderValue}
-      onValueChange={(v) => {
-        const inv = (min ?? 0) + (max ?? 4.0) - v
-        value = Number(inv.toFixed(4))
-      }}
-      class="h-full"
-      {disabled}
-      {min}
-      {max}
-      onValueCommit={(v) => {
-        const inv = (min ?? 0) + (max ?? 4.0) - v
-        const clamped = Number(inv.toFixed(4))
-        value = clamped
-        committed = clamped
-        onCommit?.(clamped)
-      }}
-      orientation="vertical"
-      {step}
-      type="single"
-    />
+    <div
+      bind:this={trackRef}
+      role="presentation"
+      class={cn(
+        "relative flex h-full w-4 touch-none select-none justify-center cursor-pointer",
+        disabled && "opacity-50 pointer-events-none"
+      )}
+      onpointerdown={handlePointerDown}
+      onpointermove={handlePointerMove}
+      onpointerup={handlePointerUp}
+      onpointercancel={handlePointerUp}
+    >
+      <div class="relative h-full w-1.5 overflow-hidden rounded-full bg-muted">
+        <div
+          class="absolute w-full bg-primary"
+          style="top: 0; height: {pct}%;"
+        ></div>
+      </div>
+      <button
+        type="button"
+        tabindex="0"
+        aria-label="Slider Handle"
+        class={cn(
+          "absolute w-4 h-2 shrink-0 rounded-xs border border-primary bg-white shadow-xs ring-ring/50 transition-[box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden -translate-y-1/2 cursor-grab active:cursor-grabbing",
+          isDragging && "ring-4 z-10"
+        )}
+        style="top: {pct}%;"
+      ></button>
+    </div>
   </div>
 </div>
