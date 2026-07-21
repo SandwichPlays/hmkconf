@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import RangeDistanceSlider from "$lib/components/range-distance-slider.svelte"
   import Switch from "$lib/components/switch.svelte"
-  import { distanceToMM } from "$lib/distance"
+  import { distanceToMM, mmToDistance } from "$lib/distance"
   import {
     DEFAULT_ACTUATION_POINT,
     DEFAULT_RT_SENSITIVITY,
@@ -71,12 +71,38 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     for (const key of keys) {
       newSwitchTravel[key] = v
     }
+    const newCalibration = {
+      ...calibration,
+      switchTravel: newSwitchTravel,
+    }
     calibrationQuery.set({
-      data: {
-        ...calibration,
-        switchTravel: newSwitchTravel,
-      }
+      data: newCalibration,
     })
+
+    const newTravelMM = v / 10
+    if (currentActuation && firstKey !== undefined) {
+      const actPointMM = distanceToMM(currentActuation.actuationPoint, firstKey, calibration)
+      const rtDownMM = distanceToMM(currentActuation.rtDown, firstKey, calibration)
+      const rtUpMM = distanceToMM(currentActuation.rtUp, firstKey, calibration)
+      const topMM = distanceToMM(currentActuation.rtDeadzoneTop ?? 0, firstKey, calibration)
+      const botMM = distanceToMM(currentActuation.rtDeadzoneBottom ?? 0, firstKey, calibration)
+
+      const updatedActuation: HMK_Actuation = {
+        ...currentActuation,
+        actuationPoint: mmToDistance(Math.min(actPointMM, newTravelMM), firstKey, newCalibration),
+        rtDown: mmToDistance(Math.min(rtDownMM, newTravelMM), firstKey, newCalibration),
+        rtUp: mmToDistance(Math.min(rtUpMM, newTravelMM), firstKey, newCalibration),
+        rtDeadzoneTop: mmToDistance(Math.min(topMM, newTravelMM), firstKey, newCalibration),
+        rtDeadzoneBottom: mmToDistance(Math.min(botMM, newTravelMM), firstKey, newCalibration),
+      }
+
+      setToIntervals(keys).map(([offset, len]) =>
+        actuationQuery.set({
+          offset,
+          data: Array(len).fill(updatedActuation),
+        }),
+      )
+    }
   }
 
   const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) =>
