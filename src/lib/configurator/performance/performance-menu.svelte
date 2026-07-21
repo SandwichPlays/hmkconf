@@ -66,7 +66,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   })
 
   const updateTravel = (v: number) => {
-    if (disabled || !calibration?.switchTravel) return
+    if (disabled || !calibration?.switchTravel || firstKey === undefined) return
+    const oldTravelMM = (calibration.switchTravel[firstKey] ?? 40) / 10
+    const newTravelMM = v / 10
+    if (oldTravelMM === newTravelMM) return
+
     const newSwitchTravel = [...calibration.switchTravel]
     for (const key of keys) {
       newSwitchTravel[key] = v
@@ -75,25 +79,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       ...calibration,
       switchTravel: newSwitchTravel,
     }
-    calibrationQuery.set({
-      data: newCalibration,
-    })
 
-    const newTravelMM = v / 10
-    if (currentActuation && firstKey !== undefined) {
-      const actPointMM = distanceToMM(currentActuation.actuationPoint, firstKey, calibration)
-      const rtDownMM = currentActuation.rtDown > 0 ? distanceToMM(currentActuation.rtDown, firstKey, calibration) : 0
-      const rtUpMM = currentActuation.rtUp > 0 ? distanceToMM(currentActuation.rtUp, firstKey, calibration) : 0
-      const topMM = (currentActuation.rtDeadzoneTop ?? 0) > 0 ? distanceToMM(currentActuation.rtDeadzoneTop ?? 0, firstKey, calibration) : 0
-      const botMM = (currentActuation.rtDeadzoneBottom ?? 0) > 0 ? distanceToMM(currentActuation.rtDeadzoneBottom ?? 0, firstKey, calibration) : 0
+    if (currentActuation) {
+      const actPointMM = (currentActuation.actuationPoint / 10000) * oldTravelMM
+      const rtDownMM = currentActuation.rtDown > 0 ? (currentActuation.rtDown / 10000) * oldTravelMM : 0
+      const rtUpMM = currentActuation.rtUp > 0 ? (currentActuation.rtUp / 10000) * oldTravelMM : 0
+      const topMM = (currentActuation.rtDeadzoneTop ?? 0) > 0 ? ((currentActuation.rtDeadzoneTop ?? 0) / 10000) * oldTravelMM : 0
+      const botMM = (currentActuation.rtDeadzoneBottom ?? 0) > 0 ? ((currentActuation.rtDeadzoneBottom ?? 0) / 10000) * oldTravelMM : 0
 
       const updatedActuation: HMK_Actuation = {
         ...currentActuation,
-        actuationPoint: mmToDistance(Math.min(actPointMM, newTravelMM), firstKey, newCalibration),
-        rtDown: rtDownMM > 0 ? mmToDistance(Math.min(rtDownMM, newTravelMM), firstKey, newCalibration) : 0,
-        rtUp: rtUpMM > 0 ? mmToDistance(Math.min(rtUpMM, newTravelMM), firstKey, newCalibration) : 0,
-        rtDeadzoneTop: topMM > 0 ? mmToDistance(Math.min(topMM, newTravelMM), firstKey, newCalibration) : 0,
-        rtDeadzoneBottom: botMM > 0 ? mmToDistance(Math.min(botMM, newTravelMM), firstKey, newCalibration) : 0,
+        actuationPoint: Math.max(0, Math.min(10000, Math.round((Math.min(actPointMM, newTravelMM) / newTravelMM) * 10000))),
+        rtDown: rtDownMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtDownMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+        rtUp: rtUpMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtUpMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+        rtDeadzoneTop: topMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(topMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+        rtDeadzoneBottom: botMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(botMM, newTravelMM) / newTravelMM) * 10000))) : 0,
       }
 
       setToIntervals(keys).map(([offset, len]) =>
@@ -103,6 +103,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         }),
       )
     }
+
+    calibrationQuery.set({
+      data: newCalibration,
+    })
   }
 
   const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) =>
