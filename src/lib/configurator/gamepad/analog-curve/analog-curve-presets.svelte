@@ -37,7 +37,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <svg
         class="size-10"
         preserveAspectRatio="none"
-        viewBox="{HMK_MIN_DISTANCE} 0 {HMK_MAX_DISTANCE - HMK_MIN_DISTANCE} 255"
+        viewBox="0 0 255 255"
       >
         <polygon
           class="fill-primary/30"

@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } from "$lib/configurator/lib/gamepad"
   import { calibrationQueryContext } from "$lib/configurator/queries/calibration.query.svelte"
   import { gamepadQueryContext } from "$lib/configurator/queries/gamepad-query.svelte"
-  import { displayDistance } from "$lib/distance"
+  import { getSwitchDistanceMM } from "$lib/distance"
   import { clamp } from "$lib/utils"
   import { analogCurveStateContext } from "./context.svelte"
 
@@ -33,6 +33,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const calibrationQuery = calibrationQueryContext.get()
   const { current: calibration } = $derived(calibrationQuery.calibration)
   const key = $derived(gamepadState.key)
+  const travel = $derived(getSwitchDistanceMM(key ?? undefined, calibration))
 
   const analogCurveState = analogCurveStateContext.get()
   const { viewCurve } = $derived(analogCurveState)
@@ -43,6 +44,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   let isDragging = $state(false)
   let tooltipOpen = $state(false)
+
+  const pointMM = $derived(((analogCurve[index].x / 255) * travel).toFixed(2))
 
   const onmousemove = (e: MouseEvent) => {
     if (!isDragging) return
@@ -80,6 +83,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ></div>
   </Tooltip.Trigger>
   <Tooltip.Content>
-    ({displayDistance(analogCurve[index].x, key ?? undefined, calibration)}mm, {analogCurve[index].y})
+    ({pointMM}mm, {analogCurve[index].y})
   </Tooltip.Content>
 </Tooltip.Root>
