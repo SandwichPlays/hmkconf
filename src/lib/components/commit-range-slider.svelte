@@ -119,6 +119,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     committed = [value[0], value[1]]
     onCommit?.([value[0], value[1]])
   }
+  const isTouching = $derived(value[0] === value[1])
 </script>
 
 <div class={cn("flex flex-col", className)} {...props}>
@@ -152,7 +153,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       tabindex="0"
       aria-label="Left Thumb"
       class={cn(
-        "absolute size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden -translate-x-1/2 cursor-grab active:cursor-grabbing",
+        "absolute size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[box-shadow,transform] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden cursor-grab active:cursor-grabbing",
+        isTouching ? "-translate-x-full" : "-translate-x-1/2",
         activeThumb === 0 && "ring-4 z-10"
       )}
       style="left: {leftPct}%;"
@@ -167,7 +169,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       tabindex="0"
       aria-label="Right Thumb"
       class={cn(
-        "absolute size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden -translate-x-1/2 cursor-grab active:cursor-grabbing",
+        "absolute size-4 shrink-0 rounded-full border border-primary bg-white shadow-sm ring-ring/50 transition-[box-shadow,transform] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden cursor-grab active:cursor-grabbing",
+        isTouching ? "translate-x-0" : "-translate-x-1/2",
         activeThumb === 1 && "ring-4 z-10"
       )}
       style="left: {rightPct}%;"
