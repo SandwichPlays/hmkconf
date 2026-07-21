@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import CommitSlider from "$lib/components/commit-slider.svelte"
   import DistanceSlider from "$lib/components/distance-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+  import RangeDistanceSlider from "$lib/components/range-distance-slider.svelte"
   import Switch from "$lib/components/switch.svelte"
   import { distanceToMM } from "$lib/distance"
   import {
@@ -38,7 +39,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const calibrationQuery = calibrationQueryContext.get()
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
-  const { disabled, firstKey, currentActuation, rtEnabled, separatedRT } = $derived.by(
+  const { disabled, firstKey, currentActuation, rtEnabled, separatedRT, deadzoneEnabled } = $derived.by(
     () => {
       if (keys.size === 0 || !actuationMap) {
         return { disabled: true } as const
@@ -52,6 +53,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         currentActuation,
         rtEnabled: currentActuation.rtDown > 0,
         separatedRT: currentActuation.rtUp > 0,
+        deadzoneEnabled:
+          (currentActuation.rtDeadzoneTop ?? 0) > 0 ||
+          (currentActuation.rtDeadzoneBottom ?? 0) > 0,
       } as const
     },
   )
@@ -112,74 +116,60 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       {disabled}
       title="Actuation Point"
     />
-    <DistanceSlider
-      bind:committed={
-        () => currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
-        (v) =>
-          updateActuation((actuation) => ({
-            ...actuation,
-            rtDown: v,
-            rtUp: separatedRT && actuation.rtUp > 0 && actuation.rtUp < v ? v : actuation.rtUp,
-          }))
-      }
-      keyIndex={firstKey}
-      calibration={calibration}
-      description={separatedRT
-        ? "Set the distance for Rapid Trigger to register a key press."
-        : "Set the distance for Rapid Trigger to register a key press or release."}
-      disabled={disabled || !rtEnabled}
-      title={separatedRT
-        ? "Rapid Trigger Press Sensitivity"
-        : "Rapid Trigger Sensitivity"}
-    />
     {#if separatedRT}
-      <DistanceSlider
+      <RangeDistanceSlider
         bind:committed={
-          () => Math.max(currentActuation?.rtUp ?? DEFAULT_RT_SENSITIVITY, currentActuation?.rtDown ?? 0),
+          () => [
+            currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
+            Math.max(currentActuation?.rtUp ?? DEFAULT_RT_SENSITIVITY, currentActuation?.rtDown ?? 0),
+          ],
           (v) =>
             updateActuation((actuation) => ({
               ...actuation,
-              rtUp: Math.max(v, actuation.rtDown),
+              rtDown: v[0],
+              rtUp: Math.max(v[1], v[0]),
             }))
         }
-        min={optMap(currentActuation?.rtDown, (v) => distanceToMM(v, firstKey, calibration))}
         keyIndex={firstKey}
         calibration={calibration}
-        description="Set the distance for Rapid Trigger to register a key release."
+        description="Set Press (Left Nub) and Release (Right Nub) sensitivity for Rapid Trigger."
         disabled={disabled || !rtEnabled}
-        title="Rapid Trigger Release Sensitivity"
+        title="Rapid Trigger Press & Release Sensitivity"
+        display={(v) => `Press: ${v[0].toFixed(2)}mm | Release: ${v[1].toFixed(2)}mm`}
+      />
+    {:else}
+      <DistanceSlider
+        bind:committed={
+          () => currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
+          (v) => updateActuation((actuation) => ({ ...actuation, rtDown: v }))
+        }
+        keyIndex={firstKey}
+        calibration={calibration}
+        description="Set the distance for Rapid Trigger to register a key press or release."
+        disabled={disabled || !rtEnabled}
+        title="Rapid Trigger Sensitivity"
       />
     {/if}
-    {#if rtEnabled}
-      <DistanceSlider
+    {#if rtEnabled && deadzoneEnabled}
+      <RangeDistanceSlider
         bind:committed={
-          () => currentActuation?.rtDeadzoneTop ?? 0,
+          () => [
+            currentActuation?.rtDeadzoneTop ?? 0,
+            currentActuation?.rtDeadzoneBottom ?? 0,
+          ],
           (v) =>
             updateActuation((actuation) => ({
               ...actuation,
-              rtDeadzoneTop: v,
+              rtDeadzoneTop: v[0],
+              rtDeadzoneBottom: v[1],
             }))
         }
         keyIndex={firstKey}
         calibration={calibration}
-        description="Set the Top Rapid Trigger deadzone distance to prevent micro-tremors near rest."
+        description="Set Top (Left Nub) and Bottom (Right Nub) RT Deadzones to prevent micro-tremors and accidental releases."
         disabled={disabled || !rtEnabled}
-        title="Top RT Deadzone"
-      />
-      <DistanceSlider
-        bind:committed={
-          () => currentActuation?.rtDeadzoneBottom ?? 0,
-          (v) =>
-            updateActuation((actuation) => ({
-              ...actuation,
-              rtDeadzoneBottom: v,
-            }))
-        }
-        keyIndex={firstKey}
-        calibration={calibration}
-        description="Set the Bottom Rapid Trigger deadzone distance to prevent accidental release resets at bottom-out."
-        disabled={disabled || !rtEnabled}
-        title="Bottom RT Deadzone"
+        title="Top & Bottom RT Deadzones"
+        display={(v) => `Top: ${v[0].toFixed(2)}mm | Bottom: ${v[1].toFixed(2)}mm`}
       />
     {/if}
   </FixedScrollArea>
@@ -215,6 +205,23 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       id="separate-rt"
       title="Separate Press/Release Sensitivity"
     />
+
+    <Switch
+      bind:checked={
+        () => deadzoneEnabled ?? false,
+        (v) =>
+          updateActuation((actuation) => ({
+            ...actuation,
+            rtDeadzoneTop: v ? 200 : 0,
+            rtDeadzoneBottom: v ? 200 : 0,
+          }))
+      }
+      description="Suppress Rapid Trigger near top rest and bottom-out to eliminate finger micro-tremor chatter."
+      disabled={disabled || !rtEnabled}
+      id="rt-deadzone"
+      title="Enable RT Deadzone"
+    />
+
     <Switch
       bind:checked={
         () => currentActuation?.continuous ?? false,
@@ -224,7 +231,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             continuous: v,
           }))
       }
-      description="Deactivates Rapid Trigger only when the key is fully released, instead of at the actuation point."
+      description="Continuous Rapid Trigger bypasses the actuation point and keeps Rapid Trigger active across the entire switch travel."
       disabled={disabled || !rtEnabled}
       id="continuous-rapid-trigger"
       title="Continuous Rapid Trigger"
