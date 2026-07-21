@@ -48,49 +48,31 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <CommitRangeSlider
   bind:committed={
-    () =>
-      mode === "deadzone"
-        ? [
-            distanceToMM(committed[0], keyIndex, calibration),
-            Math.max(0, travel - distanceToMM(committed[1], keyIndex, calibration)),
-          ]
-        : [
-            distanceToMM(committed[0], keyIndex, calibration),
-            distanceToMM(committed[1], keyIndex, calibration),
-          ],
+    () => [
+      distanceToMM(committed[0], keyIndex, calibration),
+      distanceToMM(committed[1], keyIndex, calibration),
+    ],
     (v) =>
-      (committed =
-        mode === "deadzone"
-          ? [
-              mmToDistance(v[0], keyIndex, calibration),
-              mmToDistance(Math.max(0, travel - v[1]), keyIndex, calibration),
-            ]
-          : [
-              mmToDistance(v[0], keyIndex, calibration),
-              mmToDistance(v[1], keyIndex, calibration),
-            ])
+      (committed = [
+        mmToDistance(v[0], keyIndex, calibration),
+        mmToDistance(v[1], keyIndex, calibration),
+      ])
   }
   display={
     display ??
     (mode === "deadzone"
       ? (v) =>
-          `Top: ${v[0].toFixed(2)}mm | Bottom: ${Math.max(0, travel - v[1]).toFixed(2)}mm`
+          `Top: ${v[0].toFixed(2)}mm | Bottom: ${v[1].toFixed(2)}mm`
       : (v) => `Press: ${v[0].toFixed(2)}mm | Release: ${v[1].toFixed(2)}mm`)
   }
   min={sliderMin}
   max={sliderMax}
   {step}
+  {mode}
   onCommit={(v) =>
-    onCommit?.(
-      mode === "deadzone"
-        ? [
-            mmToDistance(v[0], keyIndex, calibration),
-            mmToDistance(Math.max(0, travel - v[1]), keyIndex, calibration),
-          ]
-        : [
-            mmToDistance(v[0], keyIndex, calibration),
-            mmToDistance(v[1], keyIndex, calibration),
-          ],
-    )}
+    onCommit?.([
+      mmToDistance(v[0], keyIndex, calibration),
+      mmToDistance(v[1], keyIndex, calibration),
+    ])}
   {...props}
 />

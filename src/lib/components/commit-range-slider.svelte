@@ -27,6 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     step = 0.01,
     committed = $bindable([0, 4.0]),
     display,
+    mode = "sensitivity",
     onCommit,
     ...props
   }: WithoutChildren<HTMLAttributes<HTMLDivElement>> & {
@@ -38,6 +39,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     step?: number
     committed?: [number, number]
     display?: (v: [number, number]) => string
+    mode?: "sensitivity" | "deadzone"
     onCommit?: (v: [number, number]) => void
   } = $props()
 
@@ -52,9 +54,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   })
 
   const range = $derived(max > min ? max - min : 1)
-  const leftPct = $derived(Math.max(0, Math.min(100, ((value[0] - min) / range) * 100)))
-  const rightPct = $derived(Math.max(0, Math.min(100, ((value[1] - min) / range) * 100)))
-  const widthPct = $derived(Math.max(0, rightPct - leftPct))
+
+  const leftPct = $derived(
+    mode === "deadzone"
+      ? Math.max(0, Math.min(100, ((value[0] - min) / range) * 100))
+      : Math.max(0, Math.min(100, ((value[0] - min) / range) * 100))
+  )
+  const rightPct = $derived(
+    mode === "deadzone"
+      ? Math.max(0, Math.min(100, (((max - value[1]) - min) / range) * 100))
+      : Math.max(0, Math.min(100, ((value[1] - min) / range) * 100))
+  )
+  const widthPct = $derived(
+    mode === "deadzone"
+      ? Math.max(0, rightPct - leftPct)
+      : Math.max(0, rightPct - leftPct)
+  )
 
   function getSteppedValue(raw: number): number {
     const clamped = Math.max(min, Math.min(raw, max))
@@ -78,15 +93,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const rawVal = min + pct * range
     const stepped = getSteppedValue(rawVal)
 
-    if (thumbIndex === 0) {
-      const nextV0 = Math.min(stepped, value[1])
-      if (nextV0 !== value[0]) {
-        value = [nextV0, value[1]]
+    if (mode === "deadzone") {
+      if (thumbIndex === 0) {
+        const nextV0 = Math.min(stepped, max - value[1])
+        if (nextV0 !== value[0]) value = [nextV0, value[1]]
+      } else {
+        const nextV1 = Math.min(max - stepped, max - value[0])
+        if (nextV1 !== value[1]) value = [value[0], nextV1]
       }
     } else {
-      const nextV1 = Math.max(stepped, value[0])
-      if (nextV1 !== value[1]) {
-        value = [value[0], nextV1]
+      if (thumbIndex === 0) {
+        const nextV0 = Math.min(stepped, value[1])
+        if (nextV0 !== value[0]) value = [nextV0, value[1]]
+      } else {
+        const nextV1 = Math.max(stepped, value[0])
+        if (nextV1 !== value[1]) value = [value[0], nextV1]
       }
     }
   }
@@ -106,20 +127,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
     const clickedVal = getSteppedValue(min + pct * range)
 
-    const distTo0 = Math.abs(clickedVal - value[0])
-    const distTo1 = Math.abs(clickedVal - value[1])
-
-    if (distTo0 <= distTo1) {
-      const nextV0 = Math.min(clickedVal, value[1])
-      value = [nextV0, value[1]]
+    if (mode === "deadzone") {
+      const distTo0 = Math.abs(clickedVal - value[0])
+      const distTo1 = Math.abs((max - clickedVal) - value[1])
+      if (distTo0 <= distTo1) {
+        const nextV0 = Math.min(clickedVal, max - value[1])
+        value = [nextV0, value[1]]
+      } else {
+        const nextV1 = Math.min(max - clickedVal, max - value[0])
+        value = [value[0], nextV1]
+      }
     } else {
-      const nextV1 = Math.max(clickedVal, value[0])
-      value = [value[0], nextV1]
+      const distTo0 = Math.abs(clickedVal - value[0])
+      const distTo1 = Math.abs(clickedVal - value[1])
+      if (distTo0 <= distTo1) {
+        const nextV0 = Math.min(clickedVal, value[1])
+        value = [nextV0, value[1]]
+      } else {
+        const nextV1 = Math.max(clickedVal, value[0])
+        value = [value[0], nextV1]
+      }
     }
     committed = [value[0], value[1]]
     onCommit?.([value[0], value[1]])
   }
-  const isTouching = $derived(value[0] === value[1])
 </script>
 
 <div class={cn("flex flex-col", className)} {...props}>
@@ -130,19 +161,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <span class="text-xs text-muted-foreground">{description}</span>
       {/if}
     </div>
-    <div class="flex items-center gap-1.5 shrink-0 text-xs font-medium">
+    <div class="flex items-center gap-2 shrink-0 text-xs font-medium">
       <div class="flex items-center gap-1 bg-muted/40 border rounded-md px-1.5 py-0.5">
+        <span class="text-muted-foreground font-semibold">{mode === "deadzone" ? "Top:" : "Press:"}</span>
         <input
           type="number"
           step={step}
           min={min}
-          max={value[1]}
+          max={mode === "deadzone" ? Number((max - value[1]).toFixed(4)) : value[1]}
           {disabled}
           value={value[0]}
           onchange={(e) => {
             const num = parseFloat((e.currentTarget as HTMLInputElement).value)
             if (!isNaN(num)) {
-              const clamped = Math.max(min, Math.min(num, value[1]))
+              const maxCap = mode === "deadzone" ? max - value[1] : value[1]
+              const clamped = Math.max(min, Math.min(num, maxCap))
               value = [Number(clamped.toFixed(4)), value[1]]
               committed = [value[0], value[1]]
               onCommit?.([value[0], value[1]])
@@ -152,19 +185,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         />
         <span class="text-muted-foreground">mm</span>
       </div>
-      <span class="text-muted-foreground">-</span>
       <div class="flex items-center gap-1 bg-muted/40 border rounded-md px-1.5 py-0.5">
+        <span class="text-muted-foreground font-semibold">{mode === "deadzone" ? "Bottom:" : "Release:"}</span>
         <input
           type="number"
           step={step}
-          min={value[0]}
-          max={max}
+          min={min}
+          max={mode === "deadzone" ? Number((max - value[0]).toFixed(4)) : max}
           {disabled}
           value={value[1]}
           onchange={(e) => {
             const num = parseFloat((e.currentTarget as HTMLInputElement).value)
             if (!isNaN(num)) {
-              const clamped = Math.max(value[0], Math.min(num, max))
+              const maxCap = mode === "deadzone" ? max - value[0] : max
+              const minCap = mode === "deadzone" ? min : value[0]
+              const clamped = Math.max(minCap, Math.min(num, maxCap))
               value = [value[0], Number(clamped.toFixed(4))]
               committed = [value[0], value[1]]
               onCommit?.([value[0], value[1]])
