@@ -164,12 +164,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               rtDeadzoneBottom: v[1],
             }))
         }
+        mode="deadzone"
         keyIndex={firstKey}
         calibration={calibration}
         description="Set Top (Left Nub) and Bottom (Right Nub) RT Deadzones to prevent micro-tremors and accidental releases."
         disabled={disabled || !rtEnabled}
         title="Top & Bottom RT Deadzones"
-        display={(v) => `Top: ${v[0].toFixed(2)}mm | Bottom: ${v[1].toFixed(2)}mm`}
       />
     {/if}
   </FixedScrollArea>
@@ -197,7 +197,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         (v) =>
           updateActuation((actuation) => ({
             ...actuation,
-            rtUp: v ? DEFAULT_RT_SENSITIVITY : 0,
+            rtUp: v ? Math.min((actuation.rtDown || DEFAULT_RT_SENSITIVITY) + 500, 4000) : 0,
           }))
       }
       description="Configure Rapid Trigger sensitivity for key presses and releases independently."

@@ -49,6 +49,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       value = [committed[0], committed[1]]
     }
   })
+  function clampValues(v: number[]): [number, number] {
+    if (!Array.isArray(v) || v.length < 2) return [min, max]
+    let v0 = Math.max(min, Math.min(v[0], max))
+    let v1 = Math.max(min, Math.min(v[1], max))
+    if (v0 > v1) {
+      if (Math.abs(v0 - value[0]) > 0.0001) v0 = v1
+      else v1 = v0
+    }
+    return [v0, v1]
+  }
 </script>
 
 <div class={cn("flex flex-col", className)} {...props}>
@@ -61,17 +71,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {/if}
   </div>
   <Slider
-    bind:value={value as any}
+    value={value}
+    onValueChange={(v) => {
+      value = clampValues(v)
+    }}
     class="mt-3"
     {disabled}
     {min}
     {max}
     onValueCommit={(v) => {
-      if (Array.isArray(v) && v.length === 2) {
-        const res: [number, number] = [v[0], v[1]]
-        committed = res
-        onCommit?.(res)
-      }
+      const clamped = clampValues(v)
+      committed = clamped
+      onCommit?.(clamped)
     }}
     {step}
     type="multiple"
