@@ -50,24 +50,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   })
   function clampValues(v: number[]): [number, number] {
-    if (!Array.isArray(v) || v.length < 2) return [min, max]
-    let v0 = Math.max(min, Math.min(v[0], max))
-    let v1 = Math.max(min, Math.min(v[1], max))
-    if (v0 > v1) {
-      if (Math.abs(value[0] - value[1]) < 0.0001) {
-        if (v[1] < value[0]) {
-          v0 = v[1]
-          v1 = value[1]
-        } else {
-          v1 = v[0]
-          v0 = value[0]
-        }
-      } else if (Math.abs(v[0] - value[0]) > 0.0001) {
-        v0 = v1
-      } else {
-        v1 = v0
-      }
-    }
+    if (!Array.isArray(v) || v.length < 2) return [value[0], value[1]]
+
+    let v0 = Math.max(min, Math.min(v[0], value[1]))
+    let v1 = Math.max(value[0], Math.min(v[1], max))
+
     return [v0, v1]
   }
 </script>
