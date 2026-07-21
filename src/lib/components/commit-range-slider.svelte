@@ -51,18 +51,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   })
   function clampValues(v: number[]): [number, number] {
     if (!Array.isArray(v) || v.length < 2) return [min, max]
-    let v0 = Math.max(min, Math.min(v[0], max - step))
-    let v1 = Math.max(min + step, Math.min(v[1], max))
-    const gap = step
-    if (v1 < v0 + gap) {
-      if (Math.abs(v[0] - value[0]) > 0.0001) {
-        // Left nub pushed right -> push right nub forward
-        v1 = Math.min(max, v0 + gap)
-        v0 = Math.max(min, v1 - gap)
+    let v0 = Math.max(min, Math.min(v[0], max))
+    let v1 = Math.max(min, Math.min(v[1], max))
+    if (v0 > v1) {
+      if (Math.abs(value[0] - value[1]) < 0.0001) {
+        if (v[1] < value[0]) {
+          v0 = v[1]
+          v1 = value[1]
+        } else {
+          v1 = v[0]
+          v0 = value[0]
+        }
+      } else if (Math.abs(v[0] - value[0]) > 0.0001) {
+        v0 = v1
       } else {
-        // Right nub pushed left -> push left nub backward
-        v0 = Math.max(min, v1 - gap)
-        v1 = Math.min(max, v0 + gap)
+        v1 = v0
       }
     }
     return [v0, v1]
