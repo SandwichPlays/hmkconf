@@ -15,7 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
   import DistanceSlider from "$lib/components/distance-slider.svelte"
-  import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
+  import RangeDistanceSlider from "$lib/components/range-distance-slider.svelte"
   import Switch from "$lib/components/switch.svelte"
   import VerticalCommitSlider from "$lib/components/vertical-commit-slider.svelte"
   import VerticalDistanceSlider from "$lib/components/vertical-distance-slider.svelte"
@@ -118,7 +118,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     )
 </script>
 
-<FixedScrollArea class="size-full p-6">
+<div class="size-full p-4 overflow-y-auto">
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
     <!-- Column 1: Travel & Actuation (Vertical Sliders) -->
     <div class="flex flex-col gap-4 rounded-xl border p-5 bg-card/60 shadow-2xs h-full">
@@ -275,30 +275,28 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
       {#if rtEnabled && deadzoneEnabled}
         <div class="flex flex-col gap-4 mt-2 pt-2 border-t">
-          <DistanceSlider
+          <RangeDistanceSlider
             bind:committed={
-              () => currentActuation?.rtDeadzoneTop ?? 200,
-              (v) => updateActuation((actuation) => ({ ...actuation, rtDeadzoneTop: v }))
+              () => [
+                currentActuation?.rtDeadzoneTop ?? 0,
+                currentActuation?.rtDeadzoneBottom ?? 0,
+              ],
+              (v) =>
+                updateActuation((actuation) => ({
+                  ...actuation,
+                  rtDeadzoneTop: v[0],
+                  rtDeadzoneBottom: v[1],
+                }))
             }
+            mode="deadzone"
             keyIndex={firstKey}
             calibration={calibration}
-            description="Inactive deadzone distance near rest."
+            description="Set Top (Left Stick) and Bottom (Right Stick) RT Deadzones."
             disabled={disabled || !rtEnabled}
-            title="Top RT Deadzone"
-          />
-          <DistanceSlider
-            bind:committed={
-              () => currentActuation?.rtDeadzoneBottom ?? 200,
-              (v) => updateActuation((actuation) => ({ ...actuation, rtDeadzoneBottom: v }))
-            }
-            keyIndex={firstKey}
-            calibration={calibration}
-            description="Forces key pressed distance near bottom-out."
-            disabled={disabled || !rtEnabled}
-            title="Bottom RT Deadzone"
+            title="Top & Bottom RT Deadzones"
           />
         </div>
       {/if}
     </div>
   </div>
-</FixedScrollArea>
+</div>
