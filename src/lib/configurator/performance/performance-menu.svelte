@@ -126,13 +126,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <div class="grid grid-cols-2 gap-3 flex-1">
         <VerticalCommitSlider
           bind:committed={
-            () => currentTravel,
-            (v) => updateTravel(v)
+            () => currentTravel / 10,
+            (v) => updateTravel(Math.round(v * 10))
           }
-          display={(v) => `${(v / 10).toFixed(1)}mm`}
-          min={10}
-          max={40}
-          step={1}
+          display={(v) => `${v.toFixed(1)}mm`}
+          min={1.0}
+          max={4.0}
+          step={0.1}
           disabled={disabled || !calibration}
           title="Travel Depth"
           description="Physical switch travel depth"
