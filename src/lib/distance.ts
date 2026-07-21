@@ -19,11 +19,14 @@ import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE, type HMK_Calibration } from "$lib/l
 export const SWITCH_DISTANCE_UNIT = 10000
 
 export function getSwitchDistanceMM(keyIndex?: number, calibration?: HMK_Calibration) {
-  try {
-    const kb = keyboardContext.get()
-    if (keyIndex !== undefined && calibration?.switchTravel?.[keyIndex] !== undefined) {
+  if (calibration?.switchTravel && calibration.switchTravel.length > 0) {
+    if (keyIndex !== undefined && calibration.switchTravel[keyIndex] !== undefined) {
       return calibration.switchTravel[keyIndex] / 10
     }
+    return calibration.switchTravel[0] / 10
+  }
+  try {
+    const kb = keyboardContext.get()
     return kb?.metadata?.switchTravel ?? 4.0
   } catch {
     return 4.0
