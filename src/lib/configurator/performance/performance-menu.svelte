@@ -118,43 +118,45 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     )
 </script>
 
-<div class="grid size-full grid-cols-[16rem_1fr]">
-  <!-- Left Column: Vertical Sliders (Travel Depth -> Actuation Point) -->
-  <div class="flex gap-3 p-4 border-r overflow-y-auto">
-    <VerticalCommitSlider
-      bind:committed={
-        () => currentTravel,
-        (v) => updateTravel(v)
-      }
-      display={(v) => `${(v / 10).toFixed(1)}mm`}
-      min={10}
-      max={40}
-      step={1}
-      disabled={disabled || !calibration}
-      title="Travel Depth"
-      description="Physical switch travel depth"
-    />
-    <VerticalDistanceSlider
-      bind:committed={
-        () => currentActuation?.actuationPoint ?? DEFAULT_ACTUATION_POINT,
-        (v) =>
-          updateActuation((actuation) => ({ ...actuation, actuationPoint: v }))
-      }
-      keyIndex={firstKey}
-      calibration={calibration}
-      description="Key press actuation registration point"
-      {disabled}
-      title="Actuation Point"
-    />
-  </div>
+<FixedScrollArea class="size-full p-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <!-- Column 1: Travel & Actuation (Vertical Sliders) -->
+    <div class="flex flex-col gap-4 rounded-xl border p-5 bg-card/60 shadow-2xs h-full">
+      <h3 class="font-semibold text-lg border-b pb-2">Travel & Actuation</h3>
+      <div class="grid grid-cols-2 gap-3 flex-1">
+        <VerticalCommitSlider
+          bind:committed={
+            () => currentTravel,
+            (v) => updateTravel(v)
+          }
+          display={(v) => `${(v / 10).toFixed(1)}mm`}
+          min={10}
+          max={40}
+          step={1}
+          disabled={disabled || !calibration}
+          title="Travel Depth"
+          description="Physical switch travel depth"
+        />
+        <VerticalDistanceSlider
+          bind:committed={
+            () => currentActuation?.actuationPoint ?? DEFAULT_ACTUATION_POINT,
+            (v) =>
+              updateActuation((actuation) => ({ ...actuation, actuationPoint: v }))
+          }
+          keyIndex={firstKey}
+          calibration={calibration}
+          description="Key press registration point"
+          {disabled}
+          title="Actuation Point"
+        />
+      </div>
+    </div>
 
-  <!-- Right Section: Rapid Trigger & Continuous/Deadzone Cards -->
-  <FixedScrollArea class="flex flex-col gap-6 p-6">
-    <!-- Rapid Trigger Section Card -->
-    <div class="flex flex-col gap-4 rounded-xl border p-5 bg-card/60 shadow-2xs">
+    <!-- Column 2: Rapid Trigger Section Card -->
+    <div class="flex flex-col gap-4 rounded-xl border p-5 bg-card/60 shadow-2xs h-full">
       <h3 class="font-semibold text-lg border-b pb-2">Rapid Trigger</h3>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4">
         <Switch
           bind:checked={
             () => rtEnabled ?? false,
@@ -232,8 +234,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       {/if}
     </div>
 
-    <!-- Continuous RT & Deadzones Section Card (Dedicated Separate Area) -->
-    <div class="flex flex-col gap-4 rounded-xl border p-5 bg-card/60 shadow-2xs">
+    <!-- Column 3: Continuous RT & Deadzones Section Card -->
+    <div class="flex flex-col gap-4 rounded-xl border p-5 bg-card/60 shadow-2xs h-full">
       <h3 class="font-semibold text-lg border-b pb-2">Continuous RT & Deadzones</h3>
 
       <div class="flex flex-col gap-4">
@@ -247,7 +249,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 continuous: v,
               }))
           }
-          description="Bypasses actuation point and keeps RT active across full travel."
+          description="Bypasses actuation point across full travel."
           disabled={disabled || !rtEnabled}
           id="continuous-rapid-trigger"
           title="Continuous Rapid Trigger"
@@ -264,7 +266,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 rtDeadzoneBottom: v ? 200 : 0,
               }))
           }
-          description="Eliminates chatter near rest and bottom-out positions."
+          description="Eliminates chatter near rest and bottom-out."
           disabled={disabled || !rtEnabled}
           id="rt-deadzone"
           title="Enable RT Deadzone"
@@ -280,7 +282,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             }
             keyIndex={firstKey}
             calibration={calibration}
-            description="Inactive deadzone distance near rest position."
+            description="Inactive deadzone distance near rest."
             disabled={disabled || !rtEnabled}
             title="Top RT Deadzone"
           />
@@ -291,12 +293,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             }
             keyIndex={firstKey}
             calibration={calibration}
-            description="Forces key pressed distance near bottom-out position."
+            description="Forces key pressed distance near bottom-out."
             disabled={disabled || !rtEnabled}
             title="Bottom RT Deadzone"
           />
         </div>
       {/if}
     </div>
-  </FixedScrollArea>
-</div>
+  </div>
+</FixedScrollArea>

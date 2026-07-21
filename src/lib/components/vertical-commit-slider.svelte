@@ -61,7 +61,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <span class="text-xs text-muted-foreground mt-1 max-w-40">{description}</span>
     {/if}
   </div>
-  <div class="flex-1 flex items-center justify-center min-h-64 py-2">
+  <div class="flex-1 flex items-center justify-center min-h-44 h-48 py-2">
     <Slider
       bind:value
       class="h-full"
