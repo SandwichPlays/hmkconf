@@ -58,13 +58,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     disabled={!actuationMap}
     keyIndex={key}
     calibration={calibration}
-    max={distanceToUnit(action.bottomOutPoint, key, calibration)}
+    max={distanceToUnit((action.bottomOutPoint * 10000) / 255, key, calibration)}
     title="Actuation Point"
   />
   <DistanceSlider
     bind:committed={
-      () => action.bottomOutPoint,
-      (v) => configMenuState.updateAction({ ...action, bottomOutPoint: v })
+      () => (action.bottomOutPoint * 10000) / 255,
+      (v) => configMenuState.updateAction({ ...action, bottomOutPoint: Math.round((v * 255) / 10000) })
     }
     description="Set the actuation point for &quot;Key fully pressed&quot; and &quot;Key released from fully pressed&quot; actions."
     disabled={!actuationMap}

@@ -98,15 +98,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     keyIndex={key}
     calibration={calibration}
     max={action.bottomOutPoint > 0
-      ? distanceToUnit(action.bottomOutPoint, key, calibration)
+      ? distanceToUnit((action.bottomOutPoint * 10000) / 255, key, calibration)
       : undefined}
     title="Actuation Point"
   />
   {#if action.bottomOutPoint > 0}
     <DistanceSlider
       bind:committed={
-        () => action.bottomOutPoint,
-        (v) => configMenuState.updateAction({ ...action, bottomOutPoint: v })
+        () => (action.bottomOutPoint * 10000) / 255,
+        (v) => configMenuState.updateAction({ ...action, bottomOutPoint: Math.round((v * 255) / 10000) })
       }
       description="Set the actuation point at which the key is considered fully pressed."
       {disabled}
