@@ -24,8 +24,8 @@ import type { KeyboardMetadata } from "$lib/keyboard/metadata"
 import { HMK_Command } from "."
 import { HMK_AKType, type HMK_AdvancedKey } from "../advanced-keys"
 
-export const ADVANCED_KEY_SIZE = 12
-const GET_ADVANCED_KEYS_MAX_ENTRIES = 5
+export const ADVANCED_KEY_SIZE = 13
+const GET_ADVANCED_KEYS_MAX_ENTRIES = 4
 
 export async function getAdvancedKeys(
   commander: Commander,
@@ -58,7 +58,7 @@ export async function getAdvancedKeys(
               type,
               secondaryKey: reader.uint8(),
               behavior: reader.uint8(),
-              bottomOutPoint: reader.uint8(),
+              bottomOutPoint: reader.uint16(),
             },
           })
           break
@@ -73,7 +73,7 @@ export async function getAdvancedKeys(
                 const bitmapRaw = reader.uint8()
                 return [...Array(4)].map((_, i) => (bitmapRaw >> (i * 2)) & 3)
               }),
-              bottomOutPoint: reader.uint8(),
+              bottomOutPoint: reader.uint16(),
             },
           })
           break
@@ -112,7 +112,7 @@ export async function getAdvancedKeys(
   return ret
 }
 
-const SET_ADVANCED_KEYS_MAX_ENTRIES = 5
+const SET_ADVANCED_KEYS_MAX_ENTRIES = 4
 
 export async function setAdvancedKeys(
   commander: Commander,
@@ -129,7 +129,7 @@ export async function setAdvancedKeys(
           buffer.push(
             action.secondaryKey,
             action.behavior,
-            action.bottomOutPoint,
+            ...uint16ToUInt8s(action.bottomOutPoint),
           )
           break
         case HMK_AKType.DYNAMIC_KEYSTROKE:
@@ -138,7 +138,7 @@ export async function setAdvancedKeys(
             ...action.bitmap.map((bitmap) =>
               bitmap.reduce((acc, bit, i) => acc | (bit << (2 * i)), 0),
             ),
-            action.bottomOutPoint,
+            ...uint16ToUInt8s(action.bottomOutPoint),
           )
           break
         case HMK_AKType.TAP_HOLD:

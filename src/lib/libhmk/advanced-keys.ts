@@ -17,7 +17,7 @@ import { uint8Schema, uint16Schema } from "$lib/integer"
 import z from "zod"
 import { HMK_MAX_NUM_KEYS, HMK_MAX_NUM_LAYERS } from "."
 
-export const DEFAULT_BOTTOM_OUT_POINT = 230
+export const DEFAULT_BOTTOM_OUT_POINT = 9000
 export const DEFAULT_TAPPING_TERM = 200
 export const MIN_TAPPING_TERM = 10
 export const MAX_TAPPING_TERM = 1000
@@ -49,7 +49,7 @@ export const hmkAKNullBindSchema = z.object({
   type: z.literal(HMK_AKType.NULL_BIND),
   secondaryKey: uint8Schema,
   behavior: z.enum(HMK_NullBindBehavior),
-  bottomOutPoint: uint8Schema,
+  bottomOutPoint: uint16Schema,
 })
 
 export type HMK_AKNullBind = z.infer<typeof hmkAKNullBindSchema>
@@ -65,7 +65,7 @@ export const hmkAKDynamicKeystrokeSchema = z.object({
   type: z.literal(HMK_AKType.DYNAMIC_KEYSTROKE),
   keycodes: z.array(uint8Schema).length(4),
   bitmap: z.array(z.array(z.enum(HMK_DKSAction)).length(4)).length(4),
-  bottomOutPoint: uint8Schema,
+  bottomOutPoint: uint16Schema,
 })
 
 export type HMK_AKDynamicKeystroke = z.infer<typeof hmkAKDynamicKeystrokeSchema>
