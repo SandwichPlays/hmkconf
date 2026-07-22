@@ -53,14 +53,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   })
 
-  const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) =>
-    !disabled &&
-    setToIntervals(new Set([key, action.secondaryKey])).map(([offset, len]) =>
-      actuationQuery.set({
-        offset,
-        data: Array(len).fill(f(currentActuation)),
-      }),
-    )
+  const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) => {
+    if (disabled) return
+    const updates = setToIntervals(new Set([key, action.secondaryKey])).map(([offset, len]) => ({
+      offset,
+      data: Array(len).fill(f(currentActuation)),
+    }))
+    actuationQuery.setMany(updates)
+  }
 </script>
 
 <div class={cn("flex flex-col gap-4", className)} {...props}>

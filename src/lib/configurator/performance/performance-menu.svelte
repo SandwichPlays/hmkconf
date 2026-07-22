@@ -95,12 +95,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         rtDeadzoneBottom: botMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(botMM, newTravelMM) / newTravelMM) * 10000))) : 0,
       }
 
-      setToIntervals(keys).map(([offset, len]) =>
-        actuationQuery.set({
-          offset,
-          data: Array(len).fill(updatedActuation),
-        }),
-      )
+      const updates = setToIntervals(keys).map(([offset, len]) => ({
+        offset,
+        data: Array(len).fill(updatedActuation),
+      }))
+      actuationQuery.setMany(updates)
     }
 
     calibrationQuery.set({
@@ -108,14 +107,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     })
   }
 
-  const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) =>
-    !disabled &&
-    setToIntervals(keys).map(([offset, len]) =>
-      actuationQuery.set({
-        offset,
-        data: Array(len).fill(f(currentActuation)),
-      }),
-    )
+  const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) => {
+    if (disabled) return
+    const updates = setToIntervals(keys).map(([offset, len]) => ({
+      offset,
+      data: Array(len).fill(f(currentActuation)),
+    }))
+    actuationQuery.setMany(updates)
+  }
 </script>
 
 <div class="size-full p-4 overflow-y-auto">

@@ -47,6 +47,30 @@ export class ActuationQuery {
         this.#keyboard.setActuationMap({ ...params, profile: this.#profile }),
     })
   }
+
+  async setMany(updates: { offset: number; data: HMK_Actuation[] }[]) {
+    await optimisticUpdate({
+      resource: this.actuationMap,
+      optimisticFn: (current) => {
+        const ret = [...current]
+        for (const { offset, data } of updates) {
+          for (let i = 0; i < data.length; i++) {
+            ret[offset + i] = data[i]
+          }
+        }
+        return ret
+      },
+      updateFn: async () => {
+        for (const { offset, data } of updates) {
+          await this.#keyboard.setActuationMap({
+            offset,
+            data,
+            profile: this.#profile,
+          })
+        }
+      },
+    })
+  }
 }
 
 export const actuationQueryContext = new Context<ActuationQuery>(

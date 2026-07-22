@@ -62,12 +62,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <Button
       disabled={keys.size === 0}
       onclick={() => {
-        setToIntervals(keys).map(([offset, len]) =>
-          actuationQuery.set({
-            offset,
-            data: [...Array(len)].map(() => ({ ...defaultActuation })),
-          }),
-        )
+        const updates = setToIntervals(keys).map(([offset, len]) => ({
+          offset,
+          data: [...Array(len)].map(() => ({ ...defaultActuation })),
+        }))
+        actuationQuery.setMany(updates)
         performanceState.keys.clear()
       }}
       size="sm"
