@@ -54,9 +54,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <div
   class={cn("flex flex-col", className)}
-  onpointerdown={() => { isDragging = true }}
-  onpointerup={() => { isDragging = false }}
-  onpointercancel={() => { isDragging = false }}
+  onpointerdowncapture={() => { isDragging = true }}
+  onpointerupcapture={() => { isDragging = false }}
+  onpointercancelcapture={() => { isDragging = false }}
   {...props}
 >
   <div class={cn("flex items-center justify-between text-sm gap-2", disabled && "opacity-50")}>
