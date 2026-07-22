@@ -47,7 +47,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let isDragging = $state(false)
 
   $effect(() => {
-    if (committed !== undefined) {
+    if (committed !== undefined && !isDragging) {
       value = committed
     }
   })

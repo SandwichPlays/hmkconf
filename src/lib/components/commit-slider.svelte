@@ -43,15 +43,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } = $props()
 
   let value = $state(0)
+  let isDragging = $state(false)
 
   $effect(() => {
-    if (committed !== undefined) {
+    if (committed !== undefined && !isDragging) {
       value = committed
     }
   })
 </script>
 
-<div class={cn("flex flex-col", className)} {...props}>
+<div
+  class={cn("flex flex-col", className)}
+  onpointerdown={() => { isDragging = true }}
+  onpointerup={() => { isDragging = false }}
+  onpointercancel={() => { isDragging = false }}
+  {...props}
+>
   <div class={cn("flex items-center justify-between text-sm gap-2", disabled && "opacity-50")}>
     <div class="flex flex-col text-wrap">
       <span class="font-medium">{title}</span>
