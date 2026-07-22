@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import DistanceSlider from "$lib/components/distance-slider.svelte"
   import Switch from "$lib/components/switch.svelte"
   import { actuationQueryContext } from "$lib/configurator/queries/actuation-query.svelte"
+  import { calibrationQueryContext } from "$lib/configurator/queries/calibration.query.svelte"
   import { distanceToUnit, SWITCH_DISTANCE_UNIT } from "$lib/distance"
   import {
     DEFAULT_ACTUATION_POINT,
@@ -39,6 +40,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const actuationQuery = actuationQueryContext.get()
   const { current: actuationMap } = $derived(actuationQuery.actuationMap)
+
+  const calibrationQuery = calibrationQueryContext.get()
+  const { current: calibration } = $derived(calibrationQuery.calibration)
 
   const { disabled, currentActuation, rtEnabled } = $derived.by(() => {
     if (!actuationMap) {
@@ -91,9 +95,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
     description="Set the actuation point at which Null Bind becomes active."
     {disabled}
+    keyIndex={key}
+    calibration={calibration}
     max={action.bottomOutPoint > 0
-      ? distanceToUnit(action.bottomOutPoint)
-      : SWITCH_DISTANCE_UNIT}
+      ? distanceToUnit(action.bottomOutPoint, key, calibration)
+      : undefined}
     title="Actuation Point"
   />
   {#if action.bottomOutPoint > 0}
@@ -104,7 +110,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       }
       description="Set the actuation point at which the key is considered fully pressed."
       {disabled}
-      min={optMap(currentActuation?.actuationPoint, distanceToUnit)}
+      keyIndex={key}
+      calibration={calibration}
+      min={optMap(currentActuation?.actuationPoint, (v) => distanceToUnit(v, key, calibration))}
       title="Bottom Out Point"
     />
   {/if}

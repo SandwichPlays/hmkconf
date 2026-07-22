@@ -23,20 +23,24 @@ export type ConfigMenuStateProps = {
 }
 
 export class ConfigMenuState {
-  advancedKey: HMK_AdvancedKey
-
-  #index: number
+  #props: () => ConfigMenuStateProps
   #advancedKeysQuery = advancedKeysQueryContext.get()
 
   constructor(props: () => ConfigMenuStateProps) {
-    const { index, advancedKey } = $derived(props())
-    this.#index = $derived(index)
-    this.advancedKey = $derived(advancedKey)
+    this.#props = props
+  }
+
+  get index() {
+    return this.#props().index
+  }
+
+  get advancedKey() {
+    return this.#props().advancedKey
   }
 
   updateAction(action: HMK_AdvancedKey["action"]) {
     this.#advancedKeysQuery.set({
-      offset: this.#index,
+      offset: this.index,
       data: [{ ...this.advancedKey, action }],
     })
   }

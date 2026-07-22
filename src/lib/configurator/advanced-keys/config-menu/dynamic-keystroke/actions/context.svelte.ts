@@ -23,23 +23,31 @@ export type DKSActionsStateProps = {
 }
 
 export class DKSActionsState {
-  bitmap: HMK_DKSAction[]
-  intervals: [number, number][]
-  currentBitmap: HMK_DKSAction[]
-  currentIntervals: [number, number][]
-  updateBitmap: (bitmap: HMK_DKSAction[]) => void
+  #props: () => DKSActionsStateProps
+  currentBitmap = $state<HMK_DKSAction[]>(Array(4).fill(HMK_DKSAction.HOLD))
 
   constructor(props: () => DKSActionsStateProps) {
-    const { bitmap, updateBitmap } = $derived(props())
-    this.bitmap = $derived(bitmap)
-    this.intervals = $derived(bitmapToIntervals(bitmap))
-    this.currentBitmap = $state(Array(4).fill(HMK_DKSAction.HOLD))
-    this.currentIntervals = $derived(bitmapToIntervals(this.currentBitmap))
-    this.updateBitmap = $derived(updateBitmap)
+    this.#props = props
 
     $effect(() => {
       this.currentBitmap = this.bitmap
     })
+  }
+
+  get bitmap() {
+    return this.#props().bitmap
+  }
+
+  get intervals() {
+    return bitmapToIntervals(this.bitmap)
+  }
+
+  get currentIntervals() {
+    return bitmapToIntervals(this.currentBitmap)
+  }
+
+  get updateBitmap() {
+    return this.#props().updateBitmap
   }
 }
 

@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { InfoIcon } from "@lucide/svelte"
   import DistanceSlider from "$lib/components/distance-slider.svelte"
   import { actuationQueryContext } from "$lib/configurator/queries/actuation-query.svelte"
+  import { calibrationQueryContext } from "$lib/configurator/queries/calibration.query.svelte"
   import { distanceToUnit } from "$lib/distance"
   import { DEFAULT_ACTUATION_POINT } from "$lib/libhmk/actuation"
   import type { HMK_AKDynamicKeystroke } from "$lib/libhmk/advanced-keys"
@@ -37,6 +38,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const actuationQuery = actuationQueryContext.get()
   const { current: actuationMap } = $derived(actuationQuery.actuationMap)
+
+  const calibrationQuery = calibrationQueryContext.get()
+  const { current: calibration } = $derived(calibrationQuery.calibration)
 </script>
 
 <div class={cn("flex flex-col gap-4", className)} {...props}>
@@ -52,7 +56,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
     description="Set the actuation point for &quot;Key press&quot; and &quot;Key release&quot; actions."
     disabled={!actuationMap}
-    max={distanceToUnit(action.bottomOutPoint)}
+    keyIndex={key}
+    calibration={calibration}
+    max={distanceToUnit(action.bottomOutPoint, key, calibration)}
     title="Actuation Point"
   />
   <DistanceSlider
@@ -62,7 +68,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
     description="Set the actuation point for &quot;Key fully pressed&quot; and &quot;Key released from fully pressed&quot; actions."
     disabled={!actuationMap}
-    min={optMap(actuationMap?.[key].actuationPoint, distanceToUnit)}
+    keyIndex={key}
+    calibration={calibration}
+    min={optMap(actuationMap?.[key].actuationPoint, (v) => distanceToUnit(v, key, calibration))}
     title="Bottom Out Point"
   />
   <div class="flex items-center gap-2 text-muted-foreground">
