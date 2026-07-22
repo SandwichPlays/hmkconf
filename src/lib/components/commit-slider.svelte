@@ -42,21 +42,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     onCommit?: (v: number) => void
   } = $props()
 
-  let value = $state<number[]>([0])
+  let value = $state(0)
   let isDragging = $state(false)
 
   $effect(() => {
     if (committed !== undefined && !isDragging) {
-      value = [committed]
+      value = committed
     }
   })
 </script>
 
+<svelte:window
+  onpointerup={() => { isDragging = false }}
+  onpointercancel={() => { isDragging = false }}
+/>
+
 <div
   class={cn("flex flex-col", className)}
   onpointerdowncapture={() => { isDragging = true }}
-  onpointerupcapture={() => { isDragging = false }}
-  onpointercancelcapture={() => { isDragging = false }}
   {...props}
 >
   <div class={cn("flex items-center justify-between text-sm gap-2", disabled && "opacity-50")}>
@@ -73,14 +76,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         min={min ?? 0}
         max={max ?? 100}
         {disabled}
-        value={value[0]}
+        value={value}
         onchange={(e) => {
           const num = parseFloat((e.currentTarget as HTMLInputElement).value)
           if (!isNaN(num)) {
             const clamped = Math.max(min ?? 0, Math.min(num, max ?? 100))
-            value = [Number(clamped.toFixed(4))]
-            committed = value[0]
-            onCommit?.(value[0])
+            value = Number(clamped.toFixed(4))
+            committed = value
+            onCommit?.(value)
           }
         }}
         class="w-14 text-right bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -88,10 +91,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     </div>
   </div>
   <Slider
-    bind:value={
-      () => value[0],
-      (v) => (value = [v])
-    }
+    bind:value
     class="mt-3"
     {disabled}
     {min}
