@@ -42,12 +42,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     onCommit?: (v: number) => void
   } = $props()
 
-  let value = $state(0)
+  let value = $state<number[]>([0])
   let isDragging = $state(false)
 
   $effect(() => {
     if (committed !== undefined && !isDragging) {
-      value = committed
+      value = [committed]
     }
   })
 </script>
@@ -73,14 +73,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         min={min ?? 0}
         max={max ?? 100}
         {disabled}
-        value={value}
+        value={value[0]}
         onchange={(e) => {
           const num = parseFloat((e.currentTarget as HTMLInputElement).value)
           if (!isNaN(num)) {
             const clamped = Math.max(min ?? 0, Math.min(num, max ?? 100))
-            value = Number(clamped.toFixed(4))
-            committed = value
-            onCommit?.(value)
+            value = [Number(clamped.toFixed(4))]
+            committed = value[0]
+            onCommit?.(value[0])
           }
         }}
         class="w-14 text-right bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -88,14 +88,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     </div>
   </div>
   <Slider
-    bind:value
+    bind:value={
+      () => value[0],
+      (v) => (value = [v])
+    }
     class="mt-3"
     {disabled}
     {min}
     {max}
     onValueCommit={(v) => {
-      committed = v
-      onCommit?.(v)
+      if (Array.isArray(v) && v.length > 0) {
+        committed = v[0]
+        onCommit?.(v[0])
+      } else if (typeof v === "number") {
+        committed = v
+        onCommit?.(v)
+      }
     }}
     {step}
     type="single"
