@@ -144,7 +144,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           }
           keyIndex={firstKey}
           calibration={calibration}
-          description="Key press registration point"
+          description="Set point to activate keypress"
           {disabled}
           title="Actuation Point"
         />
@@ -181,10 +181,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 rtUp: v ? (actuation.rtDown || DEFAULT_RT_SENSITIVITY) : 0,
               }))
           }
-          description="Configure Press and Release sensitivity independently."
+          description="Configure RT Press and Release sensitivity independently."
           disabled={disabled || !rtEnabled}
           id="separate-rt"
-          title="Separate Press/Release"
+          title="Split sensitivity"
         />
       </div>
 
@@ -201,7 +201,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               calibration={calibration}
               description="Distance to register key press."
               disabled={disabled || !rtEnabled}
-              title="Rapid Trigger Press Sensitivity"
+              title="Press Sensitivity"
             />
             <!-- Independent Release Sensitivity Slider -->
             <DistanceSlider
@@ -213,7 +213,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               calibration={calibration}
               description="Distance to register key release."
               disabled={disabled || !rtEnabled}
-              title="Rapid Trigger Release Sensitivity"
+              title="Release Sensitivity"
             />
           {:else}
             <!-- Single Rapid Trigger Sensitivity Slider -->
@@ -226,7 +226,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               calibration={calibration}
               description="Distance to register key press or release."
               disabled={disabled || !rtEnabled}
-              title="Rapid Trigger Sensitivity"
+              title="Sensitivity"
             />
           {/if}
         </div>
@@ -265,7 +265,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 rtDeadzoneBottom: v ? 200 : 0,
               }))
           }
-          description="Eliminates chatter near rest and bottom-out."
+          description="Enables RT top & bottom deadzones"
           disabled={disabled || !rtEnabled}
           id="rt-deadzone"
           title="Enable RT Deadzone"
@@ -290,9 +290,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             mode="deadzone"
             keyIndex={firstKey}
             calibration={calibration}
-            description="Set Top (Left Stick) and Bottom (Right Stick) RT Deadzones."
+            description="Set top (left) and bottom (right) RT deadzones."
             disabled={disabled || !rtEnabled}
-            title="Top & Bottom RT Deadzones"
+            title="RT Deadzones"
           />
         </div>
       {/if}

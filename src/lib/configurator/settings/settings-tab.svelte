@@ -59,7 +59,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         })
       }
       title="Debounce Duration"
-      description="Set lockout debounce time (0ms - 10ms) to prevent double-clicking and key chatter while preserving instant 0ms actuation latency."
+      description="This ignores unwanted keypresses caused by keys briefly bouncing back downwards when being released. This filter does not have an impact on latency."
       display={(v) => `${v}ms`}
     />
     {#if usbHighSpeed && isFeatureAvailable("pollingRateSwitch", version)}
@@ -74,7 +74,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         }
         id="8000hz-polling-rate"
         title="8000Hz Polling Rate"
-        description="Enable the 8000Hz polling rate for faster response times, but may increase the CPU usage of the host device. Restart the keyboard to apply changes. This setting applies globally across all profiles."
+        description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
     <div class="flex flex-col gap-2">
