@@ -18,32 +18,42 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { displayDistance } from "$lib/distance"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
+  import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
 
   const keyboard = keyboardContext.get()
   const {
-    metadata: { numKeys, adcResolution },
+    metadata: { adcResolution },
   } = keyboard
 
   const analogInfoQuery = analogInfoQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
+  const calibrationState = calibrationStateContext.get()
 
   const { current: analogInfo } = $derived(analogInfoQuery.analogInfo)
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
-  let selectedKey = $state(0)
+  const selectedKey = $derived(calibrationState.selectedKey)
+
   let viewMode = $state<"adc" | "distance">("adc")
+  let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
-  // Buffer of historical values for the graph (up to 240 samples = ~4-6 seconds)
-  const MAX_HISTORY = 240
+  const MAX_HISTORY = 200
   let history: number[] = []
   let noisePeakToPeak = $state(0)
-  let noiseMin = $state(0)
-  let noiseMax = $state(0)
+  let prevKey = -1
   let animFrameId: number | null = null
 
-  // Push new data point when analogInfo updates
+  // Reset buffer when selected key changes
+  $effect(() => {
+    if (selectedKey !== prevKey) {
+      history = []
+      prevKey = selectedKey
+    }
+  })
+
+  // Capture incoming analog info
   $effect(() => {
     if (!analogInfo || !analogInfo[selectedKey]) return
 
@@ -59,85 +69,108 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       history.shift()
     }
 
-    // Calculate peak-to-peak noise over the last 30 samples (~1 second)
+    // Calculate peak-to-peak noise over the last 30 samples
     const recent = history.slice(-30)
     if (recent.length > 2) {
-      noiseMin = Math.min(...recent)
-      noiseMax = Math.max(...recent)
-      noisePeakToPeak = noiseMax - noiseMin
+      const min = Math.min(...recent)
+      const max = Math.max(...recent)
+      noisePeakToPeak = max - min
     }
   })
 
   function draw() {
-    if (!canvasEl) return
-    const ctx = canvasEl.getContext("2d")
-    if (!ctx) return
-
-    const width = canvasEl.width
-    const height = canvasEl.height
-
-    // Clear background
-    ctx.fillStyle = "#0c0d12"
-    ctx.fillRect(0, 0, width, height)
-
-    // Draw grid lines
-    ctx.strokeStyle = "#1a1d28"
-    ctx.lineWidth = 1
-
-    const gridLinesY = 4
-    for (let i = 1; i < gridLinesY; i++) {
-      const y = (height / gridLinesY) * i
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(width, y)
-      ctx.stroke()
-    }
-
-    const gridLinesX = 8
-    for (let i = 1; i < gridLinesX; i++) {
-      const x = (width / gridLinesX) * i
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, height)
-      ctx.stroke()
-    }
-
-    if (history.length < 2) {
+    if (!canvasEl || !containerEl) {
       animFrameId = requestAnimationFrame(draw)
       return
     }
 
-    // Determine scale range
-    const maxVal =
+    // Sync canvas pixel resolution with container size
+    const rect = containerEl.getBoundingClientRect()
+    const dpr = window.devicePixelRatio || 1
+    const targetW = Math.floor(rect.width * dpr)
+    const targetH = Math.floor(rect.height * dpr)
+
+    if (targetW > 0 && targetH > 0) {
+      if (canvasEl.width !== targetW || canvasEl.height !== targetH) {
+        canvasEl.width = targetW
+        canvasEl.height = targetH
+      }
+    }
+
+    const ctx = canvasEl.getContext("2d")
+    if (!ctx) {
+      animFrameId = requestAnimationFrame(draw)
+      return
+    }
+
+    const w = canvasEl.width / dpr
+    const h = canvasEl.height / dpr
+
+    ctx.save()
+    ctx.scale(dpr, dpr)
+
+    // Background
+    ctx.fillStyle = "#090a0f"
+    ctx.fillRect(0, 0, w, h)
+
+    // Grid lines
+    ctx.strokeStyle = "#161922"
+    ctx.lineWidth = 1
+
+    for (let i = 1; i < 4; i++) {
+      const y = (h / 4) * i
+      ctx.beginPath()
+      ctx.moveTo(0, y)
+      ctx.lineTo(w, y)
+      ctx.stroke()
+    }
+
+    for (let i = 1; i < 8; i++) {
+      const x = (w / 8) * i
+      ctx.beginPath()
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, h)
+      ctx.stroke()
+    }
+
+    if (history.length < 2) {
+      // Empty state prompt
+      ctx.fillStyle = "#475569"
+      ctx.font = "12px sans-serif"
+      ctx.textAlign = "center"
+      ctx.fillText("Waiting for real-time sensor stream...", w / 2, h / 2)
+      ctx.restore()
+      animFrameId = requestAnimationFrame(draw)
+      return
+    }
+
+    // Calculate Y scale
+    let plotMin = 0
+    let plotMax =
       viewMode === "adc"
         ? 1 << adcResolution
         : (calibration?.switchTravel[selectedKey] ?? 36) / 10
-    const minVal = 0
 
-    // Compute dynamic auto-zoom around active range for ADC mode
-    let plotMin = minVal
-    let plotMax = maxVal
-
-    if (viewMode === "adc" && history.length > 0) {
-      const currentMin = Math.min(...history)
-      const currentMax = Math.max(...history)
-      const padding = Math.max(30, (currentMax - currentMin) * 0.2)
-      plotMin = Math.max(0, currentMin - padding)
-      plotMax = Math.min(1 << adcResolution, currentMax + padding)
+    if (viewMode === "adc") {
+      const curMin = Math.min(...history)
+      const curMax = Math.max(...history)
+      const span = curMax - curMin
+      const pad = Math.max(25, span * 0.25)
+      plotMin = Math.max(0, curMin - pad)
+      plotMax = Math.min(1 << adcResolution, curMax + pad)
     }
 
     function getY(val: number) {
-      const normalized = (val - plotMin) / (plotMax - plotMin || 1)
-      return height - normalized * (height - 20) - 10
+      const norm = (val - plotMin) / (plotMax - plotMin || 1)
+      return h - norm * (h - 24) - 12
     }
 
-    // Draw Waveform Glow & Area
-    const stepX = width / (MAX_HISTORY - 1)
-    const startX = width - (history.length - 1) * stepX
+    const stepX = w / (MAX_HISTORY - 1)
+    const startX = w - (history.length - 1) * stepX
 
-    // Area gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, height)
-    gradient.addColorStop(0, "rgba(56, 189, 248, 0.25)")
+    // Gradient Fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, h)
+    gradient.addColorStop(0, "rgba(56, 189, 248, 0.30)")
     gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)")
 
     ctx.beginPath()
@@ -145,8 +178,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     for (let i = 1; i < history.length; i++) {
       ctx.lineTo(startX + i * stepX, getY(history[i]))
     }
-    ctx.lineTo(width, height)
-    ctx.lineTo(startX, height)
+    ctx.lineTo(w, h)
+    ctx.lineTo(startX, h)
     ctx.closePath()
     ctx.fillStyle = gradient
     ctx.fill()
@@ -154,7 +187,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     // Trace Line
     ctx.beginPath()
     ctx.strokeStyle = "#38bdf8"
-    ctx.lineWidth = 2.2
+    ctx.lineWidth = 2
     ctx.lineJoin = "round"
     ctx.lineCap = "round"
 
@@ -166,34 +199,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
     ctx.stroke()
 
-    // Draw Current Value Head Dot
-    const latestX = width
-    const latestY = getY(history[history.length - 1])
+    // Current Value Dot
+    const lastX = w
+    const lastY = getY(history[history.length - 1])
 
     ctx.beginPath()
-    ctx.arc(latestX, latestY, 5, 0, Math.PI * 2)
+    ctx.arc(lastX - 2, lastY, 4.5, 0, Math.PI * 2)
     ctx.fillStyle = "#38bdf8"
     ctx.fill()
     ctx.strokeStyle = "#ffffff"
     ctx.lineWidth = 1.5
     ctx.stroke()
 
-    // Draw Min/Max bounds indicators
+    // Scale numbers
     ctx.fillStyle = "#64748b"
     ctx.font = "10px ui-monospace, monospace"
+    ctx.textAlign = "left"
     ctx.fillText(`${plotMax.toFixed(0)}`, 8, 14)
-    ctx.fillText(`${plotMin.toFixed(0)}`, 8, height - 6)
+    ctx.fillText(`${plotMin.toFixed(0)}`, 8, h - 6)
 
+    ctx.restore()
     animFrameId = requestAnimationFrame(draw)
   }
 
   onMount(() => {
-    if (canvasEl) {
-      canvasEl.width = canvasEl.clientWidth * window.devicePixelRatio
-      canvasEl.height = canvasEl.clientHeight * window.devicePixelRatio
-      const ctx = canvasEl.getContext("2d")
-      if (ctx) ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-    }
     animFrameId = requestAnimationFrame(draw)
   })
 
@@ -206,7 +235,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <span class="size-2.5 rounded-full bg-sky-400 animate-pulse"></span>
-      <div class="font-semibold text-sm">Real-Time Sensor Oscilloscope</div>
+      <div class="font-semibold text-sm">
+        Live Oscilloscope &mdash; <span class="text-sky-400 font-mono">Key {selectedKey + 1}</span>
+      </div>
     </div>
     <div class="flex items-center gap-2">
       <!-- Mode Toggle -->
@@ -230,25 +261,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           Distance (mm)
         </button>
       </div>
-
-      <!-- Key Selector -->
-      <select
-        bind:value={selectedKey}
-        class="rounded-md border bg-background px-2.5 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-sky-500"
-        onchange={() => (history = [])}
-      >
-        {#each Array(numKeys).keys() as key}
-          <option value={key}>Key {key + 1}</option>
-        {/each}
-      </select>
     </div>
   </div>
 
-  <!-- Realtime Canvas -->
-  <div class="relative h-44 w-full overflow-hidden rounded-md border bg-[#0c0d12]">
+  <!-- Realtime Canvas Container -->
+  <div
+    bind:this={containerEl}
+    class="relative h-48 w-full overflow-hidden rounded-md border bg-[#090a0f]"
+  >
     <canvas
       bind:this={canvasEl}
-      class="size-full"
+      class="size-full block"
     ></canvas>
   </div>
 

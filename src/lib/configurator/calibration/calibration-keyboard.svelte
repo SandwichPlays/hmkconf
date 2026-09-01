@@ -19,9 +19,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { displayDistance } from "$lib/distance"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
+  import { calibrationStateContext } from "../context.svelte"
 
   const analogInfoQuery = analogInfoQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
+  const calibrationState = calibrationStateContext.get()
 
   const { current: analogInfo } = $derived(analogInfoQuery.analogInfo)
   const { current: calibration } = $derived(calibrationQuery.calibration)
@@ -32,6 +34,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {#if !analogInfo}
       <KeyButton.Skeleton />
     {:else}
+      {@const isSelected = calibrationState.selectedKey === key}
       {@const status = analogInfo[key]?.status ?? 0}
       {@const statusClass =
         status === 1
@@ -40,8 +43,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             ? "border-blue-400 bg-blue-500/40 text-blue-200 ring-2 ring-blue-400"
             : status === 3
               ? "border-emerald-400 bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-400"
-              : ""}
-      <KeyButton.Root class={statusClass}>
+              : isSelected
+                ? "border-sky-400 bg-sky-500/20 ring-2 ring-sky-400 text-sky-200"
+                : ""}
+      <KeyButton.Root
+        class={statusClass}
+        onclick={() => (calibrationState.selectedKey = key)}
+      >
         <span>{analogInfo[key].adcValue}</span>
         <span>{displayDistance(analogInfo[key].distance, key, calibration)}</span>
       </KeyButton.Root>

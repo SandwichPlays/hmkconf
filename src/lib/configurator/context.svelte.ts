@@ -52,6 +52,17 @@ export class ConfiguratorPerformanceState {
 export const performanceStateContext =
   new Context<ConfiguratorPerformanceState>("hmk-performance-state")
 
+export class ConfiguratorCalibrationState {
+  selectedKey = $state(0)
+
+  reset() {
+    this.selectedKey = 0
+  }
+}
+
+export const calibrationStateContext =
+  new Context<ConfiguratorCalibrationState>("hmk-calibration-state")
+
 export class ConfiguratorAdvancedKeysState {
   layer = $state(0)
   index: number | null = $state(null)
@@ -322,6 +333,7 @@ export function setConfiguratorStateContext() {
   performanceStateContext.set(new ConfiguratorPerformanceState())
   advancedKeysStateContext.set(new ConfiguratorAdvancedKeysState())
   gamepadStateContext.set(new ConfiguratorGamepadState())
+  calibrationStateContext.set(new ConfiguratorCalibrationState())
   // Global state depends on all other states.
   globalStateContext.set(new ConfiguratorGlobalState())
   setConfiguratorPersistedState()
