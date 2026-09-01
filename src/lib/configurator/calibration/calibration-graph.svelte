@@ -36,10 +36,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const selectedKey = $derived(calibrationState.selectedKey)
 
   let viewMode = $state<"adc" | "distance">("adc")
+  let scrollSpeed = $state<"fast" | "normal">("fast")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
-  const MAX_HISTORY = 200
+  const maxHistory = $derived(scrollSpeed === "fast" ? 80 : 160)
   let history: number[] = []
   let noisePeakToPeak = $state(0)
   let prevKey = -1
@@ -65,7 +66,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           ((calibration?.switchTravel[selectedKey] ?? 36) / 10)
 
     history.push(value)
-    if (history.length > MAX_HISTORY) {
+    if (history.length > maxHistory) {
       history.shift()
     }
 
@@ -165,7 +166,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       return h - norm * (h - 24) - 12
     }
 
-    const stepX = w / (MAX_HISTORY - 1)
+    const stepX = w / (maxHistory - 1)
     const startX = w - (history.length - 1) * stepX
 
     // Gradient Fill
@@ -240,25 +241,47 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </div>
     </div>
     <div class="flex items-center gap-2">
+      <!-- Speed Toggle -->
+      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {scrollSpeed === 'fast' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            scrollSpeed = "fast"
+            history = []
+          }}
+        >
+          Fast Scroll
+        </button>
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {scrollSpeed === 'normal' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            scrollSpeed = "normal"
+            history = []
+          }}
+        >
+          Normal
+        </button>
+      </div>
+
       <!-- Mode Toggle -->
       <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
         <button
-          class="rounded px-2.5 py-1 font-medium transition-colors {viewMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
           onclick={() => {
             viewMode = "adc"
             history = []
           }}
         >
-          ADC Counts
+          ADC
         </button>
         <button
-          class="rounded px-2.5 py-1 font-medium transition-colors {viewMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
           onclick={() => {
             viewMode = "distance"
             history = []
           }}
         >
-          Distance (mm)
+          Distance
         </button>
       </div>
     </div>

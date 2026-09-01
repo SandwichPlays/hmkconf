@@ -17,7 +17,7 @@ import { keyboardContext } from "$lib/keyboard"
 import type { HMK_AnalogInfo } from "$lib/libhmk/commands"
 import { Context, resource, type ResourceReturn } from "runed"
 
-const ANALOG_INFO_REFETCH_INTERVAL = 1000 / 30
+const ANALOG_INFO_REFETCH_INTERVAL = 1000 / 100
 
 export class AnalogInfoQuery {
   analogInfo: ResourceReturn<HMK_AnalogInfo[]>
