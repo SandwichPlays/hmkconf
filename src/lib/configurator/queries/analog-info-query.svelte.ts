@@ -23,19 +23,30 @@ export class AnalogInfoQuery {
   samplingRate = $state<"normal" | "fast">("normal")
 
   #keyboard = keyboardContext.get()
+  #timer: ReturnType<typeof setTimeout> | null = null
 
   constructor() {
     this.analogInfo = resource(
-      () => this.enabled,
-      async (enabled) => {
+      () => ({ enabled: this.enabled, rate: this.samplingRate }),
+      async ({ enabled, rate }) => {
+        if (this.#timer) {
+          clearTimeout(this.#timer)
+          this.#timer = null
+        }
         if (!enabled) return this.analogInfo.current
-        const ret = await this.#keyboard.analogInfo()
-        const interval = this.samplingRate === "fast" ? 1000 / 200 : 1000 / 60
-        setTimeout(
-          () => this.analogInfo.refetch(),
-          interval,
-        )
-        return ret
+
+        try {
+          const ret = await this.#keyboard.analogInfo()
+          return ret
+        } finally {
+          if (this.enabled) {
+            const interval = rate === "fast" ? 1000 / 200 : 1000 / 60
+            this.#timer = setTimeout(
+              () => this.analogInfo.refetch(),
+              interval,
+            )
+          }
+        }
       },
       { lazy: true },
     )
@@ -47,6 +58,10 @@ export class AnalogInfoQuery {
     } catch (err) {
       console.error(err)
     } finally {
+      if (this.#timer) {
+        clearTimeout(this.#timer)
+        this.#timer = null
+      }
       this.analogInfo.refetch()
     }
   }

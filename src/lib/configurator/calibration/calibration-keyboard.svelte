@@ -35,7 +35,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <KeyButton.Skeleton />
     {:else}
       {@const isSelected = calibrationState.selectedKey === key}
-      {@const status = analogInfo[key]?.status ?? 0}
+      {@const rawStatus = analogInfo[key]?.status ?? 0}
+      {@const status = rawStatus & 0x7f}
+      {@const isPressed = (rawStatus & 0x80) !== 0}
       {@const statusClass =
         status === 1
           ? "border-amber-400 bg-amber-500/20 text-amber-300 ring-2 ring-amber-400/50 animate-pulse"
@@ -43,9 +45,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             ? "border-blue-400 bg-blue-500/40 text-blue-200 ring-2 ring-blue-400"
             : status === 3
               ? "border-emerald-400 bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-400"
-              : isSelected
-                ? "border-sky-400 bg-sky-500/20 ring-2 ring-sky-400 text-sky-200"
-                : ""}
+              : isPressed
+                ? "border-emerald-400 bg-emerald-500/20 ring-2 ring-emerald-400/60 text-emerald-300"
+                : isSelected
+                  ? "border-sky-400 bg-sky-500/20 ring-2 ring-sky-400 text-sky-200"
+                  : ""}
       <KeyButton.Root
         class={statusClass}
         onclick={() => (calibrationState.selectedKey = key)}
