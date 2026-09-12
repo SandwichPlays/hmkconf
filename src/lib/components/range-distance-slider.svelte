@@ -27,18 +27,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     committed = $bindable([0, 0]),
     min,
     max,
-    step = 0.01,
+    step = 0.001,
+    mode = "deadzone",
     onCommit,
     keyIndex,
     calibration,
     display,
-    mode = "sensitivity",
     ...props
   }: ComponentProps<typeof CommitRangeSlider> & {
-    committed?: [number, number]
     keyIndex?: number
     calibration?: HMK_Calibration
-    mode?: "sensitivity" | "deadzone"
+    mode?: "deadzone" | "rt"
   } = $props()
 
   const travel = $derived(getSwitchDistanceMM(keyIndex, calibration))
@@ -62,8 +61,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     display ??
     (mode === "deadzone"
       ? (v) =>
-          `Top: ${v[0].toFixed(2)}mm | Bottom: ${v[1].toFixed(2)}mm`
-      : (v) => `Press: ${v[0].toFixed(2)}mm | Release: ${v[1].toFixed(2)}mm`)
+          `Top: ${v[0].toFixed(3)}mm | Bottom: ${v[1].toFixed(3)}mm`
+      : (v) => `Press: ${v[0].toFixed(3)}mm | Release: ${v[1].toFixed(3)}mm`)
   }
   min={sliderMin}
   max={sliderMax}
