@@ -385,27 +385,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     </div>
 
     <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
-      <span class="text-[11px] text-muted-foreground font-medium">Rest Value</span>
+      <span class="text-[11px] text-muted-foreground font-medium">Rest (ADC)</span>
       <span class="font-mono text-base font-bold text-foreground">
-        {#if viewMode === "distance"}
-          0.00 mm
-        {:else}
-          {observedRest ?? calibration?.initialRestValue ?? "--"}
-        {/if}
+        {observedRest ?? calibration?.initialRestValue ?? "--"}
       </span>
     </div>
 
     <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
-      <span class="text-[11px] text-muted-foreground font-medium">Bottom Out</span>
+      <span class="text-[11px] text-muted-foreground font-medium">Bottom Out (ADC)</span>
       <span class="font-mono text-base font-bold text-foreground">
-        {#if viewMode === "distance"}
-          {((calibration?.switchTravel[selectedKey] ?? 36) / 10).toFixed(2)} mm
-        {:else}
-          {observedBottomOut && observedBottomOut > (observedRest ?? 0)
-            ? observedBottomOut
-            : (observedRest ?? calibration?.initialRestValue ?? 0) +
-              (calibration?.initialBottomOutThreshold ?? 700)}
-        {/if}
+        {observedBottomOut && observedBottomOut > (observedRest ?? 0)
+          ? observedBottomOut
+          : (observedRest ?? calibration?.initialRestValue ?? 0) +
+            (calibration?.initialBottomOutThreshold ?? 700)}
       </span>
     </div>
   </div>
