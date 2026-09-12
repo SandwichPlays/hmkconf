@@ -17,11 +17,10 @@ import { keyboardContext } from "$lib/keyboard"
 import type { HMK_AnalogInfo } from "$lib/libhmk/commands"
 import { Context, resource, type ResourceReturn } from "runed"
 
-const ANALOG_INFO_REFETCH_INTERVAL = 1000 / 100
-
 export class AnalogInfoQuery {
   analogInfo: ResourceReturn<HMK_AnalogInfo[]>
   enabled = $state(false)
+  samplingRate = $state<"normal" | "fast">("normal")
 
   #keyboard = keyboardContext.get()
 
@@ -31,9 +30,10 @@ export class AnalogInfoQuery {
       async (enabled) => {
         if (!enabled) return this.analogInfo.current
         const ret = await this.#keyboard.analogInfo()
+        const interval = this.samplingRate === "fast" ? 1000 / 200 : 1000 / 60
         setTimeout(
           () => this.analogInfo.refetch(),
-          ANALOG_INFO_REFETCH_INTERVAL,
+          interval,
         )
         return ret
       },

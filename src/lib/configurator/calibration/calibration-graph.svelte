@@ -36,11 +36,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const selectedKey = $derived(calibrationState.selectedKey)
 
   let viewMode = $state<"adc" | "distance">("adc")
-  let scrollSpeed = $state<"fast" | "normal">("fast")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
-  const maxHistory = $derived(scrollSpeed === "fast" ? 80 : 160)
+  const maxHistory = 100
   let history: number[] = []
   let noisePeakToPeak = $state(0)
   let prevKey = -1
@@ -163,24 +162,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     function getY(val: number) {
       const norm = (val - plotMin) / (plotMax - plotMin || 1)
-      return h - norm * (h - 24) - 12
+      return norm * (h - 28) + 14
     }
 
     const stepX = w / (maxHistory - 1)
     const startX = w - (history.length - 1) * stepX
 
-    // Gradient Fill
+    // Gradient Fill from top baseline down to trace line
     const gradient = ctx.createLinearGradient(0, 0, 0, h)
-    gradient.addColorStop(0, "rgba(56, 189, 248, 0.30)")
-    gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)")
+    gradient.addColorStop(0, "rgba(56, 189, 248, 0.05)")
+    gradient.addColorStop(1, "rgba(56, 189, 248, 0.30)")
 
     ctx.beginPath()
-    ctx.moveTo(startX, getY(history[0]))
+    ctx.moveTo(startX, 0)
+    ctx.lineTo(startX, getY(history[0]))
     for (let i = 1; i < history.length; i++) {
       ctx.lineTo(startX + i * stepX, getY(history[i]))
     }
-    ctx.lineTo(w, h)
-    ctx.lineTo(startX, h)
+    ctx.lineTo(w, getY(history[history.length - 1]))
+    ctx.lineTo(w, 0)
     ctx.closePath()
     ctx.fillStyle = gradient
     ctx.fill()
@@ -212,12 +212,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.lineWidth = 1.5
     ctx.stroke()
 
-    // Scale numbers
+    // Scale numbers (top = rest/min, bottom = pressed/max)
     ctx.fillStyle = "#64748b"
     ctx.font = "10px ui-monospace, monospace"
     ctx.textAlign = "left"
-    ctx.fillText(`${plotMax.toFixed(0)}`, 8, 14)
-    ctx.fillText(`${plotMin.toFixed(0)}`, 8, h - 6)
+    ctx.fillText(`${viewMode === "distance" ? plotMin.toFixed(2) + " mm" : plotMin.toFixed(0)}`, 8, 14)
+    ctx.fillText(`${viewMode === "distance" ? plotMax.toFixed(2) + " mm" : plotMax.toFixed(0)}`, 8, h - 6)
 
     ctx.restore()
     animFrameId = requestAnimationFrame(draw)
@@ -241,25 +241,23 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <!-- Speed Toggle -->
+      <!-- Sampling Rate Toggle -->
       <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
         <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {scrollSpeed === 'fast' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          class="rounded px-2 py-0.5 font-medium transition-colors {analogInfoQuery.samplingRate === 'normal' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
           onclick={() => {
-            scrollSpeed = "fast"
-            history = []
-          }}
-        >
-          Fast Scroll
-        </button>
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {scrollSpeed === 'normal' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            scrollSpeed = "normal"
-            history = []
+            analogInfoQuery.samplingRate = "normal"
           }}
         >
           Normal
+        </button>
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {analogInfoQuery.samplingRate === 'fast' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            analogInfoQuery.samplingRate = "fast"
+          }}
+        >
+          Fast
         </button>
       </div>
 
@@ -318,7 +316,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
         {viewMode === "adc"
           ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
-          : `±${(noisePeakToPeak / 2).toFixed(3)} mm`}
+          : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
       </span>
     </div>
 

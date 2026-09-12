@@ -27,7 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     committed = $bindable([0, 0]),
     min,
     max,
-    step = 0.001,
+    step = 0.01,
     mode = "deadzone",
     onCommit,
     keyIndex,
@@ -61,8 +61,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     display ??
     (mode === "deadzone"
       ? (v) =>
-          `Top: ${v[0].toFixed(3)}mm | Bottom: ${v[1].toFixed(3)}mm`
-      : (v) => `Press: ${v[0].toFixed(3)}mm | Release: ${v[1].toFixed(3)}mm`)
+          `Top: ${v[0].toFixed(2)}mm | Bottom: ${v[1].toFixed(2)}mm`
+      : (v) => `Press: ${v[0].toFixed(2)}mm | Release: ${v[1].toFixed(2)}mm`)
   }
   min={sliderMin}
   max={sliderMax}
