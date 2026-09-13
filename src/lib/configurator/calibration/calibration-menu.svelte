@@ -159,22 +159,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           >
             Calibrate All Keys
           </Button>
+          <Button
+            disabled={demo}
+            onclick={() => {
+              analogInfoQuery.recalibrate()
+              toast.success("Rest positions re-zeroed.")
+            }}
+            size="sm"
+            variant="destructive"
+          >
+            Re-zero Rest Values
+          </Button>
         </div>
       {/if}
-    </div>
-
-    <div class="flex gap-2">
-      <Button
-        disabled={demo}
-        onclick={() => {
-          analogInfoQuery.recalibrate()
-          toast.success("Rest positions re-zeroed.")
-        }}
-        size="sm"
-        variant="destructive"
-      >
-        Re-zero Rest Values
-      </Button>
     </div>
   </FixedScrollArea>
   <FixedScrollArea class="flex flex-col gap-4 p-4">

@@ -318,7 +318,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- Realtime Canvas Container -->
     <div
       bind:this={containerEl}
-      class="relative h-36 flex-1 overflow-hidden rounded-md border bg-[#090a0f]"
+      class="relative h-48 flex-1 overflow-hidden rounded-md border bg-[#090a0f]"
     >
       <canvas
         bind:this={canvasEl}
