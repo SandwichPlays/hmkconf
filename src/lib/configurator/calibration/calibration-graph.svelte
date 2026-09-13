@@ -50,16 +50,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let noisePeakToPeak = $state(0)
   let prevKey = -1
   let animFrameId: number | null = null
-  let observedRest = $state<number | null>(null)
-  let observedBottomOut = $state<number | null>(null)
   let isPressedLive = $state(false)
 
   // Reset buffer when selected key changes
   $effect(() => {
     if (selectedKey !== prevKey) {
       history = []
-      observedRest = null
-      observedBottomOut = null
       prevKey = selectedKey
     }
   })
@@ -81,16 +77,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     const now = performance.now()
     history.push({ time: now, value, isPressed })
-
-    if (
-      observedRest === null ||
-      (!isPressed && keyData.distance === 0 && keyData.adcValue < observedRest)
-    ) {
-      observedRest = keyData.adcValue
-    }
-    if (observedBottomOut === null || keyData.adcValue > observedBottomOut) {
-      observedBottomOut = keyData.adcValue
-    }
 
     // Keep samples within window + safety buffer
     const cutoff = now - TIME_WINDOW_MS - 500
@@ -304,101 +290,65 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         </span>
       {/if}
     </div>
-    <div class="flex items-center gap-2">
-      <!-- Sampling Rate Toggle -->
-      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {analogInfoQuery.samplingRate === 'normal' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            analogInfoQuery.samplingRate = "normal"
-          }}
-        >
-          Normal
-        </button>
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {analogInfoQuery.samplingRate === 'fast' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            analogInfoQuery.samplingRate = "fast"
-          }}
-        >
-          Fast
-        </button>
-      </div>
-
-      <!-- Mode Toggle -->
-      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            viewMode = "adc"
-            history = []
-          }}
-        >
-          ADC
-        </button>
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            viewMode = "distance"
-            history = []
-          }}
-        >
-          Distance
-        </button>
-      </div>
+    <!-- Mode Toggle -->
+    <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+      <button
+        class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+        onclick={() => {
+          viewMode = "adc"
+          history = []
+        }}
+      >
+        ADC
+      </button>
+      <button
+        class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+        onclick={() => {
+          viewMode = "distance"
+          history = []
+        }}
+      >
+        Distance
+      </button>
     </div>
   </div>
 
-  <!-- Realtime Canvas Container -->
-  <div
-    bind:this={containerEl}
-    class="relative h-48 w-full overflow-hidden rounded-md border bg-[#090a0f]"
-  >
-    <canvas
-      bind:this={canvasEl}
-      class="size-full block"
-    ></canvas>
-  </div>
+  <!-- Realtime Canvas and Side Stats -->
+  <div class="flex gap-3">
+    <!-- Realtime Canvas Container -->
+    <div
+      bind:this={containerEl}
+      class="relative h-36 flex-1 overflow-hidden rounded-md border bg-[#090a0f]"
+    >
+      <canvas
+        bind:this={canvasEl}
+        class="size-full block"
+      ></canvas>
+    </div>
 
-  <!-- Live Stats Strip -->
-  <div class="grid grid-cols-4 gap-2 pt-1">
-    <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
-      <span class="text-[11px] text-muted-foreground font-medium">Live Value</span>
-      <span class="font-mono text-base font-bold {isPressedLive ? 'text-emerald-400' : 'text-sky-400'}">
-        {#if analogInfo && analogInfo[selectedKey]}
+    <!-- Live Stats Side Column -->
+    <div class="flex w-36 shrink-0 flex-col gap-2">
+      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2.5">
+        <span class="text-[11px] font-medium text-muted-foreground">Live Value</span>
+        <span class="font-mono text-base font-bold {isPressedLive ? 'text-emerald-400' : 'text-sky-400'}">
+          {#if analogInfo && analogInfo[selectedKey]}
+            {viewMode === "adc"
+              ? analogInfo[selectedKey].adcValue
+              : displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration)}
+          {:else}
+            --
+          {/if}
+        </span>
+      </div>
+
+      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2.5">
+        <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
+        <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
           {viewMode === "adc"
-            ? analogInfo[selectedKey].adcValue
-            : displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration)}
-        {:else}
-          --
-        {/if}
-      </span>
-    </div>
-
-    <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
-      <span class="text-[11px] text-muted-foreground font-medium">Noise (Pk-to-Pk)</span>
-      <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
-        {viewMode === "adc"
-          ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
-          : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
-      </span>
-    </div>
-
-    <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
-      <span class="text-[11px] text-muted-foreground font-medium">Rest (ADC)</span>
-      <span class="font-mono text-base font-bold text-foreground">
-        {observedRest ?? calibration?.initialRestValue ?? "--"}
-      </span>
-    </div>
-
-    <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
-      <span class="text-[11px] text-muted-foreground font-medium">Bottom Out (ADC)</span>
-      <span class="font-mono text-base font-bold text-foreground">
-        {observedBottomOut && observedBottomOut > (observedRest ?? 0)
-          ? observedBottomOut
-          : (observedRest ?? calibration?.initialRestValue ?? 0) +
-            (calibration?.initialBottomOutThreshold ?? 700)}
-      </span>
+            ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
+            : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
+        </span>
+      </div>
     </div>
   </div>
 </div>
