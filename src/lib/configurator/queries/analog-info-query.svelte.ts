@@ -39,10 +39,9 @@ export class AnalogInfoQuery {
           return ret
         } finally {
           if (this.enabled) {
-            const interval = 1000 / 200
             this.#timer = setTimeout(
               () => this.analogInfo.refetch(),
-              interval,
+              0,
             )
           }
         }

@@ -51,12 +51,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let prevKey = -1
   let animFrameId: number | null = null
   let isPressedLive = $state(false)
+  let smoothMin = 0
+  let smoothMax = 4096
+  let scaleInitialized = false
+  let prevViewMode: "adc" | "distance" = "adc"
 
   // Reset buffer when selected key changes
   $effect(() => {
     if (selectedKey !== prevKey) {
       history = []
       prevKey = selectedKey
+      scaleInitialized = false
     }
   })
 
@@ -78,19 +83,32 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     history.push({ time: now, value, isPressed })
 
-    // Keep samples within window + safety buffer
+    // Efficient buffer pruning (keep within time window + 500ms margin)
     const cutoff = now - TIME_WINDOW_MS - 500
-    while (history.length > 0 && history[0].time < cutoff) {
-      history.shift()
+    if (history.length > 50 && history[0].time < cutoff) {
+      const idx = history.findIndex((s) => s.time >= cutoff)
+      if (idx > 0) history = history.slice(idx)
     }
 
-    // Calculate peak-to-peak noise over the last 30 samples
+    // Calculate peak-to-peak noise over the last 30 samples only when stationary
     const recent = history.slice(-30)
-    if (recent.length > 2) {
-      const vals = recent.map((s) => s.value)
-      const min = Math.min(...vals)
-      const max = Math.max(...vals)
-      noisePeakToPeak = max - min
+    if (recent.length >= 10) {
+      const first = recent[0].value
+      const last = recent[recent.length - 1].value
+      const isStationary =
+        viewMode === "adc"
+          ? Math.abs(last - first) <= 6
+          : Math.abs(last - first) <= 0.05
+      if (isStationary) {
+        let min = recent[0].value
+        let max = recent[0].value
+        for (let i = 1; i < recent.length; i++) {
+          const v = recent[i].value
+          if (v < min) min = v
+          if (v > max) max = v
+        }
+        noisePeakToPeak = max - min
+      }
     }
   })
 
@@ -160,33 +178,52 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       return
     }
 
-    // Calculate Y scale (Rest at top, Bottom-out at bottom)
-    let plotMin = 0
-    let plotMax = (calibration?.switchTravel[selectedKey] ?? 36) / 10
+    // Calculate target Y scale
+    let targetMin = 0
+    let targetMax = (calibration?.switchTravel[selectedKey] ?? 36) / 10
 
     if (viewMode === "adc") {
-      const vals = history.map((s) => s.value)
-      const curMin = Math.min(...vals)
-      const curMax = Math.max(...vals)
+      let curMin = history[0].value
+      let curMax = history[0].value
+      for (let i = 1; i < history.length; i++) {
+        const v = history[i].value
+        if (v < curMin) curMin = v
+        if (v > curMax) curMax = v
+      }
       const span = curMax - curMin
-      const pad = Math.max(25, span * 0.25)
-      plotMin = Math.max(0, curMin - pad)
-      plotMax = Math.min(1 << adcResolution, curMax + pad)
+      const pad = Math.max(30, span * 0.25)
+      targetMin = Math.max(0, curMin - pad)
+      targetMax = Math.min(1 << adcResolution, curMax + pad)
+    }
+
+    if (!scaleInitialized || viewMode !== prevViewMode) {
+      smoothMin = targetMin
+      smoothMax = targetMax
+      scaleInitialized = true
+      prevViewMode = viewMode
+    } else {
+      // Smooth lerp to prevent jarring vertical jumps
+      smoothMin += (targetMin - smoothMin) * 0.12
+      smoothMax += (targetMax - smoothMax) * 0.12
     }
 
     // getY maps rest to top (14) and bottom-out to bottom (h - 14)
     function getY(val: number) {
-      const norm = (val - plotMin) / (plotMax - plotMin || 1)
+      const norm = (val - smoothMin) / (smoothMax - smoothMin || 1)
       const clamped = Math.max(0, Math.min(1, norm))
       return clamped * (h - 28) + 14
     }
 
     const now = performance.now()
     const latestSample = history[history.length - 1]
-    const referenceTime = Math.min(now, latestSample.time + 100)
     const isPressed = latestSample.isPressed
-
     const traceColor = isPressed ? "#22c55e" : "#38bdf8"
+
+    // Continuous timebase scrolling: right edge is 'now'
+    const getX = (t: number) => w - ((now - t) / TIME_WINDOW_MS) * w
+
+    const firstX = Math.max(0, getX(history[0].time))
+    const lastY = getY(latestSample.value)
 
     // Gradient Fill from bottom baseline up to trace line
     const gradient = ctx.createLinearGradient(0, h, 0, 0)
@@ -198,24 +235,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       gradient.addColorStop(1, "rgba(56, 189, 248, 0.02)")
     }
 
-    const startX = Math.max(
-      0,
-      w - ((referenceTime - history[0].time) / TIME_WINDOW_MS) * w,
-    )
-
     ctx.beginPath()
-    ctx.moveTo(startX, h)
+    ctx.moveTo(firstX, h)
     for (let i = 0; i < history.length; i++) {
       const s = history[i]
-      const age = referenceTime - s.time
-      const x = Math.min(w, w - (age / TIME_WINDOW_MS) * w)
+      const x = Math.max(0, Math.min(w, getX(s.time)))
       const y = getY(s.value)
       ctx.lineTo(x, y)
     }
-    const lastX = w
-    const lastY = getY(latestSample.value)
-    ctx.lineTo(lastX, lastY)
-    ctx.lineTo(lastX, h)
+    ctx.lineTo(w, lastY)
+    ctx.lineTo(w, h)
     ctx.closePath()
     ctx.fillStyle = gradient
     ctx.fill()
@@ -229,18 +258,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     for (let i = 0; i < history.length; i++) {
       const s = history[i]
-      const age = referenceTime - s.time
-      const x = Math.min(w, w - (age / TIME_WINDOW_MS) * w)
+      const x = Math.max(0, Math.min(w, getX(s.time)))
       const y = getY(s.value)
       if (i === 0) ctx.moveTo(x, y)
       else ctx.lineTo(x, y)
     }
-    ctx.lineTo(lastX, lastY)
+    ctx.lineTo(w, lastY)
     ctx.stroke()
 
-    // Current Value Dot
+    // Current Value Dot at right edge
     ctx.beginPath()
-    ctx.arc(lastX - 2, lastY, 4.5, 0, Math.PI * 2)
+    ctx.arc(w - 3, lastY, 4.5, 0, Math.PI * 2)
     ctx.fillStyle = traceColor
     ctx.fill()
     ctx.strokeStyle = "#ffffff"
@@ -252,12 +280,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.font = "10px ui-monospace, monospace"
     ctx.textAlign = "left"
     ctx.fillText(
-      `${viewMode === "distance" ? plotMin.toFixed(2) + " mm" : plotMin.toFixed(0)}`,
+      `${viewMode === "distance" ? smoothMin.toFixed(2) + " mm" : smoothMin.toFixed(0)}`,
       8,
       14,
     )
     ctx.fillText(
-      `${viewMode === "distance" ? plotMax.toFixed(2) + " mm" : plotMax.toFixed(0)}`,
+      `${viewMode === "distance" ? smoothMax.toFixed(2) + " mm" : smoothMax.toFixed(0)}`,
       8,
       h - 6,
     )

@@ -20,12 +20,22 @@ export class Commander {
   hidDevice: HIDDevice
   #taskQueue = new TaskQueue()
   #responseQueue: DataView[] = []
+  #pendingResolve: ((data: DataView) => void) | null = null
+  #pendingCommand: HMK_Command | null = null
 
   constructor(hidDevice: HIDDevice) {
     this.hidDevice = hidDevice
     this.hidDevice.oninputreport = (e) => {
       if (e.data.byteLength === HMK_RAW_HID_EP_SIZE) {
-        this.#responseQueue.push(e.data)
+        const cmd = e.data.getUint8(0)
+        if (this.#pendingResolve && this.#pendingCommand === cmd) {
+          const resolve = this.#pendingResolve
+          this.#pendingResolve = null
+          this.#pendingCommand = null
+          resolve(new DataView(e.data.buffer.slice(1)))
+        } else {
+          this.#responseQueue.push(e.data)
+        }
       } else {
         console.error(
           `Unexpected input report length: ${e.data.byteLength} bytes. Expected ${HMK_RAW_HID_EP_SIZE} bytes.`,
@@ -36,6 +46,8 @@ export class Commander {
 
   async clear() {
     this.hidDevice.oninputreport = null
+    this.#pendingResolve = null
+    this.#pendingCommand = null
     await this.#taskQueue.clear()
     this.#responseQueue.length = 0
   }
@@ -62,27 +74,45 @@ export class Commander {
     return this.#taskQueue.enqueue(
       (abortController) =>
         new Promise<DataView>((resolve, reject) => {
+          const idx = this.#responseQueue.findIndex(
+            (r) => r.getUint8(0) === command,
+          )
+          if (idx !== -1) {
+            const resp = this.#responseQueue.splice(idx, 1)[0]
+            resolve(new DataView(resp.buffer.slice(1)))
+            return
+          }
+
+          let timer: ReturnType<typeof setTimeout> | null = null
+
+          const cleanup = () => {
+            if (timer) clearTimeout(timer)
+            if (this.#pendingCommand === command) {
+              this.#pendingResolve = null
+              this.#pendingCommand = null
+            }
+          }
+
+          this.#pendingCommand = command
+          this.#pendingResolve = (data) => {
+            cleanup()
+            resolve(data)
+          }
+
           this.hidDevice
             .sendReport(0, new Uint8Array(commandBuffer))
-            .catch((err) => reject(err))
-
-          const interval = setInterval(() => {
-            while (this.#responseQueue.length > 0) {
-              const response = this.#responseQueue.shift()
-              if (response !== undefined && response?.getUint8(0) === command) {
-                clearInterval(interval)
-                resolve(new DataView(response.buffer.slice(1)))
-              }
-            }
-          }, 10)
+            .catch((err) => {
+              cleanup()
+              reject(err)
+            })
 
           abortController.signal.addEventListener("abort", () => {
-            clearInterval(interval)
+            cleanup()
             reject(new Error("Command was cancelled."))
           })
 
-          setTimeout(() => {
-            clearInterval(interval)
+          timer = setTimeout(() => {
+            cleanup()
             reject(new Error("Command timed out."))
           }, timeout)
         }),
