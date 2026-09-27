@@ -45,7 +45,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     isPressed: boolean
   }
 
-  const TIME_WINDOW_MS = 1500
+  const TIME_WINDOW_MS = 1350
   let history: Sample[] = []
   let noisePeakToPeak = $state(0)
   let prevKey = -1
