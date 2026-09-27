@@ -20,16 +20,29 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import Footer from "$lib/components/footer.svelte"
   import { Button } from "$lib/components/ui/button"
   import Configurator from "$lib/configurator/configurator.svelte"
+  import { firmwareUpdateState } from "$lib/dfu/firmware-update-state.svelte"
   import type { Keyboard } from "$lib/keyboard"
   import { connect } from "$lib/keyboard/hmk-keyboard.svelte"
   import { HMK_FIRMWARE_MAX_VERSION } from "$lib/libhmk"
   import { toast } from "svelte-sonner"
 
   let keyboard: Keyboard | null = $state(null)
+  let disconnectedForUpdate = $state(false)
+
+  $effect(() => {
+    if (!firmwareUpdateState.inProgress && disconnectedForUpdate) {
+      disconnectedForUpdate = false
+      keyboard = null
+    }
+  })
 
   const handleConnect = async () => {
     try {
       keyboard = await connect(({ metadata: { name } }) => {
+        if (firmwareUpdateState.inProgress) {
+          disconnectedForUpdate = true
+          return
+        }
         toast.success(`${name} disconnected.`)
         keyboard = null
       })

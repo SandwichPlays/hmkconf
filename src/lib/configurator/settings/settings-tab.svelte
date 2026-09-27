@@ -17,13 +17,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import CommitSlider from "$lib/components/commit-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import Switch from "$lib/components/switch.svelte"
+  import { Badge } from "$lib/components/ui/badge"
   import { Button } from "$lib/components/ui/button"
   import * as Dialog from "$lib/components/ui/dialog"
   import { keyboardContext } from "$lib/keyboard"
-  import { cn, isFeatureAvailable, type WithoutChildren } from "$lib/utils"
+  import { HMK_FIRMWARE_MAX_VERSION } from "$lib/libhmk"
+  import {
+    cn,
+    displayVersion,
+    isFeatureAvailable,
+    isFirmwareUpdateAvailable,
+    type WithoutChildren,
+  } from "$lib/utils"
   import type { HTMLAttributes } from "svelte/elements"
   import { optionsQueryContext } from "../queries/options-query.svelte"
   import { profileQueryContext } from "../queries/profile-query.svelte"
+  import FirmwareUpdateDialog from "./firmware-update-dialog.svelte"
 
   const {
     class: className,
@@ -40,6 +49,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const profileQuery = profileQueryContext.get()
   const optionsQuery = optionsQueryContext.get()
   const { current: options } = $derived(optionsQuery.options)
+
+  const updateAvailable = isFirmwareUpdateAvailable(version)
 </script>
 
 <div
@@ -77,6 +88,29 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
+    <div class="flex flex-col gap-2">
+      <div class="grid text-sm text-wrap">
+        <span class="font-semibold">Firmware Update</span>
+        <span class="text-muted-foreground">
+          Update the keyboard firmware via USB DFU directly from your browser.
+        </span>
+      </div>
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-muted-foreground">
+          Current: {displayVersion(version)}
+        </span>
+        {#if updateAvailable}
+          <Badge>
+            Update Available: {displayVersion(HMK_FIRMWARE_MAX_VERSION)}
+          </Badge>
+        {:else}
+          <Badge variant="secondary">Up to date</Badge>
+        {/if}
+      </div>
+      <div>
+        <FirmwareUpdateDialog />
+      </div>
+    </div>
     <div class="flex flex-col gap-2">
       <div class="grid text-sm text-wrap">
         <span class="font-semibold">Restart Keyboard</span>
