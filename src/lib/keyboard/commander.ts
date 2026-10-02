@@ -33,7 +33,7 @@ export class Commander {
           this.#pendingResolve = null
           this.#pendingCommand = null
           resolve(new DataView(e.data.buffer.slice(1)))
-        } else {
+        } else if (cmd !== HMK_Command.ANALOG_INFO) {
           this.#responseQueue.push(e.data)
         }
       } else {
@@ -74,13 +74,15 @@ export class Commander {
     return this.#taskQueue.enqueue(
       (abortController) =>
         new Promise<DataView>((resolve, reject) => {
-          const idx = this.#responseQueue.findIndex(
-            (r) => r.getUint8(0) === command,
-          )
-          if (idx !== -1) {
-            const resp = this.#responseQueue.splice(idx, 1)[0]
-            resolve(new DataView(resp.buffer.slice(1)))
-            return
+          if (command !== HMK_Command.ANALOG_INFO) {
+            const idx = this.#responseQueue.findIndex(
+              (r) => r.getUint8(0) === command,
+            )
+            if (idx !== -1) {
+              const resp = this.#responseQueue.splice(idx, 1)[0]
+              resolve(new DataView(resp.buffer.slice(1)))
+              return
+            }
           }
 
           let timer: ReturnType<typeof setTimeout> | null = null
