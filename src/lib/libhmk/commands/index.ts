@@ -13,7 +13,7 @@
  * this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { uint8Schema, uint16Schema } from "$lib/integer"
+import { uint8Schema, uint16Schema, uint32Schema } from "$lib/integer"
 import z from "zod"
 
 export enum HMK_Command {
@@ -35,6 +35,7 @@ export enum HMK_Command {
   SAVE_CALIBRATION_THRESHOLD,
   START_MANUAL_CALIBRATION,
   FINISH_MANUAL_CALIBRATION,
+  SCAN_RATE = 23,
 
   GET_KEYMAP = 128,
   SET_KEYMAP,
@@ -61,3 +62,14 @@ export const hmkAnalogInfoSchema = z.object({
 })
 
 export type HMK_AnalogInfo = z.infer<typeof hmkAnalogInfoSchema>
+
+export const hmkScanRateSchema = z.object({
+  evalRateHz: uint32Schema,
+  sweepRateHz: uint32Schema,
+  sweepPeriodUs: uint16Schema,
+  evalMinUs: uint16Schema,
+  evalMaxUs: uint16Schema,
+  evalAvgUs: uint16Schema,
+})
+
+export type HMK_ScanRate = z.infer<typeof hmkScanRateSchema>

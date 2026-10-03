@@ -16,7 +16,7 @@
 import type { HMK_Calibration, HMK_Options } from "$lib/libhmk"
 import type { HMK_Actuation } from "$lib/libhmk/actuation"
 import type { HMK_AdvancedKey } from "$lib/libhmk/advanced-keys"
-import type { HMK_AnalogInfo } from "$lib/libhmk/commands"
+import type { HMK_AnalogInfo, HMK_ScanRate } from "$lib/libhmk/commands"
 import type { HMK_GamepadOptions } from "$lib/libhmk/gamepad"
 import { Context } from "runed"
 import type { KeyboardMetadata } from "./metadata"
@@ -67,6 +67,7 @@ export type KeyboardAction = {
   factoryReset(): Promise<void>
   recalibrate(): Promise<void>
   analogInfo(): Promise<HMK_AnalogInfo[]>
+  getScanRate(): Promise<HMK_ScanRate>
   getCalibration(): Promise<HMK_Calibration>
   setCalibration(params: SetCalibrationParams): Promise<void>
   getProfile(): Promise<number>

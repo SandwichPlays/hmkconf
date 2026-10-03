@@ -23,6 +23,7 @@ import {
   AnalogInfoQuery,
   analogInfoQueryContext,
 } from "./analog-info-query.svelte"
+export { scanRateQueryContext } from "./scan-rate-query.svelte"
 import {
   CalibrationQuery,
   calibrationQueryContext,
@@ -31,6 +32,7 @@ import { GamepadQuery, gamepadQueryContext } from "./gamepad-query.svelte"
 import { KeymapQuery, keymapQueryContext } from "./keymap-query.svelte"
 import { OptionsQuery, optionsQueryContext } from "./options-query.svelte"
 import { ProfileQuery, profileQueryContext } from "./profile-query.svelte"
+import { ScanRateQuery, scanRateQueryContext } from "./scan-rate-query.svelte"
 import { TickRateQuery, tickRateQueryContext } from "./tick-rate-query.svelte"
 
 export async function optimisticUpdate<T>(options: {
@@ -62,6 +64,7 @@ export function setConfiguratorQueryContext() {
   advancedKeysQueryContext.set(new AdvancedKeysQuery())
   gamepadQueryContext.set(new GamepadQuery())
   tickRateQueryContext.set(new TickRateQuery())
+  scanRateQueryContext.set(new ScanRateQuery())
   // Profile query depends on all other queries.
   profileQueryContext.set(new ProfileQuery())
 }

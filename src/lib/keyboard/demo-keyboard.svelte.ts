@@ -111,6 +111,16 @@ export class DemoKeyboard implements Keyboard {
   async analogInfo() {
     return Array(numKeys).fill({ adcValue: 0, distance: 0, status: 0 })
   }
+  async getScanRate() {
+    return {
+      evalRateHz: 28500,
+      sweepRateHz: 30300,
+      sweepPeriodUs: 33,
+      evalMinUs: 31,
+      evalMaxUs: 42,
+      evalAvgUs: 35,
+    }
+  }
   async getCalibration() {
     return this.#state.calibration
   }

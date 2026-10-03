@@ -32,6 +32,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import type { HTMLAttributes } from "svelte/elements"
   import { optionsQueryContext } from "../queries/options-query.svelte"
   import { profileQueryContext } from "../queries/profile-query.svelte"
+  import { scanRateQueryContext } from "../queries/scan-rate-query.svelte"
+  import { onDestroy } from "svelte"
   import FirmwareUpdateDialog from "./firmware-update-dialog.svelte"
 
   const {
@@ -48,7 +50,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const profileQuery = profileQueryContext.get()
   const optionsQuery = optionsQueryContext.get()
+  const scanRateQuery = scanRateQueryContext.get()
   const { current: options } = $derived(optionsQuery.options)
+  const { current: scanRate } = $derived(scanRateQuery.scanRate)
+
+  let liveBenchmark = $state(false)
+
+  $effect(() => {
+    scanRateQuery.enabled = liveBenchmark
+  })
+
+  onDestroy(() => {
+    scanRateQuery.enabled = false
+  })
 
   const updateAvailable = isFirmwareUpdateAvailable(version)
 </script>
@@ -88,6 +102,55 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
+    <div class="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm">
+      <div class="flex items-center justify-between gap-2">
+        <div class="grid text-sm text-wrap">
+          <span class="font-semibold">Scan Rate & Latency Benchmark</span>
+          <span class="text-muted-foreground">
+            Real-time on-chip telemetry measuring key evaluation frequency, hardware ADC sweeps, and firmware loop latency.
+          </span>
+        </div>
+        <Button
+          size="sm"
+          variant={liveBenchmark ? "default" : "outline"}
+          onclick={() => (liveBenchmark = !liveBenchmark)}
+        >
+          {liveBenchmark ? "Stop Benchmark" : "Measure Scan Rate"}
+        </Button>
+      </div>
+      {#if liveBenchmark && scanRate}
+        <div class="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-4">
+          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+            <span class="text-[11px] font-medium text-muted-foreground">Matrix Scan Rate</span>
+            <span class="font-mono text-base font-bold text-sky-400">
+              {scanRate.evalRateHz.toLocaleString()} Hz
+            </span>
+            <span class="text-[10px] text-muted-foreground">Actuation loop</span>
+          </div>
+          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+            <span class="text-[11px] font-medium text-muted-foreground">ADC Sweep Rate</span>
+            <span class="font-mono text-base font-bold text-emerald-400">
+              {scanRate.sweepRateHz.toLocaleString()} Hz
+            </span>
+            <span class="text-[10px] text-muted-foreground">Period: {scanRate.sweepPeriodUs} µs</span>
+          </div>
+          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+            <span class="text-[11px] font-medium text-muted-foreground">Avg Loop Latency</span>
+            <span class="font-mono text-base font-bold text-sky-400">
+              {scanRate.evalAvgUs} µs
+            </span>
+            <span class="text-[10px] text-muted-foreground">Per evaluation</span>
+          </div>
+          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+            <span class="text-[11px] font-medium text-muted-foreground">Latency Jitter</span>
+            <span class="font-mono text-base font-bold text-amber-400">
+              {scanRate.evalMinUs} – {scanRate.evalMaxUs} µs
+            </span>
+            <span class="text-[10px] text-muted-foreground">Min / Max spread</span>
+          </div>
+        </div>
+      {/if}
+    </div>
     <div class="flex flex-col gap-2">
       <div class="grid text-sm text-wrap">
         <span class="font-semibold">Firmware Update</span>

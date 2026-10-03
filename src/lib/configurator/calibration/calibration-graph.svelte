@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { keyboardContext } from "$lib/keyboard"
   import { displayDistance } from "$lib/distance"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
+  import { scanRateQueryContext } from "../queries/scan-rate-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
@@ -27,10 +28,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } = keyboard
 
   const analogInfoQuery = analogInfoQueryContext.get()
+  const scanRateQuery = scanRateQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
   const calibrationState = calibrationStateContext.get()
 
   const { current: analogInfo } = $derived(analogInfoQuery.analogInfo)
+  const { current: scanRate } = $derived(scanRateQuery.scanRate)
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
   const selectedKey = $derived(calibrationState.selectedKey)
@@ -369,13 +372,31 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         </span>
       </div>
 
-      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2.5">
+      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2">
         <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
-        <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
+        <span class="font-mono text-sm font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
           {viewMode === "adc"
             ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
             : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
         </span>
+      </div>
+
+      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2">
+        <span class="text-[11px] font-medium text-muted-foreground">Scan Rate</span>
+        <div class="flex items-baseline gap-1">
+          <span class="font-mono text-sm font-bold text-sky-400">
+            {#if scanRate && scanRate.evalRateHz > 0}
+              {(scanRate.evalRateHz / 1000).toFixed(1)} kHz
+            {:else}
+              --
+            {/if}
+          </span>
+          {#if scanRate && scanRate.evalAvgUs > 0}
+            <span class="font-mono text-[10px] text-muted-foreground">
+              ({scanRate.evalAvgUs}µs)
+            </span>
+          {/if}
+        </div>
       </div>
     </div>
   </div>

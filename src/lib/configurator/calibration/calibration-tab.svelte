@@ -20,6 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import type { ComponentProps } from "svelte"
   import { globalStateContext } from "../context.svelte"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
+  import { scanRateQueryContext } from "../queries/scan-rate-query.svelte"
   import CalibrationKeyboard from "./calibration-keyboard.svelte"
   import CalibrationMenu from "./calibration-menu.svelte"
   import CalibrationMenubar from "./calibration-menubar.svelte"
@@ -32,10 +33,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const { demo } = keyboardContext.get()
 
   const analogInfoQuery = analogInfoQueryContext.get()
+  const scanRateQuery = scanRateQueryContext.get()
 
   $effect(() => {
     if (demo) return
     analogInfoQuery.enabled = tab === "calibration"
+    scanRateQuery.enabled = tab === "calibration"
   })
 </script>
 

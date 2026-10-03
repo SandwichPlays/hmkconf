@@ -28,6 +28,7 @@ import {
   setAdvancedKeys,
 } from "$lib/libhmk/commands/advanced-keys"
 import { analogInfo } from "$lib/libhmk/commands/analog-info"
+import { getScanRate } from "$lib/libhmk/commands/scan-rate"
 import { bootloader } from "$lib/libhmk/commands/bootloader"
 import {
   finishManualCalibration,
@@ -136,6 +137,9 @@ class HMKKeyboard implements Keyboard {
   }
   analogInfo() {
     return analogInfo(this.commander, this.metadata)
+  }
+  getScanRate() {
+    return getScanRate(this.commander)
   }
   getCalibration() {
     return getCalibration(this.commander, this.metadata.numKeys)
