@@ -102,17 +102,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
-    <div class="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm">
-      <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-primary/[0.02] p-4 shadow-xs">
+      <div class="flex items-center justify-between gap-3">
         <div class="grid text-sm text-wrap">
-          <span class="font-semibold">Scan Rate & Latency Benchmark</span>
-          <span class="text-muted-foreground">
+          <span class="font-semibold text-foreground">Scan Rate & Latency Benchmark</span>
+          <span class="text-xs text-muted-foreground">
             Real-time on-chip telemetry measuring key evaluation frequency, hardware ADC sweeps, and firmware loop latency.
           </span>
         </div>
         <Button
           size="sm"
           variant={liveBenchmark ? "default" : "outline"}
+          class={liveBenchmark ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(254,190,213,0.35)]" : "border-primary/40 text-primary hover:bg-primary/10"}
           onclick={() => (liveBenchmark = !liveBenchmark)}
         >
           {liveBenchmark ? "Stop Benchmark" : "Measure Scan Rate"}
@@ -120,30 +121,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </div>
       {#if liveBenchmark && scanRate}
         <div class="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-4">
-          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+          <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">Matrix Scan Rate</span>
-            <span class="font-mono text-base font-bold text-sky-400">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
               {scanRate.evalRateHz.toLocaleString()} Hz
             </span>
             <span class="text-[10px] text-muted-foreground">Actuation loop</span>
           </div>
-          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+          <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">ADC Sweep Rate</span>
-            <span class="font-mono text-base font-bold text-emerald-400">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
               {scanRate.sweepRateHz.toLocaleString()} Hz
             </span>
             <span class="text-[10px] text-muted-foreground">Period: {scanRate.sweepPeriodUs} µs</span>
           </div>
-          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+          <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">Avg Loop Latency</span>
-            <span class="font-mono text-base font-bold text-sky-400">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
               {scanRate.evalAvgUs} µs
             </span>
             <span class="text-[10px] text-muted-foreground">Per evaluation</span>
           </div>
-          <div class="flex flex-col rounded-md border bg-muted/20 p-2.5">
+          <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">Latency Jitter</span>
-            <span class="font-mono text-base font-bold text-amber-400">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
               {scanRate.evalMinUs} – {scanRate.evalMaxUs} µs
             </span>
             <span class="text-[10px] text-muted-foreground">Min / Max spread</span>

@@ -217,7 +217,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     const latestSample = history[history.length - 1]
     const isPressed = latestSample.isPressed
-    const traceColor = isPressed ? "#22c55e" : "#38bdf8"
+    const traceColor = isPressed ? "#22c55e" : "#febed5"
 
     // Continuous timebase scrolling: right edge is 'now'
     const getX = (t: number) => w - ((now - t) / TIME_WINDOW_MS) * w
@@ -231,8 +231,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       gradient.addColorStop(0, "rgba(34, 197, 94, 0.35)")
       gradient.addColorStop(1, "rgba(34, 197, 94, 0.02)")
     } else {
-      gradient.addColorStop(0, "rgba(56, 189, 248, 0.28)")
-      gradient.addColorStop(1, "rgba(56, 189, 248, 0.02)")
+      gradient.addColorStop(0, "rgba(254, 190, 213, 0.32)")
+      gradient.addColorStop(1, "rgba(254, 190, 213, 0.02)")
     }
 
     ctx.beginPath()
@@ -307,7 +307,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="font-semibold text-sm">
-        <span class="{isPressedLive ? 'text-emerald-400' : 'text-sky-400'} font-mono">Key {selectedKey + 1}</span>
+        <span class="{isPressedLive ? 'text-emerald-400' : 'text-primary'} font-mono">Key {selectedKey + 1}</span>
       </div>
       {#if isPressedLive}
         <span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
@@ -343,7 +343,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- Realtime Canvas Container -->
     <div
       bind:this={containerEl}
-      class="relative h-48 flex-1 overflow-hidden rounded-md border bg-[#090a0f]"
+      class="relative h-48 flex-1 overflow-hidden rounded-md border border-primary/20 bg-[#090a0f] shadow-[inset_0_0_20px_rgba(254,190,213,0.03)]"
     >
       <canvas
         bind:this={canvasEl}
@@ -353,9 +353,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     <!-- Live Stats Side Column -->
     <div class="flex w-36 shrink-0 flex-col gap-2">
-      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2.5">
+      <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
         <span class="text-[11px] font-medium text-muted-foreground">Live Value</span>
-        <span class="font-mono text-base font-bold {isPressedLive ? 'text-emerald-400' : 'text-sky-400'}">
+        <span class="font-mono text-base font-bold {isPressedLive ? 'text-emerald-400' : 'text-primary'}">
           {#if analogInfo && analogInfo[selectedKey]}
             {viewMode === "adc"
               ? analogInfo[selectedKey].adcValue
@@ -366,7 +366,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         </span>
       </div>
 
-      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2.5">
+      <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
         <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
         <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
           {viewMode === "adc"
