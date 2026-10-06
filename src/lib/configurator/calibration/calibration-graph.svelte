@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { keyboardContext } from "$lib/keyboard"
   import { displayDistance } from "$lib/distance"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
-  import { scanRateQueryContext } from "../queries/scan-rate-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
@@ -28,12 +27,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } = keyboard
 
   const analogInfoQuery = analogInfoQueryContext.get()
-  const scanRateQuery = scanRateQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
   const calibrationState = calibrationStateContext.get()
 
   const { current: analogInfo } = $derived(analogInfoQuery.analogInfo)
-  const { current: scanRate } = $derived(scanRateQuery.scanRate)
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
   const selectedKey = $derived(calibrationState.selectedKey)
@@ -309,11 +306,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <div class="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm">
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
-      <span
-        class="size-2.5 rounded-full {isPressedLive ? 'bg-emerald-400' : 'bg-sky-400'} animate-pulse"
-      ></span>
       <div class="font-semibold text-sm">
-        Live Oscilloscope &mdash; <span class="{isPressedLive ? 'text-emerald-400' : 'text-sky-400'} font-mono">Key {selectedKey + 1}</span>
+        <span class="{isPressedLive ? 'text-emerald-400' : 'text-sky-400'} font-mono">Key {selectedKey + 1}</span>
       </div>
       {#if isPressedLive}
         <span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
@@ -372,31 +366,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         </span>
       </div>
 
-      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2">
+      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2.5">
         <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
-        <span class="font-mono text-sm font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
+        <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
           {viewMode === "adc"
             ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
             : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
         </span>
-      </div>
-
-      <div class="flex flex-1 flex-col justify-center rounded-md border bg-muted/20 p-2">
-        <span class="text-[11px] font-medium text-muted-foreground">Scan Rate</span>
-        <div class="flex items-baseline gap-1">
-          <span class="font-mono text-sm font-bold text-sky-400">
-            {#if scanRate && scanRate.evalRateHz > 0}
-              {(scanRate.evalRateHz / 1000).toFixed(1)} kHz
-            {:else}
-              --
-            {/if}
-          </span>
-          {#if scanRate && scanRate.evalAvgUs > 0}
-            <span class="font-mono text-[10px] text-muted-foreground">
-              ({scanRate.evalAvgUs}µs)
-            </span>
-          {/if}
-        </div>
       </div>
     </div>
   </div>
