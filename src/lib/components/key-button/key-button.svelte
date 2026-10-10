@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     base: cn(
       toggleVariants({ variant: "outline" }),
       "size-full flex-col gap-0 p-0 text-[length:inherit] leading-[1em] whitespace-pre-wrap [&_svg:not([class*='size-'])]:size-[1em]",
-      "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary data-[state=on]:ring-2 data-[state=on]:ring-primary/50 data-[state=on]:font-bold data-[state=on]:shadow-sm"
+      "data-[state=on]:border-primary data-[state=on]:bg-primary/20 data-[state=on]:text-[#7a2846] dark:data-[state=on]:text-primary data-[state=on]:ring-2 data-[state=on]:ring-primary/60 data-[state=on]:shadow-[0_0_12px_rgba(254,190,213,0.25)] data-[state=on]:font-bold data-[state=on]:hover:bg-primary/30"
     ),
     variants: {
       size: {
