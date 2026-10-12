@@ -47,7 +47,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   <link rel="manifest" href="/manifest.json" />
 </svelte:head>
 
-<ModeWatcher />
+<ModeWatcher defaultMode="dark" />
 <Toaster />
 <div class="relative flex min-h-svh flex-col bg-background font-sans">
   {@render children?.()}

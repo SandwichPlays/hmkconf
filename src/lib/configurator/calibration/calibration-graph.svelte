@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
-  import { themeState, hexToRgb, getEffectiveAccentColor } from "$lib/theme.svelte"
+  import { themeState, hexToRgb } from "$lib/theme.svelte"
 
   const keyboard = keyboardContext.get()
   const {
@@ -197,9 +197,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     const latestSample = history[history.length - 1]
     const isPressed = latestSample.isPressed
-    const effectiveHex = getEffectiveAccentColor(themeState.accent)
-    const rgb = hexToRgb(effectiveHex) || { r: 254, g: 190, b: 213 }
-    const traceColor = isPressed ? "#22c55e" : effectiveHex
+    const rgb = hexToRgb(themeState.accent) || { r: 255, g: 255, b: 255 }
+    const traceColor = isPressed ? "#22c55e" : themeState.accent
 
     // Continuous timebase scrolling: right edge is 'now'
     const getX = (t: number) => w - ((now - t) / TIME_WINDOW_MS) * w

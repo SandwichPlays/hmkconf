@@ -15,7 +15,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
   import GithubLink from "./github-link.svelte"
-  import ThemeSwitcher from "./theme-switcher.svelte"
   import ColorThemePicker from "./color-theme-picker.svelte"
 </script>
 
@@ -26,6 +25,5 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   <div class="flex shrink-0 items-center gap-2">
     <GithubLink />
     <ColorThemePicker />
-    <ThemeSwitcher />
   </div>
 </footer>

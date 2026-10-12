@@ -20,37 +20,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     DEFAULT_ACCENT,
     PRESET_THEMES,
     themeState,
-    getEffectiveAccentColor,
-    hexToRgb,
   } from "$lib/theme.svelte"
 
-  let hexInput = $state(
-    themeState.accent === "default" ? "DEFAULT" : themeState.accent,
-  )
-
-  $effect(() => {
-    hexInput = themeState.accent === "default" ? "DEFAULT" : themeState.accent
-  })
-
   function handleSelectPreset(color: string) {
-    hexInput = color === "default" ? "DEFAULT" : color
     applyThemeColor(color)
   }
 
-  function handleCustomInput(val: string) {
-    hexInput = val
-    if (val.trim().toLowerCase() === "default") {
-      applyThemeColor("default")
-    } else if (hexToRgb(val)) {
-      applyThemeColor(val)
-    }
-  }
-
   function handleReset() {
-    handleSelectPreset(DEFAULT_ACCENT)
+    applyThemeColor(DEFAULT_ACCENT)
   }
 
-  const effectiveColor = $derived(getEffectiveAccentColor(themeState.accent))
+  const activePreset = $derived(
+    PRESET_THEMES.find(
+      (p) => p.color.toLowerCase() === themeState.accent.toLowerCase(),
+    ) ?? PRESET_THEMES[0],
+  )
 </script>
 
 <div class="flex flex-col gap-3">
@@ -59,21 +43,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {#each PRESET_THEMES as preset}
       {@const isSelected =
         themeState.accent.toLowerCase() === preset.color.toLowerCase()}
-      {@const isDefault = preset.color === "default"}
       <button
         type="button"
         onclick={() => handleSelectPreset(preset.color)}
-        title="{preset.name} {isDefault ? '(Auto Light/Dark)' : `(${preset.color})`}"
+        title="{preset.name} ({preset.color})"
         class="group relative flex h-10 w-full items-center justify-center rounded-lg border border-border/80 shadow-2xs transition-all duration-150 hover:scale-105 active:scale-95"
-        style={isDefault
-          ? "background: linear-gradient(135deg, #ffffff 50%, #09090b 50%);"
-          : `background-color: ${preset.color};`}
+        style="background-color: {preset.color};"
       >
         {#if isSelected}
           <div
-            class="flex size-5 items-center justify-center rounded-full shadow-xs {isDefault
-              ? 'border border-border bg-background text-foreground'
-              : 'bg-black/60 text-white dark:bg-black/70'}"
+            class="flex size-5 items-center justify-center rounded-full bg-black/75 text-white shadow-xs"
           >
             <CheckIcon class="size-3.5 stroke-[3]" />
           </div>
@@ -82,45 +61,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {/each}
   </div>
 
-  <!-- Custom Hex & Picker Row -->
-  <div class="flex items-center gap-2 pt-1 border-t border-border/60">
-    <div
-      class="relative flex size-8 shrink-0 overflow-hidden rounded-md border border-input shadow-xs"
-    >
-      <input
-        type="color"
-        value={effectiveColor}
-        oninput={(e) => handleCustomInput(e.currentTarget.value)}
-        class="absolute -inset-2 size-12 cursor-pointer opacity-0"
-        title="Pick custom color"
-      />
-      <div
-        class="size-full"
-        style={themeState.accent === "default"
-          ? "background: linear-gradient(135deg, #ffffff 50%, #09090b 50%);"
-          : `background-color: ${themeState.accent};`}
-      ></div>
-    </div>
-    <div class="flex flex-1 items-center rounded-md border border-input bg-background px-2.5 py-1 text-xs font-mono shadow-xs">
-      <span class="select-none text-muted-foreground mr-1">HEX</span>
-      <input
-        type="text"
-        value={hexInput}
-        maxlength={7}
-        oninput={(e) => handleCustomInput(e.currentTarget.value)}
-        placeholder="#febed5"
-        class="w-full bg-transparent outline-none uppercase font-semibold text-foreground"
-      />
+  <div class="flex items-center justify-between pt-1 border-t border-border/60">
+    <div class="flex items-center gap-2 text-xs">
+      <span class="text-muted-foreground">Active Preset:</span>
+      <span class="font-semibold text-foreground">{activePreset.name}</span>
+      <span class="font-mono text-muted-foreground uppercase">({themeState.accent})</span>
     </div>
 
     <button
       type="button"
       onclick={handleReset}
-      title="Reset to default (Auto Light/Dark)"
+      title="Reset to default (White)"
       class="flex h-8 items-center gap-1 rounded-md border border-input bg-background px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
     >
       <RotateCcwIcon class="size-3" />
-      <span class="hidden sm:inline">Reset</span>
+      <span>Reset to White</span>
     </button>
   </div>
 </div>
