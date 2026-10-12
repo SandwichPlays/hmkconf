@@ -198,7 +198,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const latestSample = history[history.length - 1]
     const isPressed = latestSample.isPressed
     const rgb = hexToRgb(themeState.accent) || { r: 255, g: 255, b: 255 }
-    const traceColor = isPressed ? "#22c55e" : themeState.accent
+    const traceColor = themeState.accent
 
     // Continuous timebase scrolling: right edge is 'now'
     const getX = (t: number) => w - ((now - t) / TIME_WINDOW_MS) * w
@@ -209,11 +209,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     // Gradient Fill from bottom baseline up to trace line
     const gradient = ctx.createLinearGradient(0, h, 0, 0)
     if (isPressed) {
-      gradient.addColorStop(0, "rgba(34, 197, 94, 0.35)")
-      gradient.addColorStop(1, "rgba(34, 197, 94, 0.02)")
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.42)`)
+      gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`)
     } else {
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.32)`)
-      gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.02)`)
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`)
+      gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.01)`)
     }
 
     ctx.beginPath()
@@ -230,12 +230,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.fillStyle = gradient
     ctx.fill()
 
-    // Trace Line
+    // Trace Line with Neon Bloom on Pressed
+    ctx.save()
     ctx.beginPath()
     ctx.strokeStyle = traceColor
-    ctx.lineWidth = 2
+    ctx.lineWidth = isPressed ? 2.5 : 1.75
     ctx.lineJoin = "round"
     ctx.lineCap = "round"
+
+    if (isPressed) {
+      ctx.shadowColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.75)`
+      ctx.shadowBlur = 10
+    }
 
     for (let i = 0; i < history.length; i++) {
       const s = history[i]
@@ -246,15 +252,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
     ctx.lineTo(w, lastY)
     ctx.stroke()
+    ctx.restore()
 
-    // Current Value Dot at right edge
+    // Current Value Dot at right edge with bloom on Pressed
+    ctx.save()
+    if (isPressed) {
+      ctx.shadowColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.85)`
+      ctx.shadowBlur = 12
+    }
     ctx.beginPath()
-    ctx.arc(w - 3, lastY, 4.5, 0, Math.PI * 2)
+    ctx.arc(w - 3, lastY, isPressed ? 5 : 4, 0, Math.PI * 2)
     ctx.fillStyle = traceColor
     ctx.fill()
     ctx.strokeStyle = "#ffffff"
-    ctx.lineWidth = 1.5
+    ctx.lineWidth = isPressed ? 2 : 1.5
     ctx.stroke()
+    ctx.restore()
 
     // Scale numbers (top = rest/min, bottom = pressed/bottom-out)
     ctx.fillStyle = "#64748b"
@@ -336,7 +349,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <div class="flex w-36 shrink-0 flex-col gap-2">
       <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
         <span class="text-[11px] font-medium text-muted-foreground">Live Value</span>
-        <span class="font-mono text-base font-bold {isPressedLive ? 'text-emerald-400' : 'text-primary'}">
+        <span class="font-mono text-base font-bold text-primary transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : 'opacity-85'}">
           {#if analogInfo && analogInfo[selectedKey]}
             {viewMode === "adc"
               ? analogInfo[selectedKey].adcValue

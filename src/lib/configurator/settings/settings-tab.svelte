@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import CommitSlider from "$lib/components/commit-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import Switch from "$lib/components/switch.svelte"
-  import ThemePalette from "$lib/components/theme-palette.svelte"
   import { Badge } from "$lib/components/ui/badge"
   import { Button } from "$lib/components/ui/button"
   import * as Dialog from "$lib/components/ui/dialog"
@@ -103,15 +102,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
-    <div class="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-xs">
-      <div class="grid text-sm text-wrap">
-        <span class="font-semibold text-foreground">Theme Accent Color</span>
-        <span class="text-xs text-muted-foreground">
-          Choose a preset or customize the accent color for active keys, diagnostic waveforms, and interface highlights.
-        </span>
-      </div>
-      <ThemePalette />
-    </div>
     <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-primary/[0.02] p-4 shadow-xs">
       <div class="flex items-center justify-between gap-3">
         <div class="grid text-sm text-wrap">
