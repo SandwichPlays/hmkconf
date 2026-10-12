@@ -18,9 +18,10 @@ export interface ThemePreset {
   color: string
 }
 
-export const DEFAULT_ACCENT = "#febed5"
+export const DEFAULT_ACCENT = "default"
 
 export const PRESET_THEMES: ThemePreset[] = [
+  { name: "Default (Auto)", color: "default" },
   { name: "Sakura Pink", color: "#febed5" },
   { name: "Cyber Cyan", color: "#67e8f9" },
   { name: "Electric Violet", color: "#c084fc" },
@@ -35,8 +36,21 @@ export const themeState = $state({
   accent: DEFAULT_ACCENT,
 })
 
+export function isDarkMode(): boolean {
+  if (typeof document === "undefined") return true
+  return document.documentElement.classList.contains("dark")
+}
+
+export function getEffectiveAccentColor(color = themeState.accent): string {
+  if (color === "default") {
+    return isDarkMode() ? "#ffffff" : "#09090b"
+  }
+  return color
+}
+
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const clean = hex.trim().replace(/^#/, "")
+  const effective = hex === "default" ? getEffectiveAccentColor("default") : hex
+  const clean = effective.trim().replace(/^#/, "")
   if (clean.length === 3) {
     const r = parseInt(clean[0] + clean[0], 16)
     const g = parseInt(clean[1] + clean[1], 16)
@@ -63,43 +77,62 @@ function darken(r: number, g: number, b: number, factor = 0.45): string {
   return `#${dr.toString(16).padStart(2, "0")}${dg.toString(16).padStart(2, "0")}${db.toString(16).padStart(2, "0")}`
 }
 
-export function applyThemeColor(hex: string) {
-  const rgb = hexToRgb(hex)
-  if (!rgb) return
-
-  themeState.accent = hex
+export function applyThemeColor(color: string) {
+  themeState.accent = color
 
   if (typeof document === "undefined") return
 
+  const effectiveHex = getEffectiveAccentColor(color)
+  const rgb = hexToRgb(effectiveHex)
+  if (!rgb) return
+
   const root = document.documentElement
-  root.style.setProperty("--app-accent", hex)
+  root.style.setProperty("--app-accent", effectiveHex)
   root.style.setProperty("--app-accent-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`)
 
   const lum = getLuminance(rgb.r, rgb.g, rgb.b)
-  const primaryFg = lum > 0.55 ? "#1c0f14" : "#ffffff"
+  const primaryFg = lum > 0.55 ? "#09090b" : "#ffffff"
   root.style.setProperty("--primary-foreground", primaryFg)
   root.style.setProperty("--sidebar-primary-foreground", primaryFg)
 
-  const darkAccentText = darken(rgb.r, rgb.g, rgb.b, 0.45)
+  const darkAccentText =
+    color === "default"
+      ? (isDarkMode() ? "#ffffff" : "#09090b")
+      : darken(rgb.r, rgb.g, rgb.b, 0.45)
   root.style.setProperty("--accent-text-light", darkAccentText)
 
   try {
-    localStorage.setItem("hmk-accent-color", hex)
+    localStorage.setItem("hmk-accent-color", color)
   } catch {
     // Ignore storage errors
   }
 }
+
+let observerInitialized = false
 
 export function initTheme() {
   if (typeof window === "undefined") return
   let saved = DEFAULT_ACCENT
   try {
     const stored = localStorage.getItem("hmk-accent-color")
-    if (stored && hexToRgb(stored)) {
+    if (stored && (stored === "default" || hexToRgb(stored))) {
       saved = stored
     }
   } catch {
     // Ignore storage errors
   }
   applyThemeColor(saved)
+
+  if (!observerInitialized && typeof MutationObserver !== "undefined") {
+    observerInitialized = true
+    const observer = new MutationObserver(() => {
+      if (themeState.accent === "default") {
+        applyThemeColor("default")
+      }
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    })
+  }
 }

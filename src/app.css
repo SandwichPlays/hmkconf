@@ -6,9 +6,9 @@
 
 :root {
   --radius: 0.625rem;
-  --app-accent: #febed5;
-  --app-accent-rgb: 254, 190, 213;
-  --accent-text-light: #7a2846;
+  --app-accent: #09090b;
+  --app-accent-rgb: 9, 9, 11;
+  --accent-text-light: #09090b;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -16,12 +16,12 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: var(--app-accent);
-  --primary-foreground: #1c0f14;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: rgba(var(--app-accent-rgb), 0.2);
+  --accent: rgba(var(--app-accent-rgb), 0.15);
   --accent-foreground: var(--accent-text-light);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -35,7 +35,7 @@
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: var(--app-accent);
-  --sidebar-primary-foreground: #1c0f14;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: rgba(var(--app-accent-rgb), 0.15);
   --sidebar-accent-foreground: var(--accent-text-light);
   --sidebar-border: oklch(0.922 0 0);
@@ -43,8 +43,8 @@
 }
 
 .dark {
-  --app-accent: #febed5;
-  --app-accent-rgb: 254, 190, 213;
+  --app-accent: #ffffff;
+  --app-accent-rgb: 255, 255, 255;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -52,7 +52,7 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: var(--app-accent);
-  --primary-foreground: #1c0f14;
+  --primary-foreground: #09090b;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -71,7 +71,7 @@
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: var(--app-accent);
-  --sidebar-primary-foreground: #1c0f14;
+  --sidebar-primary-foreground: #09090b;
   --sidebar-accent: rgba(var(--app-accent-rgb), 0.15);
   --sidebar-accent-foreground: var(--app-accent);
   --sidebar-border: oklch(1 0 0 / 10%);

@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
-  import { themeState, hexToRgb } from "$lib/theme.svelte"
+  import { themeState, hexToRgb, getEffectiveAccentColor } from "$lib/theme.svelte"
 
   const keyboard = keyboardContext.get()
   const {
@@ -144,33 +144,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.save()
     ctx.scale(dpr, dpr)
 
-    // Background
-    ctx.fillStyle = "#090a0f"
-    ctx.fillRect(0, 0, w, h)
-
-    // Grid lines
-    ctx.strokeStyle = "#161922"
-    ctx.lineWidth = 1
-
-    for (let i = 1; i < 4; i++) {
-      const y = (h / 4) * i
-      ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(w, y)
-      ctx.stroke()
-    }
-
-    for (let i = 1; i < 8; i++) {
-      const x = (w / 8) * i
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, h)
-      ctx.stroke()
-    }
+    // Clear canvas - container CSS handles theme-adaptive background
+    ctx.clearRect(0, 0, w, h)
 
     if (history.length < 2) {
       // Empty state prompt
-      ctx.fillStyle = "#475569"
+      ctx.fillStyle = "rgba(148, 163, 184, 0.7)"
       ctx.font = "12px sans-serif"
       ctx.textAlign = "center"
       ctx.fillText("Waiting for real-time sensor stream...", w / 2, h / 2)
@@ -218,8 +197,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     const latestSample = history[history.length - 1]
     const isPressed = latestSample.isPressed
-    const rgb = hexToRgb(themeState.accent) || { r: 254, g: 190, b: 213 }
-    const traceColor = isPressed ? "#22c55e" : themeState.accent
+    const effectiveHex = getEffectiveAccentColor(themeState.accent)
+    const rgb = hexToRgb(effectiveHex) || { r: 254, g: 190, b: 213 }
+    const traceColor = isPressed ? "#22c55e" : effectiveHex
 
     // Continuous timebase scrolling: right edge is 'now'
     const getX = (t: number) => w - ((now - t) / TIME_WINDOW_MS) * w
@@ -345,7 +325,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- Realtime Canvas Container -->
     <div
       bind:this={containerEl}
-      class="relative h-48 flex-1 overflow-hidden rounded-md border border-primary/20 bg-[#090a0f] shadow-[inset_0_0_20px_rgba(var(--app-accent-rgb),0.03)]"
+      class="relative h-48 flex-1 overflow-hidden rounded-md border border-border/80 bg-card dark:bg-[#090a0f]/90 shadow-[inset_0_0_20px_rgba(var(--app-accent-rgb),0.04)]"
     >
       <canvas
         bind:this={canvasEl}

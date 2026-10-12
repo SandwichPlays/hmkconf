@@ -22,23 +22,28 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     DEFAULT_ACCENT,
     PRESET_THEMES,
     themeState,
+    getEffectiveAccentColor,
     hexToRgb,
   } from "$lib/theme.svelte"
 
-  let hexInput = $state(themeState.accent)
+  let hexInput = $state(
+    themeState.accent === "default" ? "DEFAULT" : themeState.accent,
+  )
 
   $effect(() => {
-    hexInput = themeState.accent
+    hexInput = themeState.accent === "default" ? "DEFAULT" : themeState.accent
   })
 
   function handleSelectPreset(color: string) {
-    hexInput = color
+    hexInput = color === "default" ? "DEFAULT" : color
     applyThemeColor(color)
   }
 
   function handleCustomInput(val: string) {
     hexInput = val
-    if (hexToRgb(val)) {
+    if (val.trim().toLowerCase() === "default") {
+      applyThemeColor("default")
+    } else if (hexToRgb(val)) {
       applyThemeColor(val)
     }
   }
@@ -52,6 +57,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       (p) => p.color.toLowerCase() === themeState.accent.toLowerCase(),
     ),
   )
+
+  const effectiveColor = $derived(getEffectiveAccentColor(themeState.accent))
 </script>
 
 <Popover.Root>
@@ -63,7 +70,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <PaletteIcon class="size-[1.2rem]" />
     <span
       class="absolute bottom-1 right-1 size-2 rounded-full ring-1 ring-background shadow-xs transition-colors"
-      style="background-color: {themeState.accent};"
+      style={themeState.accent === "default"
+        ? "background: linear-gradient(135deg, #ffffff 50%, #09090b 50%);"
+        : `background-color: ${themeState.accent};`}
     ></span>
     <span class="sr-only">Choose accent color</span>
   </Popover.Trigger>
@@ -79,7 +88,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <button
         type="button"
         onclick={handleReset}
-        title="Reset to default (Sakura #febed5)"
+        title="Reset to default (Auto Light/Dark)"
         class="flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <RotateCcwIcon class="size-3" />
@@ -87,21 +96,26 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </button>
     </div>
 
-    <!-- Preset Swatches Grid -->
-    <div class="grid grid-cols-4 gap-2 pt-1">
+    <!-- Preset Swatches Grid (3x3) -->
+    <div class="grid grid-cols-3 gap-2 pt-1">
       {#each PRESET_THEMES as preset}
         {@const isSelected =
           themeState.accent.toLowerCase() === preset.color.toLowerCase()}
+        {@const isDefault = preset.color === "default"}
         <button
           type="button"
           onclick={() => handleSelectPreset(preset.color)}
-          title="{preset.name} ({preset.color})"
-          class="group relative flex h-10 w-full items-center justify-center rounded-lg border border-black/10 transition-all duration-150 hover:scale-105 active:scale-95 dark:border-white/10"
-          style="background-color: {preset.color};"
+          title="{preset.name} {isDefault ? '(Auto Light/Dark)' : `(${preset.color})`}"
+          class="group relative flex h-10 w-full items-center justify-center rounded-lg border border-border/80 shadow-2xs transition-all duration-150 hover:scale-105 active:scale-95"
+          style={isDefault
+            ? "background: linear-gradient(135deg, #ffffff 50%, #09090b 50%);"
+            : `background-color: ${preset.color};`}
         >
           {#if isSelected}
             <div
-              class="flex size-5 items-center justify-center rounded-full bg-black/60 text-white shadow-xs dark:bg-black/70"
+              class="flex size-5 items-center justify-center rounded-full shadow-xs {isDefault
+                ? 'border border-border bg-background text-foreground'
+                : 'bg-black/60 text-white dark:bg-black/70'}"
             >
               <CheckIcon class="size-3.5 stroke-[3]" />
             </div>
@@ -117,14 +131,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       >
         <input
           type="color"
-          value={themeState.accent}
+          value={effectiveColor}
           oninput={(e) => handleCustomInput(e.currentTarget.value)}
           class="absolute -inset-2 size-12 cursor-pointer opacity-0"
           title="Pick custom color"
         />
         <div
           class="size-full"
-          style="background-color: {themeState.accent};"
+          style={themeState.accent === "default"
+            ? "background: linear-gradient(135deg, #ffffff 50%, #09090b 50%);"
+            : `background-color: ${themeState.accent};`}
         ></div>
       </div>
       <div class="flex flex-1 items-center rounded-md border border-input bg-background px-2.5 py-1 text-xs font-mono shadow-xs">
@@ -135,7 +151,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           maxlength={7}
           oninput={(e) => handleCustomInput(e.currentTarget.value)}
           placeholder="#febed5"
-          class="w-full bg-transparent outline-none uppercase font-semibold"
+          class="w-full bg-transparent outline-none uppercase font-semibold text-foreground"
         />
       </div>
     </div>
@@ -145,7 +161,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       class="flex items-center justify-between rounded-md border border-primary/50 bg-primary/20 px-2.5 py-1.5 text-xs text-accent-foreground shadow-xs transition-colors"
     >
       <span class="font-medium">Selected Style Preview</span>
-      <span class="font-mono font-bold uppercase">{themeState.accent}</span>
+      <span class="font-mono font-bold uppercase">
+        {themeState.accent === "default" ? "DEFAULT (AUTO)" : themeState.accent}
+      </span>
     </div>
   </Popover.Content>
 </Popover.Root>
