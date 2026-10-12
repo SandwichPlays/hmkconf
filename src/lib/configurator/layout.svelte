@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { MonitorIcon } from "@lucide/svelte"
   import GithubLink from "$lib/components/github-link.svelte"
   import ThemeSwitcher from "$lib/components/theme-switcher.svelte"
+  import ColorThemePicker from "$lib/components/color-theme-picker.svelte"
   import * as Sidebar from "$lib/components/ui/sidebar"
   import { Tabs } from "bits-ui"
   import type { ComponentProps } from "svelte"
@@ -63,6 +64,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           </div>
           <div class="flex shrink-0 items-center gap-2">
             <GithubLink />
+            <ColorThemePicker />
             <ThemeSwitcher />
           </div>
         </header>

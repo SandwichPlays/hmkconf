@@ -126,7 +126,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <div
   bind:this={selectionBoxRef}
   class={cn(
-    "fixed z-50 hidden border border-primary/60 bg-primary/20 shadow-[0_0_12px_rgba(254,190,213,0.18)] pointer-events-none",
+    "fixed z-50 hidden border border-primary/60 bg-primary/20 shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.18)] pointer-events-none",
     selectionBox && "block",
   )}
   style={selectionBoxStyle}

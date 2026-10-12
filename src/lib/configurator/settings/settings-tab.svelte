@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import CommitSlider from "$lib/components/commit-slider.svelte"
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import Switch from "$lib/components/switch.svelte"
+  import ThemePalette from "$lib/components/theme-palette.svelte"
   import { Badge } from "$lib/components/ui/badge"
   import { Button } from "$lib/components/ui/button"
   import * as Dialog from "$lib/components/ui/dialog"
@@ -102,6 +103,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
+    <div class="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-xs">
+      <div class="grid text-sm text-wrap">
+        <span class="font-semibold text-foreground">Theme Accent Color</span>
+        <span class="text-xs text-muted-foreground">
+          Choose a preset or customize the accent color for active keys, diagnostic waveforms, and interface highlights.
+        </span>
+      </div>
+      <ThemePalette />
+    </div>
     <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-primary/[0.02] p-4 shadow-xs">
       <div class="flex items-center justify-between gap-3">
         <div class="grid text-sm text-wrap">
@@ -113,7 +123,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <Button
           size="sm"
           variant={liveBenchmark ? "default" : "outline"}
-          class={liveBenchmark ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(254,190,213,0.35)]" : "border-primary/40 text-primary hover:bg-primary/10"}
+          class={liveBenchmark ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--app-accent-rgb),0.35)]" : "border-primary/40 text-primary hover:bg-primary/10"}
           onclick={() => (liveBenchmark = !liveBenchmark)}
         >
           {liveBenchmark ? "Stop Benchmark" : "Measure Scan Rate"}
@@ -123,28 +133,28 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <div class="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-4">
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">Matrix Scan Rate</span>
-            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
               {scanRate.evalRateHz.toLocaleString()} Hz
             </span>
             <span class="text-[10px] text-muted-foreground">Actuation loop</span>
           </div>
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">ADC Sweep Rate</span>
-            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
               {scanRate.sweepRateHz.toLocaleString()} Hz
             </span>
             <span class="text-[10px] text-muted-foreground">Period: {scanRate.sweepPeriodUs} µs</span>
           </div>
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">Avg Loop Latency</span>
-            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
               {scanRate.evalAvgUs} µs
             </span>
             <span class="text-[10px] text-muted-foreground">Per evaluation</span>
           </div>
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
             <span class="text-[11px] font-medium text-muted-foreground">Latency Jitter</span>
-            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(254,190,213,0.3)]">
+            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
               {scanRate.evalMinUs} – {scanRate.evalMaxUs} µs
             </span>
             <span class="text-[10px] text-muted-foreground">Min / Max spread</span>

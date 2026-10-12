@@ -20,6 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
+  import { themeState, hexToRgb } from "$lib/theme.svelte"
 
   const keyboard = keyboardContext.get()
   const {
@@ -217,7 +218,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     const latestSample = history[history.length - 1]
     const isPressed = latestSample.isPressed
-    const traceColor = isPressed ? "#22c55e" : "#febed5"
+    const rgb = hexToRgb(themeState.accent) || { r: 254, g: 190, b: 213 }
+    const traceColor = isPressed ? "#22c55e" : themeState.accent
 
     // Continuous timebase scrolling: right edge is 'now'
     const getX = (t: number) => w - ((now - t) / TIME_WINDOW_MS) * w
@@ -231,8 +233,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       gradient.addColorStop(0, "rgba(34, 197, 94, 0.35)")
       gradient.addColorStop(1, "rgba(34, 197, 94, 0.02)")
     } else {
-      gradient.addColorStop(0, "rgba(254, 190, 213, 0.32)")
-      gradient.addColorStop(1, "rgba(254, 190, 213, 0.02)")
+      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.32)`)
+      gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.02)`)
     }
 
     ctx.beginPath()
@@ -343,7 +345,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- Realtime Canvas Container -->
     <div
       bind:this={containerEl}
-      class="relative h-48 flex-1 overflow-hidden rounded-md border border-primary/20 bg-[#090a0f] shadow-[inset_0_0_20px_rgba(254,190,213,0.03)]"
+      class="relative h-48 flex-1 overflow-hidden rounded-md border border-primary/20 bg-[#090a0f] shadow-[inset_0_0_20px_rgba(var(--app-accent-rgb),0.03)]"
     >
       <canvas
         bind:this={canvasEl}

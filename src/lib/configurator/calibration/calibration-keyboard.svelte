@@ -48,7 +48,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               : isPressed
                 ? "border-emerald-400 bg-emerald-500/20 ring-2 ring-emerald-400/60 text-emerald-300"
                 : isSelected
-                  ? "border-primary bg-primary/20 ring-2 ring-primary/60 text-[#7a2846] dark:text-primary shadow-[0_0_12px_rgba(254,190,213,0.25)] font-semibold"
+                  ? "border-primary bg-primary/20 ring-2 ring-primary/60 text-[var(--accent-text-light)] dark:text-primary shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.25)] font-semibold"
                   : ""}
       <KeyButton.Root
         class={statusClass}

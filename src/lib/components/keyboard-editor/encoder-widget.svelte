@@ -64,7 +64,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       "flex h-full w-1/2 flex-col items-center justify-center pr-2 sm:pr-4 border-r border-muted-foreground/20 transition-colors",
       interactive ? "hover:bg-accent" : "cursor-default opacity-50",
       leftSelected &&
-        "bg-primary/20 text-[#7a2846] dark:text-primary ring-2 ring-primary/60 shadow-[0_0_12px_rgba(254,190,213,0.25)] hover:bg-primary/30",
+        "bg-primary/20 text-[var(--accent-text-light)] dark:text-primary ring-2 ring-primary/60 shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.25)] hover:bg-primary/30",
     )}
     onclick={() => onclick?.(keys[0])}
   >
@@ -78,11 +78,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           <span
             class={cn(
               "max-w-full overflow-hidden px-1 text-[16px] leading-[1.1em] text-ellipsis whitespace-pre-wrap",
-              leftSelected ? "text-[#7a2846] dark:text-primary font-bold" : "text-muted-foreground",
+              leftSelected ? "text-[var(--accent-text-light)] dark:text-primary font-bold" : "text-muted-foreground",
             )}>{Variant}</span
           >
         {:else}
-          <div class={cn("[&>svg]:size-5", leftSelected ? "text-[#7a2846] dark:text-primary" : "text-muted-foreground")}>
+          <div class={cn("[&>svg]:size-5", leftSelected ? "text-[var(--accent-text-light)] dark:text-primary" : "text-muted-foreground")}>
             <Variant />
           </div>
         {/if}
@@ -96,7 +96,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       "flex h-full w-1/2 flex-col items-center justify-center pl-2 sm:pl-4 transition-colors",
       interactive ? "hover:bg-accent" : "cursor-default opacity-50",
       rightSelected &&
-        "bg-primary/20 text-[#7a2846] dark:text-primary ring-2 ring-primary/60 shadow-[0_0_12px_rgba(254,190,213,0.25)] hover:bg-primary/30",
+        "bg-primary/20 text-[var(--accent-text-light)] dark:text-primary ring-2 ring-primary/60 shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.25)] hover:bg-primary/30",
     )}
     onclick={() => onclick?.(keys[1])}
   >
@@ -111,12 +111,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             class={cn(
               "max-w-full overflow-hidden px-1 text-[16px] leading-[1.1em] text-ellipsis whitespace-pre-wrap",
               rightSelected
-                ? "text-[#7a2846] dark:text-primary font-bold"
+                ? "text-[var(--accent-text-light)] dark:text-primary font-bold"
                 : "text-muted-foreground",
             )}>{Variant}</span
           >
         {:else}
-          <div class={cn("[&>svg]:size-5", rightSelected ? "text-[#7a2846] dark:text-primary" : "text-muted-foreground")}>
+          <div class={cn("[&>svg]:size-5", rightSelected ? "text-[var(--accent-text-light)] dark:text-primary" : "text-muted-foreground")}>
             <Variant />
           </div>
         {/if}
@@ -131,7 +131,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         "absolute flex h-1/2 w-1/2 flex-col items-center justify-center rounded-full border-2 border-background bg-muted-foreground/20 transition-colors",
         interactive ? "hover:bg-accent" : "cursor-default opacity-50",
         buttonSelected &&
-          "border-primary bg-primary/25 text-[#7a2846] dark:text-primary ring-2 ring-primary/60 shadow-[0_0_12px_rgba(254,190,213,0.25)] hover:bg-primary/35",
+          "border-primary bg-primary/25 text-[var(--accent-text-light)] dark:text-primary ring-2 ring-primary/60 shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.25)] hover:bg-primary/35",
       )}
       onclick={() => onclick?.(buttonKey)}
     >
@@ -146,12 +146,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               class={cn(
                 "max-w-full overflow-hidden px-1 text-[16px] leading-[1.1em] text-ellipsis whitespace-pre-wrap",
                 buttonSelected
-                  ? "text-[#7a2846] dark:text-primary font-bold"
+                  ? "text-[var(--accent-text-light)] dark:text-primary font-bold"
                   : "text-muted-foreground",
               )}>{Variant}</span
             >
           {:else}
-            <div class={cn("[&>svg]:size-5", buttonSelected ? "text-[#7a2846] dark:text-primary" : "text-muted-foreground")}>
+            <div class={cn("[&>svg]:size-5", buttonSelected ? "text-[var(--accent-text-light)] dark:text-primary" : "text-muted-foreground")}>
               <Variant />
             </div>
           {/if}
