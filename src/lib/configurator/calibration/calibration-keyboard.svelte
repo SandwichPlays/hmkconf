@@ -46,9 +46,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             : status === 3
               ? "border-emerald-400 bg-emerald-500/30 text-emerald-300 ring-1 ring-emerald-400"
               : isPressed
-                ? "border-emerald-400 bg-emerald-500/20 ring-2 ring-emerald-400/60 text-emerald-300"
+                ? "border-primary bg-primary/35 ring-2 ring-primary text-[var(--accent-text-light)] dark:text-primary shadow-[0_0_16px_rgba(var(--app-accent-rgb),0.45)] brightness-110"
                 : isSelected
-                  ? "border-primary bg-primary/20 ring-2 ring-primary/60 text-[var(--accent-text-light)] dark:text-primary shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.25)] font-semibold"
+                  ? "border-primary bg-primary/20 ring-2 ring-primary/60 text-[var(--accent-text-light)] dark:text-primary shadow-[0_0_12px_rgba(var(--app-accent-rgb),0.25)]"
                   : ""}
       <KeyButton.Root
         class={statusClass}

@@ -301,10 +301,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="font-semibold text-sm">
-        <span class="{isPressedLive ? 'text-emerald-400' : 'text-primary'} font-mono">Key {selectedKey + 1}</span>
+        <span class="text-primary font-mono transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : ''}">Key {selectedKey + 1}</span>
       </div>
       {#if isPressedLive}
-        <span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
+        <span class="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary border border-primary/35 shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.25)]">
           Pressed
         </span>
       {/if}

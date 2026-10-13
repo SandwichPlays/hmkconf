@@ -78,7 +78,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           <span
             class={cn(
               "max-w-full overflow-hidden px-1 text-[16px] leading-[1.1em] text-ellipsis whitespace-pre-wrap",
-              leftSelected ? "text-[var(--accent-text-light)] dark:text-primary font-bold" : "text-muted-foreground",
+              leftSelected ? "text-[var(--accent-text-light)] dark:text-primary" : "text-muted-foreground",
             )}>{Variant}</span
           >
         {:else}
@@ -111,7 +111,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             class={cn(
               "max-w-full overflow-hidden px-1 text-[16px] leading-[1.1em] text-ellipsis whitespace-pre-wrap",
               rightSelected
-                ? "text-[var(--accent-text-light)] dark:text-primary font-bold"
+                ? "text-[var(--accent-text-light)] dark:text-primary"
                 : "text-muted-foreground",
             )}>{Variant}</span
           >
@@ -146,7 +146,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               class={cn(
                 "max-w-full overflow-hidden px-1 text-[16px] leading-[1.1em] text-ellipsis whitespace-pre-wrap",
                 buttonSelected
-                  ? "text-[var(--accent-text-light)] dark:text-primary font-bold"
+                  ? "text-[var(--accent-text-light)] dark:text-primary"
                   : "text-muted-foreground",
               )}>{Variant}</span
             >
