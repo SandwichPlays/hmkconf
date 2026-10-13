@@ -18,7 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <Button
-  href="https://github.com/peppapighs/hmkconf"
+  href="https://github.com/SandwichPlays/hmkconf"
   rel="noopener noreferrer"
   size="icon"
   target="_blank"
