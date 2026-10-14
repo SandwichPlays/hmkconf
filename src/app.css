@@ -129,7 +129,9 @@
   [data-slot="scroll-area"],
   [data-slot="scroll-area-viewport"],
   [data-slot="resizable-pane-group"],
-  main {
+  main,
+  button,
+  [role="button"] {
     outline: none !important;
   }
   [role="tabpanel"]:focus,
@@ -145,7 +147,11 @@
   [data-slot="resizable-pane-group"]:focus,
   [data-slot="resizable-pane-group"]:focus-visible,
   main:focus,
-  main:focus-visible {
+  main:focus-visible,
+  button:focus,
+  button:focus-visible,
+  [role="button"]:focus,
+  [role="button"]:focus-visible {
     outline: none !important;
     box-shadow: none !important;
   }

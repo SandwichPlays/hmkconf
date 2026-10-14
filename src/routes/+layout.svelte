@@ -49,6 +49,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <ModeWatcher defaultMode="dark" />
 <Toaster />
+<svelte:window
+  onpointerup={(e) => {
+    const el = (e.target as HTMLElement)?.closest("button, [role='button']")
+    if (el instanceof HTMLElement) {
+      setTimeout(() => el.blur(), 0)
+    }
+  }}
+/>
 <div class="relative flex min-h-svh flex-col bg-background font-sans">
   {@render children?.()}
 </div>
