@@ -38,49 +38,49 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <ConfiguratorLayout>
   {#await profilesTab then { default: ProfilesTab }}
-    <Tabs.Content value="profiles">
+    <Tabs.Content value="profiles" class="outline-none">
       {#snippet child({ props })}
         <ProfilesTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}
   {#await remapTab then { default: RemapTab }}
-    <Tabs.Content value="remap">
+    <Tabs.Content value="remap" class="outline-none">
       {#snippet child({ props })}
         <RemapTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}
   {#await performanceTab then { default: PerformanceTab }}
-    <Tabs.Content value="performance">
+    <Tabs.Content value="performance" class="outline-none">
       {#snippet child({ props })}
         <PerformanceTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}
   {#await advancedKeysTab then { default: AdvancedKeysTab }}
-    <Tabs.Content value="advanced-keys">
+    <Tabs.Content value="advanced-keys" class="outline-none">
       {#snippet child({ props })}
         <AdvancedKeysTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}
   {#await gamepadTab then { default: GamepadTab }}
-    <Tabs.Content value="gamepad">
+    <Tabs.Content value="gamepad" class="outline-none">
       {#snippet child({ props })}
         <GamepadTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}
   {#await calibrationTab then { default: CalibrationTab }}
-    <Tabs.Content value="calibration">
+    <Tabs.Content value="calibration" class="outline-none">
       {#snippet child({ props })}
         <CalibrationTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}
   {#await settingsTab then { default: SettingsTab }}
-    <Tabs.Content value="settings">
+    <Tabs.Content value="settings" class="outline-none">
       {#snippet child({ props })}
         <SettingsTab {...props} />
       {/snippet}

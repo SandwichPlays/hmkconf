@@ -68,7 +68,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <div
-  class={cn("mx-auto flex size-full max-w-3xl flex-col", className)}
+  class={cn("mx-auto flex size-full max-w-3xl flex-col outline-none focus:outline-none focus-visible:outline-none", className)}
   {...props}
 >
   <FixedScrollArea class="flex flex-col gap-4 p-4">

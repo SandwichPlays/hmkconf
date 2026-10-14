@@ -120,6 +120,35 @@
   * {
     @apply border-border outline-ring/50;
   }
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+  [role="tabpanel"],
+  [data-slot="tabs-content"],
+  [data-slot="sidebar-inset"],
+  [data-slot="scroll-area"],
+  [data-slot="scroll-area-viewport"],
+  [data-slot="resizable-pane-group"],
+  main {
+    outline: none !important;
+  }
+  [role="tabpanel"]:focus,
+  [role="tabpanel"]:focus-visible,
+  [data-slot="tabs-content"]:focus,
+  [data-slot="tabs-content"]:focus-visible,
+  [data-slot="sidebar-inset"]:focus,
+  [data-slot="sidebar-inset"]:focus-visible,
+  [data-slot="scroll-area"]:focus,
+  [data-slot="scroll-area"]:focus-visible,
+  [data-slot="scroll-area-viewport"]:focus,
+  [data-slot="scroll-area-viewport"]:focus-visible,
+  [data-slot="resizable-pane-group"]:focus,
+  [data-slot="resizable-pane-group"]:focus-visible,
+  main:focus,
+  main:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
   body {
     @apply bg-background text-foreground;
   }
