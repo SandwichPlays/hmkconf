@@ -160,7 +160,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <div class="grid shrink-0">
       <span class="font-semibold">Configure Profiles</span>
       <span class="text-sm text-muted-foreground">
-        Manage your keyboard profiles here. Click any profile to activate it on your keyboard.
+        Manage your keyboard profiles here. You can import, export, and
+        customize them.
       </span>
     </div>
     <div class="grid grid-cols-2 gap-4">
@@ -206,9 +207,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 <span class="sr-only">Rename</span>
               </Button>
             </div>
-            <span class="text-xs text-muted-foreground truncate">
-              {profile === currentProfile ? "Active profile on keyboard" : "Click to activate"}
-            </span>
           </div>
 
           <div
