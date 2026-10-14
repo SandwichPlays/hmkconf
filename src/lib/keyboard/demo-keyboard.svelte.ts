@@ -32,6 +32,7 @@ import type {
   GetTickRateParams,
   Keyboard,
   ResetProfileParams,
+  SetActiveProfileParams,
   SetActuationMapParams,
   SetAdvancedKeysParams,
   SetCalibrationParams,
@@ -127,8 +128,13 @@ export class DemoKeyboard implements Keyboard {
   async setCalibration({ data }: SetCalibrationParams) {
     this.#state.calibration = data
   }
+  #currentProfile = 0
+
   async getProfile() {
-    return 0
+    return this.#currentProfile
+  }
+  async setProfile({ profile }: SetActiveProfileParams) {
+    this.#currentProfile = profile
   }
   async getOptions() {
     return this.#state.options

@@ -55,6 +55,7 @@ import {
   duplicateProfile,
   getProfile,
   resetProfile,
+  setProfile,
 } from "$lib/libhmk/commands/profile"
 import { reboot } from "$lib/libhmk/commands/reboot"
 import { getSerial } from "$lib/libhmk/commands/serial"
@@ -70,6 +71,7 @@ import type {
   GetTickRateParams,
   Keyboard,
   ResetProfileParams,
+  SetActiveProfileParams,
   SetActuationMapParams,
   SetAdvancedKeysParams,
   SetCalibrationParams,
@@ -149,6 +151,9 @@ class HMKKeyboard implements Keyboard {
   }
   getProfile() {
     return getProfile(this.commander)
+  }
+  setProfile(params: SetActiveProfileParams) {
+    return setProfile(this.commander, params)
   }
   getOptions() {
     return getOptions(this.commander)

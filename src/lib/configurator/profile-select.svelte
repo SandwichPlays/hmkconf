@@ -18,35 +18,54 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import * as Select from "$lib/components/ui/select"
   import * as Tooltip from "$lib/components/ui/tooltip"
   import { keyboardContext } from "$lib/keyboard"
-  import { globalStateContext } from "./context.svelte"
+  import { globalStateContext, persistedStateContext } from "./context.svelte"
   import { profileQueryContext } from "./queries/profile-query.svelte"
 
   const globalState = globalStateContext.get()
   const { profile } = $derived(globalState)
   const { numProfiles } = keyboardContext.get().metadata
 
+  const profileQuery = profileQueryContext.get()
   const { current: keyboardProfile } = $derived(
-    profileQueryContext.get().profile,
+    profileQuery.profile,
   )
+
+  const persistedState = persistedStateContext.get()
+  const profileNames = $derived(persistedState.current.profileNames ?? [])
+
+  function activateProfile(index: number) {
+    globalState.setProfile(index)
+    profileQuery.setProfile({ profile: index })
+  }
 </script>
 
 <Select.Root
-  bind:value={() => String(profile), (v) => globalState.setProfile(Number(v))}
+  bind:value={() => String(profile), (v) => activateProfile(Number(v))}
   type="single"
 >
-  <Select.Trigger class="w-48" size="sm">
-    <span class="flex items-center gap-2">
-      Profile {profile}
+  <Select.Trigger class="w-52" size="sm">
+    <span class="flex items-center gap-2 truncate">
+      <span class="truncate">
+        {profileNames[profile] || `Profile ${profile}`}
+      </span>
       {#if keyboardProfile === profile}
-        <KeyboardIcon />
+        <KeyboardIcon class="shrink-0" />
       {/if}
     </span>
   </Select.Trigger>
   <Select.Content class="w-[var(--bits-select-anchor-width)]">
     {#each { length: numProfiles }, i (i)}
-      <Select.Item value={String(i)}>
+      <Select.Item
+        value={String(i)}
+        onclick={() => activateProfile(i)}
+      >
         <span class="flex items-center gap-2">
-          Profile {i}
+          {#if profileNames[i]}
+            <span class="font-medium truncate">{profileNames[i]}</span>
+            <span class="text-xs text-muted-foreground shrink-0 font-normal">P{i}</span>
+          {:else}
+            Profile {i}
+          {/if}
           {#if keyboardProfile === i}
             <Tooltip.Root>
               <Tooltip.Trigger>

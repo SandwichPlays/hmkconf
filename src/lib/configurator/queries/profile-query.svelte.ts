@@ -17,6 +17,7 @@ import {
   keyboardContext,
   type DuplicateProfileParams,
   type ResetProfileParams,
+  type SetActiveProfileParams,
 } from "$lib/keyboard"
 import { Context, resource, type ResourceReturn } from "runed"
 import { globalStateContext } from "../context.svelte"
@@ -62,6 +63,15 @@ export class ProfileQuery {
     this.#gamepadQuery.gamepadButtons.refetch()
     this.#gamepadQuery.gamepadOptions.refetch()
     this.#tickRateQuery.tickRate.refetch()
+  }
+
+  async setProfile({ profile }: SetActiveProfileParams) {
+    try {
+      await this.#keyboard.setProfile({ profile })
+    } catch (e) {
+      console.warn("Failed to set profile on keyboard", e)
+    }
+    await this.profile.refetch()
   }
 
   factoryReset() {

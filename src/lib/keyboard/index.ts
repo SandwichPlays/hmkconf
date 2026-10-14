@@ -29,6 +29,7 @@ export type SetOptionsParams = SetParams<HMK_Options>
 
 export type ResetProfileParams = { profile: number }
 export type DuplicateProfileParams = { profile: number; srcProfile: number }
+export type SetActiveProfileParams = { profile: number }
 
 type GetProfileParams = { profile: number }
 type SetProfileParams<T> = { profile: number; data: T }
@@ -71,6 +72,7 @@ export type KeyboardAction = {
   getCalibration(): Promise<HMK_Calibration>
   setCalibration(params: SetCalibrationParams): Promise<void>
   getProfile(): Promise<number>
+  setProfile(params: SetActiveProfileParams): Promise<void>
   getOptions(): Promise<HMK_Options>
   setOptions(params: SetOptionsParams): Promise<void>
   resetProfile(params: ResetProfileParams): Promise<void>

@@ -14,7 +14,11 @@
  */
 
 import { DataViewReader } from "$lib/data-view-reader"
-import type { DuplicateProfileParams, ResetProfileParams } from "$lib/keyboard"
+import type {
+  DuplicateProfileParams,
+  ResetProfileParams,
+  SetActiveProfileParams,
+} from "$lib/keyboard"
 import type { Commander } from "$lib/keyboard/commander"
 import { HMK_Command } from "."
 
@@ -22,6 +26,16 @@ export async function getProfile(commander: Commander) {
   return new DataViewReader(
     await commander.sendCommand({ command: HMK_Command.GET_PROFILE }),
   ).uint8()
+}
+
+export async function setProfile(
+  commander: Commander,
+  { profile }: SetActiveProfileParams,
+) {
+  await commander.sendCommand({
+    command: HMK_Command.SET_PROFILE,
+    payload: [profile],
+  })
 }
 
 export async function resetProfile(

@@ -180,6 +180,7 @@ export const globalStateContext = new Context<ConfiguratorGlobalState>(
 
 export const persistedStateSchema = z.object({
   layoutOptions: z.array(z.int().min(0)),
+  profileNames: z.array(z.string()).catch([]),
 })
 
 export type ConfiguratorPersistedState = z.infer<typeof persistedStateSchema>
@@ -192,6 +193,7 @@ function setConfiguratorPersistedState() {
   const { id, metadata } = keyboardContext.get()
   const defaultPersistedState: ConfiguratorPersistedState = {
     layoutOptions: Array(metadata.layout.labels.length).fill(0),
+    profileNames: Array(metadata.numProfiles).fill(""),
   }
   persistedStateContext.set(
     new PersistedState(id, defaultPersistedState, {
@@ -199,7 +201,7 @@ function setConfiguratorPersistedState() {
         serialize: JSON.stringify,
         deserialize: (val) => {
           try {
-            return persistedStateSchema
+            const parsed = persistedStateSchema
               .refine(({ layoutOptions }) => {
                 const { layout } = metadata
                 const optionMaxValues = layout.labels.map((l) =>
@@ -211,6 +213,15 @@ function setConfiguratorPersistedState() {
                 )
               })
               .parse(JSON.parse(val))
+
+            const profileNames = [...(parsed.profileNames ?? [])]
+            while (profileNames.length < metadata.numProfiles) {
+              profileNames.push("")
+            }
+            return {
+              layoutOptions: parsed.layoutOptions,
+              profileNames,
+            }
           } catch (err) {
             console.error(err)
             return defaultPersistedState
