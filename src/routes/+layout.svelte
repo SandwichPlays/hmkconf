@@ -20,12 +20,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import "@fontsource-variable/geist-mono"
   import { ModeWatcher } from "mode-watcher"
   import { initTheme } from "$lib/theme.svelte"
+  import { initDeveloperMode } from "$lib/developer-mode.svelte"
   import { onMount } from "svelte"
 
   let { children } = $props()
 
   onMount(() => {
     initTheme()
+    initDeveloperMode()
   })
 </script>
 

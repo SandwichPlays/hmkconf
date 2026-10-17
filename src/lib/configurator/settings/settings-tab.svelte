@@ -33,6 +33,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { optionsQueryContext } from "../queries/options-query.svelte"
   import { profileQueryContext } from "../queries/profile-query.svelte"
   import { scanRateQueryContext } from "../queries/scan-rate-query.svelte"
+  import { developerModeState, setDeveloperMode } from "$lib/developer-mode.svelte"
   import { onDestroy } from "svelte"
   import FirmwareUpdateDialog from "./firmware-update-dialog.svelte"
 
@@ -57,6 +58,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let liveBenchmark = $state(false)
 
   $effect(() => {
+    if (!developerModeState.enabled) {
+      liveBenchmark = false
+      scanRateQuery.enabled = false
+      return
+    }
     scanRateQuery.enabled = liveBenchmark
   })
 
@@ -102,23 +108,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         description="The polling rate determines how often the keyboard can report to the computer. A higher polling rate leads to quicker response times. You can lower the polling rate if you experience stability issues. Restart the keyboard to apply changes."
       />
     {/if}
-    <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-gradient-to-br from-primary/[0.08] via-card to-primary/[0.02] p-4 shadow-xs">
-      <div class="flex items-center justify-between gap-3">
-        <div class="grid text-sm text-wrap">
-          <span class="font-semibold text-foreground">Scan Rate & Latency Benchmark</span>
-          <span class="text-xs text-muted-foreground">
-            Real-time on-chip telemetry measuring key evaluation frequency, hardware ADC sweeps, and firmware loop latency.
-          </span>
+    <Switch
+      bind:checked={() => developerModeState.enabled, (v) => setDeveloperMode(v)}
+      id="developer-mode"
+      title="Developer Mode"
+      description="Enable advanced telemetry, raw sensor ADC values, noise analysis, and real-time scan rate benchmarks."
+    />
+    {#if developerModeState.enabled}
+      <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-card p-4 shadow-xs">
+        <div class="flex items-center justify-between gap-3">
+          <div class="grid text-sm text-wrap">
+            <span class="font-semibold text-foreground">Scan Rate & Latency Benchmark</span>
+            <span class="text-xs text-muted-foreground">
+              Real-time on-chip telemetry measuring key evaluation frequency, hardware ADC sweeps, and firmware loop latency.
+            </span>
+          </div>
+          <Button
+            size="sm"
+            variant={liveBenchmark ? "default" : "outline"}
+            class={liveBenchmark ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--app-accent-rgb),0.35)]" : "border-primary/40 text-primary hover:bg-primary/10"}
+            onclick={() => (liveBenchmark = !liveBenchmark)}
+          >
+            {liveBenchmark ? "Stop Benchmark" : "Measure Scan Rate"}
+          </Button>
         </div>
-        <Button
-          size="sm"
-          variant={liveBenchmark ? "default" : "outline"}
-          class={liveBenchmark ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--app-accent-rgb),0.35)]" : "border-primary/40 text-primary hover:bg-primary/10"}
-          onclick={() => (liveBenchmark = !liveBenchmark)}
-        >
-          {liveBenchmark ? "Stop Benchmark" : "Measure Scan Rate"}
-        </Button>
-      </div>
       {#if liveBenchmark && scanRate}
         <div class="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-4">
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
@@ -152,6 +165,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         </div>
       {/if}
     </div>
+    {/if}
     <div class="flex flex-col gap-2">
       <div class="grid text-sm text-wrap">
         <span class="font-semibold">Firmware Update</span>

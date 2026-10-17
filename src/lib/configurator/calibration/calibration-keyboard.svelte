@@ -20,6 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
+  import { developerModeState } from "$lib/developer-mode.svelte"
 
   const analogInfoQuery = analogInfoQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
@@ -54,7 +55,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         class={statusClass}
         onclick={() => (calibrationState.selectedKey = key)}
       >
-        <span>{analogInfo[key].adcValue}</span>
+        {#if developerModeState.enabled}
+          <span>{analogInfo[key].adcValue}</span>
+        {/if}
         <span>{displayDistance(analogInfo[key].distance, key, calibration)}</span>
       </KeyButton.Root>
     {/if}

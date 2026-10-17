@@ -21,6 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { calibrationStateContext } from "../context.svelte"
   import { onDestroy, onMount } from "svelte"
   import { themeState, hexToRgb } from "$lib/theme.svelte"
+  import { developerModeState } from "$lib/developer-mode.svelte"
 
   const keyboard = keyboardContext.get()
   const {
@@ -36,7 +37,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const selectedKey = $derived(calibrationState.selectedKey)
 
-  let viewMode = $state<"adc" | "distance">("adc")
+  let viewMode = $state<"adc" | "distance">("distance")
+  const currentMode = $derived(developerModeState.enabled ? viewMode : "distance")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
@@ -55,7 +57,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let smoothMin = 0
   let smoothMax = 4096
   let scaleInitialized = false
-  let prevViewMode: "adc" | "distance" = "adc"
+  let prevViewMode: "adc" | "distance" = "distance"
 
   // Reset buffer when selected key changes
   $effect(() => {
@@ -72,11 +74,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     const keyData = analogInfo[selectedKey]
     const rawStatus = keyData.status ?? 0
-    const isPressed = (rawStatus & 0x80) !== 0 || keyData.distance > 1500
+    const isPressed = (rawStatus & 0x80) !== 0
     isPressedLive = isPressed
 
     const value =
-      viewMode === "adc"
+      currentMode === "adc"
         ? keyData.adcValue
         : (keyData.distance / 10000) *
           ((calibration?.switchTravel[selectedKey] ?? 36) / 10)
@@ -97,7 +99,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       const first = recent[0].value
       const last = recent[recent.length - 1].value
       const isStationary =
-        viewMode === "adc"
+        currentMode === "adc"
           ? Math.abs(last - first) <= 6
           : Math.abs(last - first) <= 0.05
       if (isStationary) {
@@ -162,7 +164,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     let targetMin = 0
     let targetMax = (calibration?.switchTravel[selectedKey] ?? 36) / 10
 
-    if (viewMode === "adc") {
+    if (currentMode === "adc") {
       let curMin = history[0].value
       let curMax = history[0].value
       for (let i = 1; i < history.length; i++) {
@@ -176,11 +178,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       targetMax = Math.min(1 << adcResolution, curMax + pad)
     }
 
-    if (!scaleInitialized || viewMode !== prevViewMode) {
+    if (!scaleInitialized || currentMode !== prevViewMode) {
       smoothMin = targetMin
       smoothMax = targetMax
       scaleInitialized = true
-      prevViewMode = viewMode
+      prevViewMode = currentMode
     } else {
       // Smooth lerp to prevent jarring vertical jumps
       smoothMin += (targetMin - smoothMin) * 0.12
@@ -206,29 +208,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const firstX = Math.max(0, getX(history[0].time))
     const lastY = getY(latestSample.value)
 
-    // Gradient Fill from bottom baseline up to trace line
-    const gradient = ctx.createLinearGradient(0, h, 0, 0)
-    if (isPressed) {
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.42)`)
-      gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`)
-    } else {
-      gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`)
-      gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.01)`)
-    }
-
-    ctx.beginPath()
-    ctx.moveTo(firstX, h)
-    for (let i = 0; i < history.length; i++) {
-      const s = history[i]
-      const x = Math.max(0, Math.min(w, getX(s.time)))
-      const y = getY(s.value)
-      ctx.lineTo(x, y)
-    }
-    ctx.lineTo(w, lastY)
-    ctx.lineTo(w, h)
-    ctx.closePath()
-    ctx.fillStyle = gradient
-    ctx.fill()
 
     // Trace Line with Neon Bloom on Pressed
     ctx.save()
@@ -274,12 +253,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.font = "10px ui-monospace, monospace"
     ctx.textAlign = "left"
     ctx.fillText(
-      `${viewMode === "distance" ? smoothMin.toFixed(2) + " mm" : smoothMin.toFixed(0)}`,
+      `${currentMode === "distance" ? smoothMin.toFixed(2) + " mm" : smoothMin.toFixed(0)}`,
       8,
       14,
     )
     ctx.fillText(
-      `${viewMode === "distance" ? smoothMax.toFixed(2) + " mm" : smoothMax.toFixed(0)}`,
+      `${currentMode === "distance" ? smoothMax.toFixed(2) + " mm" : smoothMax.toFixed(0)}`,
       8,
       h - 6,
     )
@@ -310,26 +289,28 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       {/if}
     </div>
     <!-- Mode Toggle -->
-    <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-      <button
-        class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => {
-          viewMode = "adc"
-          history = []
-        }}
-      >
-        ADC
-      </button>
-      <button
-        class="rounded px-2 py-0.5 font-medium transition-colors {viewMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => {
-          viewMode = "distance"
-          history = []
-        }}
-      >
-        Distance
-      </button>
-    </div>
+    {#if developerModeState.enabled}
+      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            viewMode = "adc"
+            history = []
+          }}
+        >
+          ADC
+        </button>
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            viewMode = "distance"
+            history = []
+          }}
+        >
+          Distance
+        </button>
+      </div>
+    {/if}
   </div>
 
   <!-- Realtime Canvas and Side Stats -->
@@ -351,7 +332,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <span class="text-[11px] font-medium text-muted-foreground">Live Value</span>
         <span class="font-mono text-base font-bold text-primary transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : 'opacity-85'}">
           {#if analogInfo && analogInfo[selectedKey]}
-            {viewMode === "adc"
+            {currentMode === "adc"
               ? analogInfo[selectedKey].adcValue
               : displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration)}
           {:else}
@@ -360,14 +341,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         </span>
       </div>
 
-      <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
-        <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
-        <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
-          {viewMode === "adc"
-            ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
-            : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
-        </span>
-      </div>
+      {#if developerModeState.enabled}
+        <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
+          <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
+          <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
+            {currentMode === "adc"
+              ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
+              : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
+          </span>
+        </div>
+      {/if}
     </div>
   </div>
 </div>
