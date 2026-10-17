@@ -115,7 +115,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       description="Enable advanced telemetry, raw sensor ADC values, noise analysis, and real-time scan rate benchmarks."
     />
     {#if developerModeState.enabled}
-      <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-card p-4 shadow-xs">
+      <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-card bg-primary/[0.04] p-4 shadow-xs">
         <div class="flex items-center justify-between gap-3">
           <div class="grid text-sm text-wrap">
             <span class="font-semibold text-foreground">Scan Rate & Latency Benchmark</span>

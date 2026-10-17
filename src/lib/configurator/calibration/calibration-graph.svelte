@@ -208,6 +208,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const firstX = Math.max(0, getX(history[0].time))
     const lastY = getY(latestSample.value)
 
+    // Solid fill under trace line (no gradient, keeps theme color)
+    ctx.beginPath()
+    ctx.moveTo(firstX, h)
+    for (let i = 0; i < history.length; i++) {
+      const s = history[i]
+      const x = Math.max(0, Math.min(w, getX(s.time)))
+      const y = getY(s.value)
+      ctx.lineTo(x, y)
+    }
+    ctx.lineTo(w, lastY)
+    ctx.lineTo(w, h)
+    ctx.closePath()
+    ctx.fillStyle = isPressed
+      ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.28)`
+      : `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`
+    ctx.fill()
 
     // Trace Line with Neon Bloom on Pressed
     ctx.save()
@@ -277,16 +293,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 </script>
 
 <div class="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm">
-  <div class="flex items-center justify-between">
+  <div class="flex h-7 items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="font-semibold text-sm">
         <span class="text-primary font-mono transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : ''}">Key {selectedKey + 1}</span>
       </div>
-      {#if isPressedLive}
-        <span class="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary border border-primary/35 shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.25)]">
-          Pressed
-        </span>
-      {/if}
+      <span class="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary border border-primary/35 shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.25)] transition-opacity duration-150 {isPressedLive ? 'opacity-100' : 'opacity-0 pointer-events-none'}">
+        Pressed
+      </span>
     </div>
     <!-- Mode Toggle -->
     {#if developerModeState.enabled}
@@ -328,7 +342,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     <!-- Live Stats Side Column -->
     <div class="flex w-36 shrink-0 flex-col gap-2">
-      <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
+      <div class="flex h-[92px] flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
         <span class="text-[11px] font-medium text-muted-foreground">Live Value</span>
         <span class="font-mono text-base font-bold text-primary transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : 'opacity-85'}">
           {#if analogInfo && analogInfo[selectedKey]}
@@ -342,7 +356,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </div>
 
       {#if developerModeState.enabled}
-        <div class="flex flex-1 flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
+        <div class="flex h-[92px] flex-col justify-center rounded-md border border-primary/20 bg-primary/[0.04] p-2.5">
           <span class="text-[11px] font-medium text-muted-foreground">Noise (Pk-to-Pk)</span>
           <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
             {currentMode === "adc"
