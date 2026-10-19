@@ -36,9 +36,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
   const selectedKey = $derived(calibrationState.selectedKey)
-
-  let viewMode = $state<"adc" | "distance">("distance")
-  const currentMode = $derived(developerModeState.enabled ? viewMode : "distance")
+  const currentMode = $derived(calibrationState.viewMode)
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
@@ -65,6 +63,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       history = []
       prevKey = selectedKey
       scaleInitialized = false
+    }
+  })
+
+  // Reset buffer when view mode changes
+  $effect(() => {
+    if (currentMode !== prevViewMode) {
+      history = []
+      scaleInitialized = false
+      prevViewMode = currentMode
     }
   })
 
@@ -303,28 +310,26 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </span>
     </div>
     <!-- Mode Toggle -->
-    {#if developerModeState.enabled}
-      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            viewMode = "adc"
-            history = []
-          }}
-        >
-          ADC
-        </button>
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            viewMode = "distance"
-            history = []
-          }}
-        >
-          Distance
-        </button>
-      </div>
-    {/if}
+    <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+      <button
+        class="rounded px-2.5 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+        onclick={() => {
+          calibrationState.viewMode = "distance"
+          history = []
+        }}
+      >
+        Distance
+      </button>
+      <button
+        class="rounded px-2.5 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+        onclick={() => {
+          calibrationState.viewMode = "adc"
+          history = []
+        }}
+      >
+        Raw ADC
+      </button>
+    </div>
   </div>
 
   <!-- Realtime Canvas and Side Stats -->
