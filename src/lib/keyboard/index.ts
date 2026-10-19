@@ -67,7 +67,7 @@ export type KeyboardAction = {
   bootloader(): Promise<void>
   factoryReset(): Promise<void>
   recalibrate(): Promise<void>
-  analogInfo(): Promise<HMK_AnalogInfo[]>
+  analogInfo(raw?: boolean): Promise<HMK_AnalogInfo[]>
   getScanRate(): Promise<HMK_ScanRate>
   getCalibration(): Promise<HMK_Calibration>
   setCalibration(params: SetCalibrationParams): Promise<void>

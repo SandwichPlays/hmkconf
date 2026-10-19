@@ -23,13 +23,14 @@ const ANALOG_INFO_MAX_ENTRIES = 12
 export async function analogInfo(
   commander: Commander,
   { numKeys }: KeyboardMetadata,
+  raw: boolean = false,
 ): Promise<HMK_AnalogInfo[]> {
   const ret = []
   for (let i = 0; i < numKeys; i += ANALOG_INFO_MAX_ENTRIES) {
     const reader = new DataViewReader(
       await commander.sendCommand({
         command: HMK_Command.ANALOG_INFO,
-        payload: [i],
+        payload: raw ? [i, 1] : [i],
       }),
     )
 

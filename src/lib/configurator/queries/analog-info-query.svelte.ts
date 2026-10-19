@@ -20,14 +20,15 @@ import { Context, resource, type ResourceReturn } from "runed"
 export class AnalogInfoQuery {
   analogInfo: ResourceReturn<HMK_AnalogInfo[]>
   enabled = $state(false)
+  raw = $state(false)
 
   #keyboard = keyboardContext.get()
   #timer: ReturnType<typeof setTimeout> | null = null
 
   constructor() {
     this.analogInfo = resource(
-      () => this.enabled,
-      async (enabled) => {
+      () => ({ enabled: this.enabled, raw: this.raw }),
+      async ({ enabled, raw }) => {
         if (this.#timer) {
           clearTimeout(this.#timer)
           this.#timer = null
@@ -35,7 +36,7 @@ export class AnalogInfoQuery {
         if (!enabled) return this.analogInfo.current
 
         try {
-          const ret = await this.#keyboard.analogInfo()
+          const ret = await this.#keyboard.analogInfo(raw)
           return ret
         } finally {
           if (this.enabled) {

@@ -109,7 +109,7 @@ export class DemoKeyboard implements Keyboard {
   async bootloader() {}
   async factoryReset() {}
   async recalibrate() {}
-  async analogInfo() {
+  async analogInfo(_raw?: boolean) {
     return Array(numKeys).fill({ adcValue: 0, distance: 0, status: 0 })
   }
   async getScanRate() {

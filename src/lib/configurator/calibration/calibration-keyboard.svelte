@@ -55,11 +55,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         class={statusClass}
         onclick={() => (calibrationState.selectedKey = key)}
       >
-        {#if calibrationState.viewMode === "adc"}
+        {#if developerModeState.enabled && (calibrationState.viewMode === "adc" || calibrationState.viewMode === "raw_adc")}
           <span class="font-mono text-xs font-semibold">{analogInfo[key].adcValue}</span>
         {:else}
           {#if developerModeState.enabled}
-            <span class="text-[10px] opacity-70">{analogInfo[key].adcValue}</span>
+            <span>{analogInfo[key].adcValue}</span>
           {/if}
           <span>{displayDistance(analogInfo[key].distance, key, calibration)}</span>
         {/if}

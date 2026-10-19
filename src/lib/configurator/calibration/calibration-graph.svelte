@@ -36,7 +36,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
   const selectedKey = $derived(calibrationState.selectedKey)
-  const currentMode = $derived(calibrationState.viewMode)
+  const currentMode = $derived(developerModeState.enabled ? calibrationState.viewMode : "distance")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
@@ -55,7 +55,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let smoothMin = 0
   let smoothMax = 4096
   let scaleInitialized = false
-  let prevViewMode: "adc" | "distance" = "distance"
+  let prevViewMode: "distance" | "adc" | "raw_adc" = "distance"
 
   // Reset buffer when selected key changes
   $effect(() => {
@@ -75,6 +75,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   })
 
+  // Sync raw stream with query
+  $effect(() => {
+    analogInfoQuery.raw = developerModeState.enabled && currentMode === "raw_adc"
+  })
+
   // Capture incoming analog info
   $effect(() => {
     if (!analogInfo || !analogInfo[selectedKey]) return
@@ -85,10 +90,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     isPressedLive = isPressed
 
     const value =
-      currentMode === "adc"
-        ? keyData.adcValue
-        : (keyData.distance / 10000) *
+      currentMode === "distance"
+        ? (keyData.distance / 10000) *
           ((calibration?.switchTravel[selectedKey] ?? 36) / 10)
+        : keyData.adcValue
 
     const now = performance.now()
     history.push({ time: now, value, isPressed })
@@ -106,9 +111,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       const first = recent[0].value
       const last = recent[recent.length - 1].value
       const isStationary =
-        currentMode === "adc"
-          ? Math.abs(last - first) <= 6
-          : Math.abs(last - first) <= 0.05
+        currentMode === "distance"
+          ? Math.abs(last - first) <= 0.05
+          : Math.abs(last - first) <= 6
       if (isStationary) {
         let min = recent[0].value
         let max = recent[0].value
@@ -171,7 +176,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     let targetMin = 0
     let targetMax = (calibration?.switchTravel[selectedKey] ?? 36) / 10
 
-    if (currentMode === "adc") {
+    if (currentMode !== "distance") {
       let curMin = history[0].value
       let curMax = history[0].value
       for (let i = 1; i < history.length; i++) {
@@ -310,26 +315,37 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       </span>
     </div>
     <!-- Mode Toggle -->
-    <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-      <button
-        class="rounded px-2.5 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => {
-          calibrationState.viewMode = "distance"
-          history = []
-        }}
-      >
-        Distance
-      </button>
-      <button
-        class="rounded px-2.5 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-        onclick={() => {
-          calibrationState.viewMode = "adc"
-          history = []
-        }}
-      >
-        Raw ADC
-      </button>
-    </div>
+    {#if developerModeState.enabled}
+      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            calibrationState.viewMode = "distance"
+            history = []
+          }}
+        >
+          Distance
+        </button>
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            calibrationState.viewMode = "adc"
+            history = []
+          }}
+        >
+          ADC
+        </button>
+        <button
+          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'raw_adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+          onclick={() => {
+            calibrationState.viewMode = "raw_adc"
+            history = []
+          }}
+        >
+          Raw ADC
+        </button>
+      </div>
+    {/if}
   </div>
 
   <!-- Realtime Canvas and Side Stats -->
@@ -351,9 +367,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <span class="text-[11px] font-medium text-muted-foreground">Live Value</span>
         <span class="font-mono text-base font-bold text-primary transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : 'opacity-85'}">
           {#if analogInfo && analogInfo[selectedKey]}
-            {currentMode === "adc"
-              ? analogInfo[selectedKey].adcValue
-              : displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration)}
+            {currentMode === "distance"
+              ? displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration)
+              : analogInfo[selectedKey].adcValue}
           {:else}
             --
           {/if}

@@ -137,8 +137,8 @@ class HMKKeyboard implements Keyboard {
   recalibrate() {
     return recalibrate(this.commander)
   }
-  analogInfo() {
-    return analogInfo(this.commander, this.metadata)
+  analogInfo(raw: boolean = false) {
+    return analogInfo(this.commander, this.metadata, raw)
   }
   getScanRate() {
     return getScanRate(this.commander)

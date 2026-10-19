@@ -17,9 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import * as KeyboardEditor from "$lib/components/keyboard-editor"
   import { Badge } from "$lib/components/ui/badge"
   import * as Tooltip from "$lib/components/ui/tooltip"
-  import { calibrationStateContext } from "../context.svelte"
-
-  const calibrationState = calibrationStateContext.get()
 </script>
 
 <KeyboardEditor.Menubar>
@@ -33,19 +30,5 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       performing other performance-sensitive tasks with your keyboard.
     </Tooltip.Content>
   </Tooltip.Root>
-  <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-    <button
-      class="rounded px-2.5 py-0.5 font-medium transition-colors {calibrationState.viewMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-      onclick={() => (calibrationState.viewMode = "distance")}
-    >
-      Distance
-    </button>
-    <button
-      class="rounded px-2.5 py-0.5 font-medium transition-colors {calibrationState.viewMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-      onclick={() => (calibrationState.viewMode = "adc")}
-    >
-      Raw ADC
-    </button>
-  </div>
   <KeyboardEditor.LayoutDialog />
 </KeyboardEditor.Menubar>

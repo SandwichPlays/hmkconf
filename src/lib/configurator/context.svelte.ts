@@ -54,7 +54,7 @@ export const performanceStateContext =
 
 export class ConfiguratorCalibrationState {
   selectedKey = $state(0)
-  viewMode = $state<"distance" | "adc">("distance")
+  viewMode = $state<"distance" | "adc" | "raw_adc">("distance")
 
   reset() {
     this.selectedKey = 0
