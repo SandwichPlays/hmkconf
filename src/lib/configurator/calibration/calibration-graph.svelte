@@ -22,6 +22,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { onDestroy, onMount } from "svelte"
   import { themeState, hexToRgb } from "$lib/theme.svelte"
   import { developerModeState } from "$lib/developer-mode.svelte"
+  import { Label } from "$lib/components/ui/label"
+  import { Switch } from "$lib/components/ui/switch"
 
   const keyboard = keyboardContext.get()
   const {
@@ -316,9 +318,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         Pressed
       </span>
     </div>
-    <!-- Mode Toggle -->
+    <!-- Mode Toggle & Raw Toggle -->
     {#if developerModeState.enabled}
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-1.5">
+          <Label for="raw-adc-switch" class="text-xs font-medium cursor-pointer text-muted-foreground select-none">
+            Raw
+          </Label>
+          <Switch
+            id="raw-adc-switch"
+            checked={calibrationState.isRaw}
+            onCheckedChange={(v) => {
+              calibrationState.isRaw = v
+              if (v) calibrationState.viewMode = "adc"
+              history = []
+            }}
+          />
+        </div>
+
         <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
           <button
             class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
@@ -339,29 +356,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             Distance
           </button>
         </div>
-
-        {#if currentMode === 'adc'}
-          <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-            <button
-              class="rounded px-2 py-0.5 font-medium transition-colors {!calibrationState.isRaw ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-              onclick={() => {
-                calibrationState.isRaw = false
-                history = []
-              }}
-            >
-              Filtered
-            </button>
-            <button
-              class="rounded px-2 py-0.5 font-medium transition-colors {calibrationState.isRaw ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-              onclick={() => {
-                calibrationState.isRaw = true
-                history = []
-              }}
-            >
-              Raw
-            </button>
-          </div>
-        {/if}
       </div>
     {/if}
   </div>
