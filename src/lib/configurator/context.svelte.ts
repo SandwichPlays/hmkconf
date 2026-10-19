@@ -55,12 +55,12 @@ export const performanceStateContext =
 export class ConfiguratorCalibrationState {
   selectedKey = $state(0)
   viewMode = $state<"adc" | "distance">("distance")
-  isRaw = $state(false)
+  isFiltered = $state(true)
 
   reset() {
     this.selectedKey = 0
     this.viewMode = "distance"
-    this.isRaw = false
+    this.isFiltered = true
   }
 }
 

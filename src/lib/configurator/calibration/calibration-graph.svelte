@@ -39,7 +39,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const selectedKey = $derived(calibrationState.selectedKey)
   const currentMode = $derived(developerModeState.enabled ? calibrationState.viewMode : "distance")
-  const isRaw = $derived(developerModeState.enabled && calibrationState.isRaw && currentMode === "adc")
+  const isRaw = $derived(developerModeState.enabled && !calibrationState.isFiltered && currentMode === "adc")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
@@ -318,23 +318,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         Pressed
       </span>
     </div>
-    <!-- Mode Toggle & Raw Toggle -->
+    <!-- Mode Toggle & Filtered Toggle -->
     {#if developerModeState.enabled}
       <div class="flex items-center gap-2.5">
-        <div class="flex items-center gap-1.5">
-          <Label for="raw-adc-switch" class="text-xs font-medium cursor-pointer text-muted-foreground select-none">
-            Raw
-          </Label>
-          <Switch
-            id="raw-adc-switch"
-            checked={calibrationState.isRaw}
-            onCheckedChange={(v) => {
-              calibrationState.isRaw = v
-              if (v) calibrationState.viewMode = "adc"
-              history = []
-            }}
-          />
-        </div>
+        {#if currentMode === "adc"}
+          <div class="flex items-center gap-1.5">
+            <Label for="filtered-adc-switch" class="text-xs font-medium cursor-pointer text-muted-foreground select-none">
+              Filtered
+            </Label>
+            <Switch
+              id="filtered-adc-switch"
+              checked={calibrationState.isFiltered}
+              onCheckedChange={(v) => {
+                calibrationState.isFiltered = v
+                history = []
+              }}
+            />
+          </div>
+        {/if}
 
         <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
           <button
