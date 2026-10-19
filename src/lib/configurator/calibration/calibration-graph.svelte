@@ -37,6 +37,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const selectedKey = $derived(calibrationState.selectedKey)
   const currentMode = $derived(developerModeState.enabled ? calibrationState.viewMode : "distance")
+  const isRaw = $derived(developerModeState.enabled && calibrationState.isRaw && currentMode === "adc")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
 
@@ -55,7 +56,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let smoothMin = 0
   let smoothMax = 4096
   let scaleInitialized = false
-  let prevViewMode: "distance" | "adc" | "raw_adc" = "distance"
+  let prevMode: "adc" | "distance" = "distance"
+  let prevIsRaw = false
 
   // Reset buffer when selected key changes
   $effect(() => {
@@ -66,18 +68,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   })
 
-  // Reset buffer when view mode changes
+  // Reset buffer when view mode or raw state changes
   $effect(() => {
-    if (currentMode !== prevViewMode) {
+    if (currentMode !== prevMode || isRaw !== prevIsRaw) {
       history = []
       scaleInitialized = false
-      prevViewMode = currentMode
+      prevMode = currentMode
+      prevIsRaw = isRaw
     }
   })
 
   // Sync raw stream with query
   $effect(() => {
-    analogInfoQuery.raw = developerModeState.enabled && currentMode === "raw_adc"
+    analogInfoQuery.raw = isRaw
   })
 
   // Capture incoming analog info
@@ -176,7 +179,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     let targetMin = 0
     let targetMax = (calibration?.switchTravel[selectedKey] ?? 36) / 10
 
-    if (currentMode !== "distance") {
+    if (currentMode === "adc") {
       let curMin = history[0].value
       let curMax = history[0].value
       for (let i = 1; i < history.length; i++) {
@@ -190,11 +193,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       targetMax = Math.min(1 << adcResolution, curMax + pad)
     }
 
-    if (!scaleInitialized || currentMode !== prevViewMode) {
+    if (!scaleInitialized) {
       smoothMin = targetMin
       smoothMax = targetMax
       scaleInitialized = true
-      prevViewMode = currentMode
     } else {
       // Smooth lerp to prevent jarring vertical jumps
       smoothMin += (targetMin - smoothMin) * 0.12
@@ -316,34 +318,50 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     </div>
     <!-- Mode Toggle -->
     {#if developerModeState.enabled}
-      <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            calibrationState.viewMode = "distance"
-            history = []
-          }}
-        >
-          Distance
-        </button>
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            calibrationState.viewMode = "adc"
-            history = []
-          }}
-        >
-          ADC
-        </button>
-        <button
-          class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'raw_adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
-          onclick={() => {
-            calibrationState.viewMode = "raw_adc"
-            history = []
-          }}
-        >
-          Raw ADC
-        </button>
+      <div class="flex items-center gap-1.5">
+        <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+          <button
+            class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'adc' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+            onclick={() => {
+              calibrationState.viewMode = "adc"
+              history = []
+            }}
+          >
+            ADC
+          </button>
+          <button
+            class="rounded px-2 py-0.5 font-medium transition-colors {currentMode === 'distance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+            onclick={() => {
+              calibrationState.viewMode = "distance"
+              history = []
+            }}
+          >
+            Distance
+          </button>
+        </div>
+
+        {#if currentMode === 'adc'}
+          <div class="flex rounded-md border bg-muted/40 p-0.5 text-xs">
+            <button
+              class="rounded px-2 py-0.5 font-medium transition-colors {!calibrationState.isRaw ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+              onclick={() => {
+                calibrationState.isRaw = false
+                history = []
+              }}
+            >
+              Filtered
+            </button>
+            <button
+              class="rounded px-2 py-0.5 font-medium transition-colors {calibrationState.isRaw ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}"
+              onclick={() => {
+                calibrationState.isRaw = true
+                history = []
+              }}
+            >
+              Raw
+            </button>
+          </div>
+        {/if}
       </div>
     {/if}
   </div>

@@ -55,8 +55,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         class={statusClass}
         onclick={() => (calibrationState.selectedKey = key)}
       >
-        {#if developerModeState.enabled && (calibrationState.viewMode === "adc" || calibrationState.viewMode === "raw_adc")}
-          <span class="font-mono text-xs font-semibold">{analogInfo[key].adcValue}</span>
+        {#if developerModeState.enabled && calibrationState.viewMode === "adc"}
+          <span>{analogInfo[key].adcValue}</span>
         {:else}
           {#if developerModeState.enabled}
             <span>{analogInfo[key].adcValue}</span>
