@@ -42,6 +42,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const isRaw = $derived(developerModeState.enabled && !calibrationState.isFiltered && currentMode === "adc")
   let containerEl: HTMLDivElement | null = $state(null)
   let canvasEl: HTMLCanvasElement | null = $state(null)
+  let containerWidth = $state(0)
+  let containerHeight = $state(0)
+  const accentRgb = $derived(hexToRgb(themeState.accent) || { r: 255, g: 255, b: 255 })
 
   interface Sample {
     time: number
@@ -140,18 +143,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     if (!canvasEl || !containerEl) {
       return
     }
+    if (containerWidth <= 0 || containerHeight <= 0) {
+      animFrameId = requestAnimationFrame(draw)
+      return
+    }
 
-    // Sync canvas pixel resolution with container size
-    const rect = containerEl.getBoundingClientRect()
+    // Sync canvas pixel resolution with container size without layout thrashing
     const dpr = window.devicePixelRatio || 1
-    const targetW = Math.floor(rect.width * dpr)
-    const targetH = Math.floor(rect.height * dpr)
+    const targetW = Math.floor(containerWidth * dpr)
+    const targetH = Math.floor(containerHeight * dpr)
 
-    if (targetW > 0 && targetH > 0) {
-      if (canvasEl.width !== targetW || canvasEl.height !== targetH) {
-        canvasEl.width = targetW
-        canvasEl.height = targetH
-      }
+    if (canvasEl.width !== targetW || canvasEl.height !== targetH) {
+      canvasEl.width = targetW
+      canvasEl.height = targetH
     }
 
     const ctx = canvasEl.getContext("2d")
@@ -218,7 +222,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     const latestSample = history[history.length - 1]
     const isPressed = latestSample.isPressed
-    const rgb = hexToRgb(themeState.accent) || { r: 255, g: 255, b: 255 }
+    const rgb = accentRgb
     const traceColor = themeState.accent
 
     // Continuous timebase scrolling: right edge is 'now'
@@ -369,6 +373,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- Realtime Canvas Container -->
     <div
       bind:this={containerEl}
+      bind:clientWidth={containerWidth}
+      bind:clientHeight={containerHeight}
       class="relative h-48 flex-1 overflow-hidden rounded-md border border-border/80 bg-card dark:bg-[#090a0f]/90 shadow-[inset_0_0_20px_rgba(var(--app-accent-rgb),0.04)]"
     >
       <canvas
