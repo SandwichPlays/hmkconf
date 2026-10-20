@@ -42,7 +42,7 @@ export class AnalogInfoQuery {
           if (this.enabled) {
             this.#timer = setTimeout(
               () => this.analogInfo.refetch(),
-              0,
+              1000 / 120,
             )
           }
         }

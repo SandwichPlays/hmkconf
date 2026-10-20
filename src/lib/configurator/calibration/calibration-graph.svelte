@@ -103,27 +103,31 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     const now = performance.now()
     history.push({ time: now, value, isPressed })
 
-    // Efficient buffer pruning (keep within time window + 500ms margin)
+    // In-place buffer pruning (keep within time window + 500ms margin)
     const cutoff = now - TIME_WINDOW_MS - 500
     if (history.length > 50 && history[0].time < cutoff) {
-      const idx = history.findIndex((s) => s.time >= cutoff)
-      if (idx > 0) history = history.slice(idx)
+      let removeCount = 0
+      while (removeCount < history.length && history[removeCount].time < cutoff) {
+        removeCount++
+      }
+      if (removeCount > 0) history.splice(0, removeCount)
     }
 
-    // Calculate peak-to-peak noise over the last 30 samples only when stationary
-    const recent = history.slice(-30)
-    if (recent.length >= 10) {
-      const first = recent[0].value
-      const last = recent[recent.length - 1].value
+    // Calculate peak-to-peak noise over the last 30 samples only when stationary (zero allocations)
+    const count = Math.min(history.length, 30)
+    if (count >= 10) {
+      const startIdx = history.length - count
+      const first = history[startIdx].value
+      const last = history[history.length - 1].value
       const isStationary =
         currentMode === "distance"
           ? Math.abs(last - first) <= 0.05
           : Math.abs(last - first) <= 6
       if (isStationary) {
-        let min = recent[0].value
-        let max = recent[0].value
-        for (let i = 1; i < recent.length; i++) {
-          const v = recent[i].value
+        let min = first
+        let max = first
+        for (let i = startIdx + 1; i < history.length; i++) {
+          const v = history[i].value
           if (v < min) min = v
           if (v > max) max = v
         }
@@ -134,7 +138,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   function draw() {
     if (!canvasEl || !containerEl) {
-      animFrameId = requestAnimationFrame(draw)
       return
     }
 

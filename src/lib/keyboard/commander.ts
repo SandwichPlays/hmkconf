@@ -34,6 +34,9 @@ export class Commander {
           this.#pendingCommand = null
           resolve(new DataView(e.data.buffer.slice(1)))
         } else if (cmd !== HMK_Command.ANALOG_INFO) {
+          if (this.#responseQueue.length >= 30) {
+            this.#responseQueue.shift()
+          }
           this.#responseQueue.push(e.data)
         }
       } else {
@@ -87,8 +90,17 @@ export class Commander {
 
           let timer: ReturnType<typeof setTimeout> | null = null
 
+          const onAbort = () => {
+            cleanup()
+            reject(new Error("Command was cancelled."))
+          }
+
           const cleanup = () => {
-            if (timer) clearTimeout(timer)
+            abortController.signal.removeEventListener("abort", onAbort)
+            if (timer) {
+              clearTimeout(timer)
+              timer = null
+            }
             if (this.#pendingCommand === command) {
               this.#pendingResolve = null
               this.#pendingCommand = null
@@ -101,17 +113,14 @@ export class Commander {
             resolve(data)
           }
 
+          abortController.signal.addEventListener("abort", onAbort, { once: true })
+
           this.hidDevice
             .sendReport(0, new Uint8Array(commandBuffer))
             .catch((err) => {
               cleanup()
               reject(err)
             })
-
-          abortController.signal.addEventListener("abort", () => {
-            cleanup()
-            reject(new Error("Command was cancelled."))
-          })
 
           timer = setTimeout(() => {
             cleanup()
