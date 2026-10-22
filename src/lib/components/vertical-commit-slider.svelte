@@ -21,6 +21,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let {
     class: className,
     disabled,
+    locked = false,
+    lockedMessage = "Select Custom on switch selector to chage travel depth",
     title,
     description,
     min,
@@ -32,6 +34,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ...props
   }: WithoutChildren<HTMLAttributes<HTMLDivElement>> & {
     disabled?: boolean
+    locked?: boolean
+    lockedMessage?: string
     title: string
     description?: string
     min?: number
@@ -45,6 +49,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let value = $state(0)
   let trackRef = $state<HTMLDivElement | null>(null)
   let isDragging = $state(false)
+  let isHovered = $state(false)
 
   $effect(() => {
     if (committed !== undefined && !isDragging) {
@@ -52,6 +57,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   })
 
+  const isInteractionDisabled = $derived(disabled || locked)
   const minVal = $derived(min ?? 0)
   const maxVal = $derived(max ?? 4.0)
   const stepVal = $derived(step ?? 0.01)
@@ -66,7 +72,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   }
 
   function handlePointerDown(e: PointerEvent) {
-    if (disabled || !trackRef) return
+    if (isInteractionDisabled || !trackRef) return
     e.preventDefault()
     isDragging = true
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
@@ -74,7 +80,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   }
 
   function handlePointerMove(e: PointerEvent) {
-    if (!isDragging || !trackRef || disabled) return
+    if (!isDragging || !trackRef || isInteractionDisabled) return
     updateFromPointer(e)
   }
 
@@ -99,7 +105,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   }
 </script>
 
-<div class={cn("flex flex-col items-center gap-3 size-full border rounded-lg p-4 bg-card/50", className)} {...props}>
+<div
+  class={cn("flex flex-col items-center gap-3 size-full border rounded-lg p-4 bg-card/50 relative", className)}
+  onmouseenter={() => (isHovered = true)}
+  onmouseleave={() => (isHovered = false)}
+  {...props}
+>
   <div class={cn("flex flex-col items-center text-center text-sm", disabled && "opacity-50")}>
     <span class="font-semibold text-base">{title}</span>
     <div class="flex items-center gap-1 mt-1 bg-muted/40 border rounded-md px-2 py-0.5">
@@ -108,7 +119,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         step={stepVal}
         min={minVal}
         max={maxVal}
-        {disabled}
+        disabled={isInteractionDisabled}
         value={value}
         onchange={(e) => {
           const num = parseFloat((e.currentTarget as HTMLInputElement).value)
@@ -119,21 +130,29 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             onCommit?.(value)
           }
         }}
-        class="w-14 text-center bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        class={cn(
+          "w-14 text-center bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          locked && "cursor-not-allowed opacity-75"
+        )}
       />
       <span class="text-xs text-muted-foreground font-medium">mm</span>
     </div>
-    {#if description}
+    {#if locked && isHovered}
+      <span class="text-xs text-amber-500 dark:text-amber-400 font-medium mt-1 max-w-44 leading-tight animate-in fade-in duration-150">
+        {lockedMessage}
+      </span>
+    {:else if description}
       <span class="text-xs text-muted-foreground mt-1 max-w-40">{description}</span>
     {/if}
   </div>
-  <div class="flex-1 flex items-center justify-center min-h-36 h-40 py-1">
+  <div class="flex-1 flex items-center justify-center min-h-36 h-40 py-1 relative">
     <div
       bind:this={trackRef}
       role="presentation"
       class={cn(
         "relative flex h-full w-4 touch-none select-none justify-center cursor-pointer",
-        disabled && "opacity-50 pointer-events-none"
+        isInteractionDisabled && "opacity-50 pointer-events-none",
+        locked && "cursor-not-allowed"
       )}
       onpointerdown={handlePointerDown}
       onpointermove={handlePointerMove}
@@ -152,10 +171,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         aria-label="Slider Handle"
         class={cn(
           "absolute w-4 h-2 shrink-0 rounded-xs border border-primary bg-white shadow-xs ring-ring/50 transition-[box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden -translate-y-1/2 cursor-grab active:cursor-grabbing",
-          isDragging && "ring-4 z-10"
+          isDragging && "ring-4 z-10",
+          locked && "cursor-not-allowed"
         )}
         style="top: {pct}%;"
       ></button>
     </div>
+
+    {#if locked && isHovered}
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 p-2 rounded-lg bg-popover/95 border border-border shadow-lg backdrop-blur-xs text-center text-xs font-medium text-amber-500 dark:text-amber-400 pointer-events-none z-30 animate-in fade-in zoom-in-95 duration-150">
+        {lockedMessage}
+      </div>
+    {/if}
   </div>
 </div>

@@ -155,6 +155,10 @@ export class DemoKeyboard implements Keyboard {
   }
   async startManualCalibration() {}
   async finishManualCalibration() {}
+  async getSwitchLut() {
+    return Array(1024).fill(0)
+  }
+  async setSwitchLut(_lut: number[]) {}
 
   async getKeymap({ profile }: GetKeymapParams) {
     return this.#state.profiles[profile].keymap

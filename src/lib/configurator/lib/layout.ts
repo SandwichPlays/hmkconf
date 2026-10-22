@@ -20,6 +20,7 @@ import {
   Grid2X2Icon,
   PencilIcon,
   SettingsIcon,
+  SlidersHorizontalIcon,
   SquareChevronUpIcon,
 } from "@lucide/svelte"
 import type { Component } from "svelte"
@@ -47,6 +48,11 @@ export const sidebarTabGroups: SidebarTabGroup[] = [
     tabs: [
       { label: "Remap", value: "remap", icon: PencilIcon },
       { label: "Performance", value: "performance", icon: GaugeIcon },
+      {
+        label: "Switch Selector",
+        value: "switch-selector",
+        icon: SlidersHorizontalIcon,
+      },
       {
         label: "Advanced Keys",
         value: "advanced-keys",

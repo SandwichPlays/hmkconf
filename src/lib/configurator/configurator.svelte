@@ -25,6 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const profilesTab = import("./profiles/profiles-tab.svelte")
   const remapTab = import("./remap/remap-tab.svelte")
   const performanceTab = import("./performance/performance-tab.svelte")
+  const switchTab = import("./switch-selector/switch-tab.svelte")
   const advancedKeysTab = import("./advanced-keys/advanced-keys-tab.svelte")
   const gamepadTab = import("./gamepad/gamepad-tab.svelte")
   const calibrationTab = import("./calibration/calibration-tab.svelte")
@@ -55,6 +56,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <Tabs.Content value="performance" class="outline-none">
       {#snippet child({ props })}
         <PerformanceTab {...props} />
+      {/snippet}
+    </Tabs.Content>
+  {/await}
+  {#await switchTab then { default: SwitchTab }}
+    <Tabs.Content value="switch-selector" class="outline-none">
+      {#snippet child({ props })}
+        <SwitchTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}

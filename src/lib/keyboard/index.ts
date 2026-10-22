@@ -80,6 +80,8 @@ export type KeyboardAction = {
   saveCalibrationThreshold(): Promise<void>
   startManualCalibration(keys?: number[]): Promise<void>
   finishManualCalibration(save?: boolean): Promise<void>
+  getSwitchLut?(): Promise<number[]>
+  setSwitchLut?(lut: number[]): Promise<void>
 
   getKeymap(params: GetKeymapParams): Promise<number[][]>
   setKeymap(params: SetKeymapParams): Promise<void>

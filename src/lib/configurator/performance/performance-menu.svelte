@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     type HMK_Actuation,
   } from "$lib/libhmk/actuation"
   import { setToIntervals } from "$lib/utils"
-  import { performanceStateContext } from "../context.svelte"
+  import { performanceStateContext, persistedStateContext } from "../context.svelte"
   import { actuationQueryContext } from "../queries/actuation-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
 
@@ -37,6 +37,26 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const calibrationQuery = calibrationQueryContext.get()
   const { current: calibration } = $derived(calibrationQuery.calibration)
+
+  const persistedState = persistedStateContext.get()
+
+  const isTravelLocked = $derived.by(() => {
+    if (disabled || keys.size === 0 || !calibration?.switchTravel) return false
+    for (const key of keys) {
+      const storedType = persistedState?.current?.switchTypes?.[String(key)]
+      if (storedType === "custom") {
+        continue
+      }
+      if (storedType === "yingying-dual-lights-max" || storedType === "linear-he-default") {
+        return true
+      }
+      const deciMM = calibration.switchTravel[key] ?? 36
+      if (deciMM === 36 || deciMM === 40) {
+        return true
+      }
+    }
+    return false
+  })
 
   const { disabled, firstKey, currentActuation, rtEnabled, separatedRT, deadzoneEnabled } = $derived.by(
     () => {
@@ -133,6 +153,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           max={4.0}
           step={0.1}
           disabled={disabled || !calibration}
+          locked={isTravelLocked}
           title="Travel Depth"
           description="Physical switch travel depth"
         />

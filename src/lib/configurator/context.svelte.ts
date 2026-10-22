@@ -52,6 +52,18 @@ export class ConfiguratorPerformanceState {
 export const performanceStateContext =
   new Context<ConfiguratorPerformanceState>("hmk-performance-state")
 
+export class ConfiguratorSwitchState {
+  keys = new SvelteSet<number>()
+
+  reset() {
+    this.keys.clear()
+  }
+}
+
+export const switchStateContext = new Context<ConfiguratorSwitchState>(
+  "hmk-switch-state",
+)
+
 export class ConfiguratorCalibrationState {
   selectedKey = $state(0)
   viewMode = $state<"adc" | "distance">("distance")
@@ -148,6 +160,7 @@ export type ConfiguratorTabs =
   | "profiles"
   | "remap"
   | "performance"
+  | "switch-selector"
   | "advanced-keys"
   | "gamepad"
   | "calibration"
@@ -159,12 +172,14 @@ export class ConfiguratorGlobalState {
 
   #remapState: ConfiguratorRemapState
   #performanceState: ConfiguratorPerformanceState
+  #switchState: ConfiguratorSwitchState
   #advancedKeysState: ConfiguratorAdvancedKeysState
   #gamepadState: ConfiguratorGamepadState
 
   constructor() {
     this.#remapState = remapStateContext.get()
     this.#performanceState = performanceStateContext.get()
+    this.#switchState = switchStateContext.get()
     this.#advancedKeysState = advancedKeysStateContext.get()
     this.#gamepadState = gamepadStateContext.get()
   }
@@ -173,6 +188,7 @@ export class ConfiguratorGlobalState {
     this.profile = profile
     this.#remapState.reset()
     this.#performanceState.reset()
+    this.#switchState.reset()
     this.#advancedKeysState.reset()
     this.#gamepadState.reset()
   }
@@ -185,6 +201,7 @@ export const globalStateContext = new Context<ConfiguratorGlobalState>(
 export const persistedStateSchema = z.object({
   layoutOptions: z.array(z.int().min(0)),
   profileNames: z.array(z.string()).catch([]),
+  switchTypes: z.record(z.string(), z.string()).catch({}),
 })
 
 export type ConfiguratorPersistedState = z.infer<typeof persistedStateSchema>
@@ -198,6 +215,7 @@ function setConfiguratorPersistedState() {
   const defaultPersistedState: ConfiguratorPersistedState = {
     layoutOptions: Array(metadata.layout.labels.length).fill(0),
     profileNames: Array(metadata.numProfiles).fill(""),
+    switchTypes: {},
   }
   persistedStateContext.set(
     new PersistedState(id, defaultPersistedState, {
@@ -225,6 +243,7 @@ function setConfiguratorPersistedState() {
             return {
               layoutOptions: parsed.layoutOptions,
               profileNames,
+              switchTypes: parsed.switchTypes ?? {},
             }
           } catch (err) {
             console.error(err)
@@ -346,6 +365,7 @@ export const displayLayoutContext = new Context<DisplayLayout>(
 export function setConfiguratorStateContext() {
   remapStateContext.set(new ConfiguratorRemapState())
   performanceStateContext.set(new ConfiguratorPerformanceState())
+  switchStateContext.set(new ConfiguratorSwitchState())
   advancedKeysStateContext.set(new ConfiguratorAdvancedKeysState())
   gamepadStateContext.set(new ConfiguratorGamepadState())
   calibrationStateContext.set(new ConfiguratorCalibrationState())

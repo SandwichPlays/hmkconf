@@ -59,6 +59,7 @@ import {
 } from "$lib/libhmk/commands/profile"
 import { reboot } from "$lib/libhmk/commands/reboot"
 import { getSerial } from "$lib/libhmk/commands/serial"
+import { getSwitchLut, setSwitchLut } from "$lib/libhmk/commands/switch-lut"
 import { getTickRate, setTickRate } from "$lib/libhmk/commands/tick-rate"
 import { displayVersion, isWebHIDSSupported } from "$lib/utils"
 import type {
@@ -175,6 +176,12 @@ class HMKKeyboard implements Keyboard {
   }
   finishManualCalibration(save?: boolean) {
     return finishManualCalibration(this.commander, save)
+  }
+  getSwitchLut() {
+    return getSwitchLut(this.commander)
+  }
+  setSwitchLut(lut: number[]) {
+    return setSwitchLut(this.commander, lut)
   }
 
   getKeymap(params: GetKeymapParams) {
