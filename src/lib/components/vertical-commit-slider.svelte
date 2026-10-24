@@ -14,15 +14,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
 <script lang="ts">
+  import { InfoIcon } from "@lucide/svelte"
   import { cn, type WithoutChildren } from "$lib/utils"
   import type { HTMLAttributes } from "svelte/elements"
-  import { Slider } from "./ui/slider"
+  import * as Tooltip from "./ui/tooltip"
 
   let {
     class: className,
     disabled,
     locked = false,
-    lockedMessage = "Select Custom on switch selector to chage travel depth",
+    lockedMessage = "Select Custom on switch selector to change travel depth",
+    tooltip,
     title,
     description,
     min,
@@ -36,6 +38,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     disabled?: boolean
     locked?: boolean
     lockedMessage?: string
+    tooltip?: string
     title: string
     description?: string
     min?: number
@@ -49,7 +52,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let value = $state(0)
   let trackRef = $state<HTMLDivElement | null>(null)
   let isDragging = $state(false)
-  let isHovered = $state(false)
 
   $effect(() => {
     if (committed !== undefined && !isDragging) {
@@ -57,6 +59,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   })
 
+  const effectiveTooltip = $derived(
+    locked ? (tooltip ?? lockedMessage) : tooltip
+  )
   const isInteractionDisabled = $derived(disabled || locked)
   const minVal = $derived(min ?? 0)
   const maxVal = $derived(max ?? 4.0)
@@ -107,12 +112,23 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <div
   class={cn("flex flex-col items-center gap-3 size-full border rounded-lg p-4 bg-card/50 relative", className)}
-  onmouseenter={() => (isHovered = true)}
-  onmouseleave={() => (isHovered = false)}
   {...props}
 >
   <div class={cn("flex flex-col items-center text-center text-sm", disabled && "opacity-50")}>
-    <span class="font-semibold text-base">{title}</span>
+    <div class="flex items-center gap-1.5">
+      <span class="font-semibold text-base">{title}</span>
+      {#if effectiveTooltip}
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            <InfoIcon class="size-4" />
+            <span class="sr-only">Info</span>
+          </Tooltip.Trigger>
+          <Tooltip.Content class="max-w-56 text-wrap">
+            {effectiveTooltip}
+          </Tooltip.Content>
+        </Tooltip.Root>
+      {/if}
+    </div>
     <div class="flex items-center gap-1 mt-1 bg-muted/40 border rounded-md px-2 py-0.5">
       <input
         type="number"
@@ -137,11 +153,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       />
       <span class="text-xs text-muted-foreground font-medium">mm</span>
     </div>
-    {#if locked && isHovered}
-      <span class="text-xs text-amber-500 dark:text-amber-400 font-medium mt-1 max-w-44 leading-tight animate-in fade-in duration-150">
-        {lockedMessage}
-      </span>
-    {:else if description}
+    {#if description}
       <span class="text-xs text-muted-foreground mt-1 max-w-40">{description}</span>
     {/if}
   </div>
@@ -177,11 +189,5 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         style="top: {pct}%;"
       ></button>
     </div>
-
-    {#if locked && isHovered}
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 p-2 rounded-lg bg-popover/95 border border-border shadow-lg backdrop-blur-xs text-center text-xs font-medium text-amber-500 dark:text-amber-400 pointer-events-none z-30 animate-in fade-in zoom-in-95 duration-150">
-        {lockedMessage}
-      </div>
-    {/if}
   </div>
 </div>
