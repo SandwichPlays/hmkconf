@@ -96,7 +96,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     {#if usbHighSpeed && isFeatureAvailable("pollingRateSwitch", version)}
       <Switch
         bind:checked={
-          () => options?.highPollingRateEnabled ?? false,
+          () => options?.highPollingRateEnabled ?? true,
           (v) =>
             options &&
             optionsQuery.set({

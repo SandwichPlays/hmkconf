@@ -26,8 +26,18 @@ export interface SupportedSwitch {
 
 export const SUPPORTED_SWITCHES: SupportedSwitch[] = [
   {
+    id: "custom",
+    name: "Custom",
+    brand: "Custom",
+    baseTravelMM: 0,
+    stemColor: "#8b5cf6",
+    housingColor: "rgba(139, 92, 246, 0.15)",
+    description: "Custom travel depth",
+    measured: false,
+  },
+  {
     id: "yingying-dual-lights-max",
-    name: "Dual-Lights Max",
+    name: "Yingying Dual-Lights Max",
     brand: "Yingying",
     baseTravelMM: 3.6,
     stemColor: "#14b8a6",
@@ -45,34 +55,19 @@ export const SUPPORTED_SWITCHES: SupportedSwitch[] = [
     description: "4.0mm total travel",
     measured: false,
   },
-  {
-    id: "custom",
-    name: "Custom",
-    brand: "Custom",
-    baseTravelMM: 0,
-    stemColor: "#8b5cf6",
-    housingColor: "rgba(139, 92, 246, 0.15)",
-    description: "Custom travel depth",
-    measured: false,
-  },
 ]
 
 export function resolveSwitch(travelDeciMM: number = 36, switchType?: string): SupportedSwitch {
-  if (switchType === "custom") {
-    return SUPPORTED_SWITCHES[2]
-  }
-  if (switchType === "yingying-dual-lights-max") {
-    return SUPPORTED_SWITCHES[0]
-  }
-  if (switchType === "linear-he-default") {
-    return SUPPORTED_SWITCHES[1]
+  if (switchType) {
+    const found = SUPPORTED_SWITCHES.find((s) => s.id === switchType)
+    if (found) return found
   }
   if (travelDeciMM <= 36) {
-    return SUPPORTED_SWITCHES[0]
+    return SUPPORTED_SWITCHES.find((s) => s.id === "yingying-dual-lights-max") ?? SUPPORTED_SWITCHES[1]
   }
   if (travelDeciMM === 40) {
-    return SUPPORTED_SWITCHES[1]
+    return SUPPORTED_SWITCHES.find((s) => s.id === "linear-he-default") ?? SUPPORTED_SWITCHES[2]
   }
-  return SUPPORTED_SWITCHES[2]
+  return SUPPORTED_SWITCHES.find((s) => s.id === "custom") ?? SUPPORTED_SWITCHES[0]
 }
 

@@ -18,9 +18,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import SwitchGraphic from "$lib/components/switch-graphic.svelte"
   import { Button } from "$lib/components/ui/button"
   import { keyboardContext } from "$lib/keyboard"
-  import { cn, type WithoutChildren } from "$lib/utils"
+  import { defaultActuation, type HMK_Actuation } from "$lib/libhmk/actuation"
+  import { cn, setToIntervals, type WithoutChildren } from "$lib/utils"
   import type { ComponentProps } from "svelte"
   import { displayLayoutContext, persistedStateContext, switchStateContext } from "../context.svelte"
+  import { actuationQueryContext } from "../queries/actuation-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import {
     resolveSwitch,
@@ -44,6 +46,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const calibrationQuery = calibrationQueryContext.get()
   const { current: calibration } = $derived(calibrationQuery.calibration)
+
+  const actuationQuery = actuationQueryContext.get()
+  const { current: actuationMap } = $derived(actuationQuery.actuationMap)
 
   const persistedState = persistedStateContext.get()
 
@@ -78,10 +83,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
     persistedState.current.switchTypes = currentTypes
 
-    // If predefined switch with fixed travel, update hardware calibration
+    // If predefined switch with fixed travel, update hardware calibration and rescale actuation
     if (targetSwitch.baseTravelMM > 0) {
       const newSwitchTravel = [...calibration.switchTravel]
-      const targetTravelDeciMM = Math.round(targetSwitch.baseTravelMM * 10)
+      const newTravelMM = targetSwitch.baseTravelMM
+      const targetTravelDeciMM = Math.round(newTravelMM * 10)
 
       for (const key of keys) {
         newSwitchTravel[key] = targetTravelDeciMM
@@ -93,6 +99,41 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           switchTravel: newSwitchTravel,
         },
       })
+
+      if (actuationMap) {
+        const map = actuationMap
+        const updates = setToIntervals(keys).map(([offset, len]) => {
+          const data: HMK_Actuation[] = []
+          for (let i = 0; i < len; i++) {
+            const key = offset + i
+            const curAct = map[key] ?? defaultActuation
+            const oldTravelMM = (calibration.switchTravel?.[key] ?? 36) / 10
+            if (oldTravelMM === newTravelMM) {
+              data.push(curAct)
+              continue
+            }
+            const actPointMM = (curAct.actuationPoint / 10000) * oldTravelMM
+            const rtDownMM = curAct.rtDown > 0 ? (curAct.rtDown / 10000) * oldTravelMM : 0
+            const rtUpMM = curAct.rtUp > 0 ? (curAct.rtUp / 10000) * oldTravelMM : 0
+            const topMM = (curAct.rtDeadzoneTop ?? 0) > 0 ? ((curAct.rtDeadzoneTop ?? 0) / 10000) * oldTravelMM : 0
+            const botMM = (curAct.rtDeadzoneBottom ?? 0) > 0 ? ((curAct.rtDeadzoneBottom ?? 0) / 10000) * oldTravelMM : 0
+
+            data.push({
+              ...curAct,
+              actuationPoint: Math.max(
+                Math.max(1, Math.round((0.01 / newTravelMM) * 10000)),
+                Math.min(10000, Math.round((Math.min(actPointMM, newTravelMM) / newTravelMM) * 10000))
+              ),
+              rtDown: rtDownMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtDownMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+              rtUp: rtUpMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtUpMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+              rtDeadzoneTop: topMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(topMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+              rtDeadzoneBottom: botMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(botMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+            })
+          }
+          return { offset, data }
+        })
+        actuationQuery.setMany(updates)
+      }
     }
   }
 </script>
@@ -140,8 +181,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           </p>
         </div>
 
-        <!-- Switches Grid: Large square selections with graphic, full name, and travel distance -->
-        <div class="flex flex-wrap gap-5 pt-1">
+        <!-- Switches Grid: Compact square selections with graphic, full name, and travel distance -->
+        <div class="flex flex-wrap gap-4 pt-1">
           {#each SUPPORTED_SWITCHES as sw (sw.id)}
             {@const isAssigned = currentSwitchId === sw.id && keys.size > 0}
             <button
@@ -149,7 +190,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               disabled={keys.size === 0}
               onclick={() => assignSwitch(sw)}
               class={cn(
-                "flex flex-col items-center justify-center p-4 rounded-xl border text-center transition-all select-none w-44 h-44 aspect-square relative group",
+                "flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all select-none w-32 h-32 aspect-square relative group",
                 isAssigned
                   ? "border-primary bg-primary/10 shadow-sm ring-2 ring-primary/60"
                   : "border-border/60 bg-card hover:border-primary/50 hover:bg-muted/30",
@@ -162,19 +203,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               <div class="flex items-center justify-center transition-transform group-hover:scale-105">
                 <SwitchGraphic
                   mode="topdown"
-                  size={52}
+                  size={40}
                   stemColor={sw.stemColor}
                   housingColor={sw.housingColor}
                 />
               </div>
 
-              <!-- Switch Name (fits comfortably without being cut off) -->
-              <span class="font-semibold text-sm text-foreground text-center mt-3 px-1 leading-snug">
+              <!-- Switch Name -->
+              <span class="font-semibold text-xs text-foreground text-center mt-2 px-0.5 leading-tight line-clamp-2">
                 {sw.name}
               </span>
 
               <!-- Travel distance -->
-              <span class="text-xs text-muted-foreground mt-1">
+              <span class="text-[11px] text-muted-foreground mt-0.5">
                 {sw.baseTravelMM > 0 ? `${sw.baseTravelMM.toFixed(1)}mm` : "Custom"}
               </span>
             </button>

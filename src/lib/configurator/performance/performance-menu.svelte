@@ -19,9 +19,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import Switch from "$lib/components/switch.svelte"
   import VerticalCommitSlider from "$lib/components/vertical-commit-slider.svelte"
   import VerticalDistanceSlider from "$lib/components/vertical-distance-slider.svelte"
+  import { distanceToMM, mmToDistance } from "$lib/distance"
   import {
     DEFAULT_ACTUATION_POINT,
     DEFAULT_RT_SENSITIVITY,
+    DEFAULT_RT_DEADZONE,
+    DEFAULT_ACTUATION_POINT_MM,
+    DEFAULT_RT_SENSITIVITY_MM,
+    DEFAULT_RT_DEADZONE_MM,
     type HMK_Actuation,
   } from "$lib/libhmk/actuation"
   import { setToIntervals } from "$lib/utils"
@@ -86,10 +91,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
   const updateTravel = (v: number) => {
     if (disabled || !calibration?.switchTravel || firstKey === undefined) return
-    const oldTravelMM = (calibration.switchTravel[firstKey] ?? 40) / 10
     const newTravelMM = v / 10
-    if (oldTravelMM === newTravelMM) return
-
     const newSwitchTravel = [...calibration.switchTravel]
     for (const key of keys) {
       newSwitchTravel[key] = v
@@ -99,40 +101,56 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       switchTravel: newSwitchTravel,
     }
 
-    if (currentActuation) {
-      const actPointMM = (currentActuation.actuationPoint / 10000) * oldTravelMM
-      const rtDownMM = currentActuation.rtDown > 0 ? (currentActuation.rtDown / 10000) * oldTravelMM : 0
-      const rtUpMM = currentActuation.rtUp > 0 ? (currentActuation.rtUp / 10000) * oldTravelMM : 0
-      const topMM = (currentActuation.rtDeadzoneTop ?? 0) > 0 ? ((currentActuation.rtDeadzoneTop ?? 0) / 10000) * oldTravelMM : 0
-      const botMM = (currentActuation.rtDeadzoneBottom ?? 0) > 0 ? ((currentActuation.rtDeadzoneBottom ?? 0) / 10000) * oldTravelMM : 0
+    const map = actuationMap ?? []
+    const updates = setToIntervals(keys).map(([offset, len]) => {
+      const data: HMK_Actuation[] = []
+      for (let i = 0; i < len; i++) {
+        const key = offset + i
+        const curAct = map[key] ?? currentActuation
+        const oldTravelMM = (calibration.switchTravel?.[key] ?? 40) / 10
+        if (oldTravelMM === newTravelMM) {
+          data.push(curAct)
+          continue
+        }
+        const actPointMM = (curAct.actuationPoint / 10000) * oldTravelMM
+        const rtDownMM = curAct.rtDown > 0 ? (curAct.rtDown / 10000) * oldTravelMM : 0
+        const rtUpMM = curAct.rtUp > 0 ? (curAct.rtUp / 10000) * oldTravelMM : 0
+        const topMM = (curAct.rtDeadzoneTop ?? 0) > 0 ? ((curAct.rtDeadzoneTop ?? 0) / 10000) * oldTravelMM : 0
+        const botMM = (curAct.rtDeadzoneBottom ?? 0) > 0 ? ((curAct.rtDeadzoneBottom ?? 0) / 10000) * oldTravelMM : 0
 
-      const updatedActuation: HMK_Actuation = {
-        ...currentActuation,
-        actuationPoint: Math.max(0, Math.min(10000, Math.round((Math.min(actPointMM, newTravelMM) / newTravelMM) * 10000))),
-        rtDown: rtDownMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtDownMM, newTravelMM) / newTravelMM) * 10000))) : 0,
-        rtUp: rtUpMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtUpMM, newTravelMM) / newTravelMM) * 10000))) : 0,
-        rtDeadzoneTop: topMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(topMM, newTravelMM) / newTravelMM) * 10000))) : 0,
-        rtDeadzoneBottom: botMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(botMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+        data.push({
+          ...curAct,
+          actuationPoint: Math.max(
+            Math.max(1, Math.round((0.01 / newTravelMM) * 10000)),
+            Math.min(10000, Math.round((Math.min(actPointMM, newTravelMM) / newTravelMM) * 10000))
+          ),
+          rtDown: rtDownMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtDownMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+          rtUp: rtUpMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtUpMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+          rtDeadzoneTop: topMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(topMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+          rtDeadzoneBottom: botMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(botMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+        })
       }
-
-      const updates = setToIntervals(keys).map(([offset, len]) => ({
-        offset,
-        data: Array(len).fill(updatedActuation),
-      }))
-      actuationQuery.setMany(updates)
-    }
+      return { offset, data }
+    })
+    actuationQuery.setMany(updates)
 
     calibrationQuery.set({
       data: newCalibration,
     })
   }
 
-  const updateActuation = (f: (actuation: HMK_Actuation) => HMK_Actuation) => {
+  const updateActuation = (f: (actuation: HMK_Actuation, key: number) => HMK_Actuation) => {
     if (disabled) return
-    const updates = setToIntervals(keys).map(([offset, len]) => ({
-      offset,
-      data: Array(len).fill(f(currentActuation)),
-    }))
+    const map = actuationMap ?? []
+    const updates = setToIntervals(keys).map(([offset, len]) => {
+      const data: HMK_Actuation[] = []
+      for (let i = 0; i < len; i++) {
+        const key = offset + i
+        const currentKeyActuation = map[key] ?? currentActuation
+        data.push(f(currentKeyActuation, key))
+      }
+      return { offset, data }
+    })
     actuationQuery.setMany(updates)
   }
 </script>
@@ -160,13 +178,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <VerticalDistanceSlider
           bind:committed={
             () => currentActuation?.actuationPoint ?? DEFAULT_ACTUATION_POINT,
-            (v) =>
-              updateActuation((actuation) => ({ ...actuation, actuationPoint: v }))
+            (v) => {
+              const actPointMM = distanceToMM(v, firstKey, calibration)
+              updateActuation((actuation, key) => ({
+                ...actuation,
+                actuationPoint: mmToDistance(actPointMM, key, calibration),
+              }))
+            }
           }
           keyIndex={firstKey}
           calibration={calibration}
           description="Set point to activate keypress"
           {disabled}
+          min={0.01}
           title="Actuation Point"
         />
       </div>
@@ -181,12 +205,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           bind:checked={
             () => rtEnabled ?? false,
             (v) =>
-              updateActuation((actuation) => ({
-                ...actuation,
-                rtDown: v ? DEFAULT_RT_SENSITIVITY : 0,
-                rtUp: 0,
-                continuous: false,
-              }))
+              updateActuation((actuation, key) => {
+                const sensDist = mmToDistance(DEFAULT_RT_SENSITIVITY_MM, key, calibration)
+                const dzDist = mmToDistance(DEFAULT_RT_DEADZONE_MM, key, calibration)
+                return {
+                  ...actuation,
+                  rtDown: v ? (actuation.rtDown || sensDist) : 0,
+                  rtUp: 0,
+                  continuous: false,
+                  rtDeadzoneTop: v ? (actuation.rtDeadzoneTop || dzDist) : actuation.rtDeadzoneTop,
+                  rtDeadzoneBottom: v ? (actuation.rtDeadzoneBottom || dzDist) : actuation.rtDeadzoneBottom,
+                }
+              })
           }
           description="Activates keys dynamically on travel movement."
           {disabled}
@@ -197,9 +227,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           bind:checked={
             () => separatedRT ?? false,
             (v) =>
-              updateActuation((actuation) => ({
+              updateActuation((actuation, key) => ({
                 ...actuation,
-                rtUp: v ? (actuation.rtDown || DEFAULT_RT_SENSITIVITY) : 0,
+                rtUp: v ? (actuation.rtDown || mmToDistance(DEFAULT_RT_SENSITIVITY_MM, key, calibration)) : 0,
               }))
           }
           description="Configure RT Press and Release sensitivity independently."
@@ -216,7 +246,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             <DistanceSlider
               bind:committed={
                 () => currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
-                (v) => updateActuation((actuation) => ({ ...actuation, rtDown: v }))
+                (v) => {
+                  const sensMM = distanceToMM(v, firstKey, calibration)
+                  updateActuation((actuation, key) => ({
+                    ...actuation,
+                    rtDown: mmToDistance(sensMM, key, calibration),
+                  }))
+                }
               }
               keyIndex={firstKey}
               calibration={calibration}
@@ -228,7 +264,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             <DistanceSlider
               bind:committed={
                 () => currentActuation?.rtUp ?? DEFAULT_RT_SENSITIVITY,
-                (v) => updateActuation((actuation) => ({ ...actuation, rtUp: v }))
+                (v) => {
+                  const sensMM = distanceToMM(v, firstKey, calibration)
+                  updateActuation((actuation, key) => ({
+                    ...actuation,
+                    rtUp: mmToDistance(sensMM, key, calibration),
+                  }))
+                }
               }
               keyIndex={firstKey}
               calibration={calibration}
@@ -241,7 +283,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             <DistanceSlider
               bind:committed={
                 () => currentActuation?.rtDown ?? DEFAULT_RT_SENSITIVITY,
-                (v) => updateActuation((actuation) => ({ ...actuation, rtDown: v }))
+                (v) => {
+                  const sensMM = distanceToMM(v, firstKey, calibration)
+                  updateActuation((actuation, key) => ({
+                    ...actuation,
+                    rtDown: mmToDistance(sensMM, key, calibration),
+                  }))
+                }
               }
               keyIndex={firstKey}
               calibration={calibration}
@@ -280,11 +328,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           bind:checked={
             () => deadzoneEnabled ?? false,
             (v) =>
-              updateActuation((actuation) => ({
-                ...actuation,
-                rtDeadzoneTop: v ? 200 : 0,
-                rtDeadzoneBottom: v ? 200 : 0,
-              }))
+              updateActuation((actuation, key) => {
+                const dzDist = mmToDistance(DEFAULT_RT_DEADZONE_MM, key, calibration)
+                return {
+                  ...actuation,
+                  rtDeadzoneTop: v ? dzDist : 0,
+                  rtDeadzoneBottom: v ? dzDist : 0,
+                }
+              })
           }
           description="Enables RT top & bottom deadzones"
           disabled={disabled || !rtEnabled}
@@ -301,12 +352,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
                 currentActuation?.rtDeadzoneTop ?? 0,
                 currentActuation?.rtDeadzoneBottom ?? 0,
               ],
-              (v) =>
-                updateActuation((actuation) => ({
+              (v) => {
+                const topMM = distanceToMM(v[0], firstKey, calibration)
+                const botMM = distanceToMM(v[1], firstKey, calibration)
+                updateActuation((actuation, key) => ({
                   ...actuation,
-                  rtDeadzoneTop: v[0],
-                  rtDeadzoneBottom: v[1],
+                  rtDeadzoneTop: mmToDistance(topMM, key, calibration),
+                  rtDeadzoneBottom: mmToDistance(botMM, key, calibration),
                 }))
+              }
             }
             mode="deadzone"
             keyIndex={firstKey}
