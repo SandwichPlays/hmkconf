@@ -73,6 +73,8 @@ export const hmkScanRateSchema = z.object({
   evalMinUs: uint16Schema,
   evalMaxUs: uint16Schema,
   evalAvgUs: uint16Schema,
+  pressLatencyUs: uint16Schema.default(0),
+  releaseLatencyUs: uint16Schema.default(0),
 })
 
 export type HMK_ScanRate = z.infer<typeof hmkScanRateSchema>

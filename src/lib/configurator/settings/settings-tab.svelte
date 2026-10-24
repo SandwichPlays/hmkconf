@@ -149,18 +149,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             <span class="text-[10px] text-muted-foreground">Period: {scanRate.sweepPeriodUs} µs</span>
           </div>
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
-            <span class="text-[11px] font-medium text-muted-foreground">Avg Loop Latency</span>
+            <span class="text-[11px] font-medium text-muted-foreground">Switch Press Latency</span>
             <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
-              {scanRate.evalAvgUs} µs
+              {scanRate.pressLatencyUs ? `${(scanRate.pressLatencyUs / 1000).toFixed(2)} ms` : "–"}
             </span>
-            <span class="text-[10px] text-muted-foreground">Per evaluation</span>
+            <span class="text-[10px] text-muted-foreground">{scanRate.pressLatencyUs ? `${scanRate.pressLatencyUs} µs from touch` : "Tap any key"}</span>
           </div>
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
-            <span class="text-[11px] font-medium text-muted-foreground">Latency Jitter</span>
+            <span class="text-[11px] font-medium text-muted-foreground">RT Release Latency</span>
             <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
-              {scanRate.evalMinUs} – {scanRate.evalMaxUs} µs
+              {scanRate.releaseLatencyUs ? `${(scanRate.releaseLatencyUs / 1000).toFixed(2)} ms` : "–"}
             </span>
-            <span class="text-[10px] text-muted-foreground">Min / Max spread</span>
+            <span class="text-[10px] text-muted-foreground">{scanRate.releaseLatencyUs ? `${scanRate.releaseLatencyUs} µs from reversal` : "Release key"}</span>
           </div>
         </div>
       {/if}

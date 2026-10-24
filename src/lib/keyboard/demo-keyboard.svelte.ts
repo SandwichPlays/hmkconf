@@ -120,6 +120,8 @@ export class DemoKeyboard implements Keyboard {
       evalMinUs: 31,
       evalMaxUs: 42,
       evalAvgUs: 35,
+      pressLatencyUs: 135,
+      releaseLatencyUs: 110,
     }
   }
   async getCalibration() {
