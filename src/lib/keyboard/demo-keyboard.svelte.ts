@@ -114,14 +114,8 @@ export class DemoKeyboard implements Keyboard {
   }
   async getScanRate() {
     return {
-      evalRateHz: 28500,
-      sweepRateHz: 30300,
-      sweepPeriodUs: 33,
-      evalMinUs: 31,
-      evalMaxUs: 42,
-      evalAvgUs: 35,
-      pressLatencyUs: 135,
-      releaseLatencyUs: 110,
+      rawScanRateHz: 30300,
+      filteredScanRateHz: 28500,
     }
   }
   async getCalibration() {

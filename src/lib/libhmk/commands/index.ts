@@ -67,14 +67,8 @@ export const hmkAnalogInfoSchema = z.object({
 export type HMK_AnalogInfo = z.infer<typeof hmkAnalogInfoSchema>
 
 export const hmkScanRateSchema = z.object({
-  evalRateHz: uint32Schema,
-  sweepRateHz: uint32Schema,
-  sweepPeriodUs: uint16Schema,
-  evalMinUs: uint16Schema,
-  evalMaxUs: uint16Schema,
-  evalAvgUs: uint16Schema,
-  pressLatencyUs: uint16Schema.default(0),
-  releaseLatencyUs: uint16Schema.default(0),
+  rawScanRateHz: uint32Schema,
+  filteredScanRateHz: uint32Schema,
 })
 
 export type HMK_ScanRate = z.infer<typeof hmkScanRateSchema>

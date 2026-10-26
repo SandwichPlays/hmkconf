@@ -118,9 +118,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       <div class="flex flex-col gap-3 rounded-lg border border-primary/25 bg-card bg-primary/[0.04] p-4 shadow-xs">
         <div class="flex items-center justify-between gap-3">
           <div class="grid text-sm text-wrap">
-            <span class="font-semibold text-foreground">Scan Rate & Latency Benchmark</span>
+            <span class="font-semibold text-foreground">Scan Rate Benchmark</span>
             <span class="text-xs text-muted-foreground">
-              Real-time on-chip telemetry measuring key evaluation frequency, hardware ADC sweeps, and firmware loop latency.
+              Real-time on-chip telemetry measuring raw analog sampling rate per key and filtered evaluation rate.
             </span>
           </div>
           <Button
@@ -133,34 +133,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           </Button>
         </div>
       {#if liveBenchmark && scanRate}
-        <div class="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-4">
+        <div class="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2">
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
-            <span class="text-[11px] font-medium text-muted-foreground">Matrix Scan Rate</span>
+            <span class="text-[11px] font-medium text-muted-foreground">Raw Scan Rate</span>
             <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
-              {scanRate.evalRateHz.toLocaleString()} Hz
+              {scanRate.rawScanRateHz.toLocaleString()} Hz
             </span>
-            <span class="text-[10px] text-muted-foreground">Actuation loop</span>
+            <span class="text-[10px] text-muted-foreground">Hardware ADC sampling rate per key</span>
           </div>
           <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
-            <span class="text-[11px] font-medium text-muted-foreground">ADC Sweep Rate</span>
+            <span class="text-[11px] font-medium text-muted-foreground">Avg Filtered Scan Rate</span>
             <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
-              {scanRate.sweepRateHz.toLocaleString()} Hz
+              {scanRate.filteredScanRateHz.toLocaleString()} Hz
             </span>
-            <span class="text-[10px] text-muted-foreground">Period: {scanRate.sweepPeriodUs} µs</span>
-          </div>
-          <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
-            <span class="text-[11px] font-medium text-muted-foreground">Switch Press Latency</span>
-            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
-              {scanRate.pressLatencyUs ? `${(scanRate.pressLatencyUs / 1000).toFixed(2)} ms` : "–"}
-            </span>
-            <span class="text-[10px] text-muted-foreground">{scanRate.pressLatencyUs ? `${scanRate.pressLatencyUs} µs from touch` : "Tap any key"}</span>
-          </div>
-          <div class="flex flex-col rounded-md border border-primary/20 bg-primary/[0.05] p-2.5 transition-colors hover:border-primary/35">
-            <span class="text-[11px] font-medium text-muted-foreground">RT Release Latency</span>
-            <span class="font-mono text-base font-bold text-primary drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.3)]">
-              {scanRate.releaseLatencyUs ? `${(scanRate.releaseLatencyUs / 1000).toFixed(2)} ms` : "–"}
-            </span>
-            <span class="text-[10px] text-muted-foreground">{scanRate.releaseLatencyUs ? `${scanRate.releaseLatencyUs} µs from reversal` : "Release key"}</span>
+            <span class="text-[10px] text-muted-foreground">Full key calculation & filter rate</span>
           </div>
         </div>
       {/if}

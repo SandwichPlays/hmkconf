@@ -25,13 +25,7 @@ export async function getScanRate(commander: Commander): Promise<HMK_ScanRate> {
   )
 
   return {
-    evalRateHz: reader.uint32(),
-    sweepRateHz: reader.uint32(),
-    sweepPeriodUs: reader.uint16(),
-    evalMinUs: reader.uint16(),
-    evalMaxUs: reader.uint16(),
-    evalAvgUs: reader.uint16(),
-    pressLatencyUs: reader.uint16(),
-    releaseLatencyUs: reader.uint16(),
+    rawScanRateHz: reader.uint32(),
+    filteredScanRateHz: reader.uint32(),
   }
 }
