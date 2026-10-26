@@ -16,7 +16,7 @@
 import { keyboardContext } from "$lib/keyboard"
 import { HMK_MAX_DISTANCE, HMK_MIN_DISTANCE, type HMK_Calibration } from "$lib/libhmk"
 
-export const SWITCH_DISTANCE_UNIT = 10000
+export const SWITCH_DISTANCE_UNIT = 1000
 
 export function getSwitchDistanceMM(keyIndex?: number, calibration?: HMK_Calibration) {
   if (calibration?.switchTravel && calibration.switchTravel.length > 0) {
@@ -33,20 +33,16 @@ export function getSwitchDistanceMM(keyIndex?: number, calibration?: HMK_Calibra
   }
 }
 
-export function distanceToMM(v: number, keyIndex?: number, calibration?: HMK_Calibration): number {
+export function distanceToMM(v: number, _keyIndex?: number, _calibration?: HMK_Calibration): number {
   if (v <= 0) return 0
-  const travel = getSwitchDistanceMM(keyIndex, calibration)
-  return Number(((v / HMK_MAX_DISTANCE) * travel).toFixed(2))
+  return Number((v / 1000).toFixed(2))
 }
 
 export function mmToDistance(mm: number, keyIndex?: number, calibration?: HMK_Calibration): number {
   if (mm <= 0) return 0
   const travel = getSwitchDistanceMM(keyIndex, calibration)
-  if (travel <= 0) return 0
-  return Math.max(
-    0,
-    Math.min(HMK_MAX_DISTANCE, Math.round((mm / travel) * HMK_MAX_DISTANCE))
-  )
+  const maxDistance = Math.round(travel * 1000)
+  return Math.max(0, Math.min(maxDistance, Math.round(mm * 1000)))
 }
 
 export function unitToDistance(v: number, keyIndex?: number, calibration?: HMK_Calibration) {
@@ -57,10 +53,10 @@ export function distanceToUnit(v: number, keyIndex?: number, calibration?: HMK_C
   return distanceToMM(v, keyIndex, calibration)
 }
 
-export function displayUnitDistance(v: number, keyIndex?: number, calibration?: HMK_Calibration, decimal = 2) {
-  return ((v * getSwitchDistanceMM(keyIndex, calibration)) / HMK_MAX_DISTANCE).toFixed(decimal)
+export function displayUnitDistance(v: number, _keyIndex?: number, _calibration?: HMK_Calibration, decimal = 2) {
+  return (v / 1000).toFixed(decimal)
 }
 
-export function displayDistance(v: number, keyIndex?: number, calibration?: HMK_Calibration, decimal = 2) {
-  return distanceToMM(v, keyIndex, calibration).toFixed(decimal)
+export function displayDistance(v: number, _keyIndex?: number, _calibration?: HMK_Calibration, decimal = 2) {
+  return (v / 1000).toFixed(decimal)
 }

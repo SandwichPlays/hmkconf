@@ -112,22 +112,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           data.push(curAct)
           continue
         }
-        const actPointMM = (curAct.actuationPoint / 10000) * oldTravelMM
-        const rtDownMM = curAct.rtDown > 0 ? (curAct.rtDown / 10000) * oldTravelMM : 0
-        const rtUpMM = curAct.rtUp > 0 ? (curAct.rtUp / 10000) * oldTravelMM : 0
-        const topMM = (curAct.rtDeadzoneTop ?? 0) > 0 ? ((curAct.rtDeadzoneTop ?? 0) / 10000) * oldTravelMM : 0
-        const botMM = (curAct.rtDeadzoneBottom ?? 0) > 0 ? ((curAct.rtDeadzoneBottom ?? 0) / 10000) * oldTravelMM : 0
-
+        const maxTravelUM = Math.round(newTravelMM * 1000)
         data.push({
           ...curAct,
-          actuationPoint: Math.max(
-            Math.max(1, Math.round((0.01 / newTravelMM) * 10000)),
-            Math.min(10000, Math.round((Math.min(actPointMM, newTravelMM) / newTravelMM) * 10000))
-          ),
-          rtDown: rtDownMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtDownMM, newTravelMM) / newTravelMM) * 10000))) : 0,
-          rtUp: rtUpMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(rtUpMM, newTravelMM) / newTravelMM) * 10000))) : 0,
-          rtDeadzoneTop: topMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(topMM, newTravelMM) / newTravelMM) * 10000))) : 0,
-          rtDeadzoneBottom: botMM > 0 ? Math.max(0, Math.min(10000, Math.round((Math.min(botMM, newTravelMM) / newTravelMM) * 10000))) : 0,
+          actuationPoint: Math.max(10, Math.min(maxTravelUM, curAct.actuationPoint)),
+          rtDown: curAct.rtDown,
+          rtUp: curAct.rtUp,
+          rtDeadzoneTop: curAct.rtDeadzoneTop,
+          rtDeadzoneBottom: curAct.rtDeadzoneBottom,
         })
       }
       return { offset, data }

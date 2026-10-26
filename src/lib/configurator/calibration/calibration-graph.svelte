@@ -99,8 +99,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
     const value =
       currentMode === "distance"
-        ? (keyData.distance / 10000) *
-          ((calibration?.switchTravel[selectedKey] ?? 36) / 10)
+        ? keyData.distance / 1000
         : keyData.adcValue
 
     const now = performance.now()

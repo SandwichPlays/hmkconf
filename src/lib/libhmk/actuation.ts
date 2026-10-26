@@ -31,9 +31,9 @@ export const DEFAULT_ACTUATION_POINT_MM = 2.0
 export const DEFAULT_RT_SENSITIVITY_MM = 0.2
 export const DEFAULT_RT_DEADZONE_MM = 0.1
 
-export const DEFAULT_ACTUATION_POINT = 5556
-export const DEFAULT_RT_SENSITIVITY = 556
-export const DEFAULT_RT_DEADZONE = 278
+export const DEFAULT_ACTUATION_POINT = 2000
+export const DEFAULT_RT_SENSITIVITY = 200
+export const DEFAULT_RT_DEADZONE = 100
 
 export const defaultActuation: HMK_Actuation = {
   actuationPoint: DEFAULT_ACTUATION_POINT,

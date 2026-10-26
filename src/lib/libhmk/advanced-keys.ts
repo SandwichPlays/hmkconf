@@ -17,7 +17,7 @@ import { uint8Schema, uint16Schema } from "$lib/integer"
 import z from "zod"
 import { HMK_MAX_NUM_KEYS, HMK_MAX_NUM_LAYERS } from "."
 
-export const DEFAULT_BOTTOM_OUT_POINT = 9000
+export const DEFAULT_BOTTOM_OUT_POINT = 3500
 export const DEFAULT_TAPPING_TERM = 200
 export const MIN_TAPPING_TERM = 10
 export const MAX_TAPPING_TERM = 1000
