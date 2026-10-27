@@ -14,6 +14,7 @@
  */
 
 import { analogCurvePresets } from "$lib/configurator/lib/gamepad"
+import { LINEAR_SWITCH_LUT } from "$lib/configurator/switch-selector/switch-definitions"
 import { HMK_FIRMWARE_MAX_VERSION, type HMK_Options, type HMK_Calibration } from "$lib/libhmk"
 import { defaultActuation, type HMK_Actuation } from "$lib/libhmk/actuation"
 import {
@@ -151,10 +152,13 @@ export class DemoKeyboard implements Keyboard {
   }
   async startManualCalibration() {}
   async finishManualCalibration() {}
+  #switchLut = [...LINEAR_SWITCH_LUT]
   async getSwitchLut() {
-    return Array(1024).fill(0)
+    return this.#switchLut
   }
-  async setSwitchLut(_lut: number[]) {}
+  async setSwitchLut(lut: number[]) {
+    this.#switchLut = [...lut]
+  }
 
   async getKeymap({ profile }: GetKeymapParams) {
     return this.#state.profiles[profile].keymap

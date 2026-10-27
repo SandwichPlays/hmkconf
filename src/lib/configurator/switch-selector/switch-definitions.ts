@@ -22,7 +22,15 @@ export interface SupportedSwitch {
   housingColor: string
   description: string
   measured: boolean
+  curveName?: string
+  lut?: number[]
 }
+
+// 1024-entry completely linear distance LUT (maps normalized ADC 0..1023 to 0..10000)
+export const LINEAR_SWITCH_LUT: number[] = Array.from(
+  { length: 1024 },
+  (_, i) => Math.round((i * 10000) / 1023),
+)
 
 export const SUPPORTED_SWITCHES: SupportedSwitch[] = [
   {
@@ -32,8 +40,10 @@ export const SUPPORTED_SWITCHES: SupportedSwitch[] = [
     baseTravelMM: 0,
     stemColor: "#8b5cf6",
     housingColor: "rgba(139, 92, 246, 0.15)",
-    description: "Custom travel depth",
+    description: "Custom travel depth (linear curve)",
     measured: false,
+    curveName: "Linear",
+    lut: LINEAR_SWITCH_LUT,
   },
   {
     id: "yingying-dual-lights-max",

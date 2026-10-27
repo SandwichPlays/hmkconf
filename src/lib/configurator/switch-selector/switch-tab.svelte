@@ -127,6 +127,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         actuationQuery.setMany(updates)
       }
     }
+
+    if (targetSwitch.lut && keyboard.setSwitchLut) {
+      keyboard.setSwitchLut(targetSwitch.lut).catch(console.error)
+    }
   }
 </script>
 
