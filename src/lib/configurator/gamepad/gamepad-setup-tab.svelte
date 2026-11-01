@@ -17,7 +17,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import FixedScrollArea from "$lib/components/fixed-scroll-area.svelte"
   import { KeycodeButton } from "$lib/components/keycode-button"
   import Switch from "$lib/components/switch.svelte"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import { gamepadButtonToKeycode } from "$lib/keycodes/gamepad"
+  import { HMK_GamepadButton } from "$lib/libhmk/gamepad"
   import { unitToStyle } from "$lib/ui"
   import { cn, type WithoutChildren } from "$lib/utils"
   import type { HTMLAttributes } from "svelte/elements"
@@ -30,8 +33,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ...props
   }: WithoutChildren<HTMLAttributes<HTMLDivElement>> = $props()
 
+  const keyboard = keyboardContext.get()
   const gamepadState = gamepadStateContext.get()
   const { key } = $derived(gamepadState)
+  const selectedKeyIsAnalog = $derived(
+    key === null ? true : isAnalogKey(keyboard.metadata, key),
+  )
 
   const gamepadQuery = gamepadQueryContext.get()
   const { current: options } = $derived(gamepadQuery.gamepadOptions)
@@ -47,11 +54,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     </div>
     <div class="flex flex-wrap text-sm">
       {#each gamepadButtons as button (button)}
+        {@const isAnalogAxis =
+          button >= HMK_GamepadButton.LS_UP && button <= HMK_GamepadButton.RT}
+        {@const buttonDisabled = !selectedKeyIsAnalog && isAnalogAxis}
         <div class="p-0.5" style={unitToStyle()}>
           <KeycodeButton
+            class={buttonDisabled ? "opacity-45 cursor-not-allowed" : ""}
+            disabled={buttonDisabled}
             keycode={gamepadButtonToKeycode(button)}
             onclick={() => {
-              if (key === null) return
+              if (key === null || buttonDisabled) return
               gamepadQuery.setButtons({ offset: key, data: [button] })
               gamepadState.key = null
             }}

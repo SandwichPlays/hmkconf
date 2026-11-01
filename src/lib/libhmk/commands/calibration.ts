@@ -24,19 +24,34 @@ export async function recalibrate(commander: Commander) {
   await commander.sendCommand({ command: HMK_Command.RECALIBRATE })
 }
 
+const GET_CALIBRATION_MAX_KEYS = 59
+const SET_CALIBRATION_MAX_KEYS = 57
+
 export async function getCalibration(
   commander: Commander,
   numKeys: number,
 ): Promise<HMK_Calibration> {
-  const reader = new DataViewReader(
-    await commander.sendCommand({ command: HMK_Command.GET_CALIBRATION }),
-  )
-
-  const initialRestValue = reader.uint16()
-  const initialBottomOutThreshold = reader.uint16()
+  let initialRestValue = 0
+  let initialBottomOutThreshold = 0
   const switchTravel: number[] = []
-  for (let i = 0; i < numKeys; i++) {
-    switchTravel.push(reader.uint8())
+
+  for (let offset = 0; offset < numKeys; offset += GET_CALIBRATION_MAX_KEYS) {
+    const reader = new DataViewReader(
+      await commander.sendCommand({
+        command: HMK_Command.GET_CALIBRATION,
+        payload: [offset],
+      }),
+    )
+
+    initialRestValue = reader.uint16()
+    initialBottomOutThreshold = reader.uint16()
+    for (
+      let j = 0;
+      j < GET_CALIBRATION_MAX_KEYS && offset + j < numKeys;
+      j++
+    ) {
+      switchTravel.push(reader.uint8())
+    }
   }
 
   return {
@@ -53,14 +68,20 @@ export async function setCalibration(
   }: SetCalibrationParams,
   numKeys: number,
 ) {
-  await commander.sendCommand({
-    command: HMK_Command.SET_CALIBRATION,
-    payload: [
-      ...uint16ToUInt8s(initialRestValue),
-      ...uint16ToUInt8s(initialBottomOutThreshold),
-      ...switchTravel.slice(0, numKeys),
-    ],
-  })
+  const total = Math.min(numKeys, switchTravel.length)
+  for (let offset = 0; offset < total; offset += SET_CALIBRATION_MAX_KEYS) {
+    const part = switchTravel.slice(offset, offset + SET_CALIBRATION_MAX_KEYS)
+    await commander.sendCommand({
+      command: HMK_Command.SET_CALIBRATION,
+      payload: [
+        ...uint16ToUInt8s(initialRestValue),
+        ...uint16ToUInt8s(initialBottomOutThreshold),
+        offset,
+        part.length,
+        ...part,
+      ],
+    })
+  }
 }
 
 export async function saveCalibrationThreshold(commander: Commander) {

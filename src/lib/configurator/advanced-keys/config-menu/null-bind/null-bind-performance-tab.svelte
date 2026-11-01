@@ -19,6 +19,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { actuationQueryContext } from "$lib/configurator/queries/actuation-query.svelte"
   import { calibrationQueryContext } from "$lib/configurator/queries/calibration.query.svelte"
   import { distanceToUnit, SWITCH_DISTANCE_UNIT } from "$lib/distance"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import {
     DEFAULT_ACTUATION_POINT,
     DEFAULT_RT_SENSITIVITY,
@@ -34,9 +36,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ...props
   }: WithoutChildren<HTMLAttributes<HTMLDivElement>> = $props()
 
+  const keyboard = keyboardContext.get()
   const configMenuState = configMenuStateContext.get()
   const { key } = $derived(configMenuState.advancedKey)
   const action = $derived(configMenuState.advancedKey.action as HMK_AKNullBind)
+  const bothAnalog = $derived(
+    isAnalogKey(keyboard.metadata, key) &&
+      isAnalogKey(keyboard.metadata, action.secondaryKey),
+  )
 
   const actuationQuery = actuationQueryContext.get()
   const { current: actuationMap } = $derived(actuationQuery.actuationMap)
@@ -45,7 +52,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const { current: calibration } = $derived(calibrationQuery.calibration)
 
   const { disabled, currentActuation, rtEnabled } = $derived.by(() => {
-    if (!actuationMap) {
+    if (!actuationMap || !bothAnalog) {
       return { disabled: true } as const
     }
 

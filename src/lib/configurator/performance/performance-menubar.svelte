@@ -17,6 +17,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import * as KeyboardEditor from "$lib/components/keyboard-editor"
   import { Button } from "$lib/components/ui/button"
   import { Toggle } from "$lib/components/ui/toggle"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import { defaultActuation } from "$lib/libhmk/actuation"
   import { setToIntervals } from "$lib/utils"
   import {
@@ -25,10 +27,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } from "../context.svelte"
   import { actuationQueryContext } from "../queries/actuation-query.svelte"
 
+  const keyboard = keyboardContext.get()
   const performanceState = performanceStateContext.get()
   const { keys } = $derived(performanceState)
   const allKeys = $derived(
-    displayLayoutContext.get().displayKeys.map(({ key }) => key),
+    displayLayoutContext
+      .get()
+      .displayKeys.map(({ key }) => key)
+      .filter((key) => isAnalogKey(keyboard.metadata, key)),
   )
 
   const actuationQuery = actuationQueryContext.get()

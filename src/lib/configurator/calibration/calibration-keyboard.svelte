@@ -17,11 +17,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import * as KeyButton from "$lib/components/key-button"
   import { KeyboardEditorKeyboard } from "$lib/components/keyboard-editor"
   import { displayDistance } from "$lib/distance"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import { analogInfoQueryContext } from "../queries/analog-info-query.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
   import { calibrationStateContext } from "../context.svelte"
   import { developerModeState } from "$lib/developer-mode.svelte"
 
+  const keyboard = keyboardContext.get()
   const analogInfoQuery = analogInfoQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
   const calibrationState = calibrationStateContext.get()
@@ -34,6 +37,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   {#snippet keyGenerator(key)}
     {#if !analogInfo}
       <KeyButton.Skeleton />
+    {:else if !isAnalogKey(keyboard.metadata, key)}
+      <KeyButton.Root disabled class="opacity-45 cursor-not-allowed">
+        <span class="text-[10px] text-muted-foreground">DIGITAL</span>
+      </KeyButton.Root>
     {:else}
       {@const isSelected = calibrationState.selectedKey === key}
       {@const rawStatus = analogInfo[key]?.status ?? 0}

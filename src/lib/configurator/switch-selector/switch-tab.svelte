@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import SwitchGraphic from "$lib/components/switch-graphic.svelte"
   import { Button } from "$lib/components/ui/button"
   import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import { defaultActuation, type HMK_Actuation } from "$lib/libhmk/actuation"
   import { cn, setToIntervals, type WithoutChildren } from "$lib/utils"
   import type { ComponentProps } from "svelte"
@@ -41,7 +42,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const switchState = switchStateContext.get()
   const { keys } = $derived(switchState)
   const allKeys = $derived(
-    displayLayoutContext.get().displayKeys.map(({ key }) => key),
+    displayLayoutContext
+      .get()
+      .displayKeys.map(({ key }) => key)
+      .filter((key) => isAnalogKey(keyboard.metadata, key)),
   )
 
   const calibrationQuery = calibrationQueryContext.get()

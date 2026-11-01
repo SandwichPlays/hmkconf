@@ -16,6 +16,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
   import { KeyboardEditorKeyboard } from "$lib/components/keyboard-editor"
   import * as KeycodeButton from "$lib/components/keycode-button"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import { defaultAdvancedKey, HMK_AKType } from "$lib/libhmk/advanced-keys"
   import { Toggle } from "bits-ui"
   import { advancedKeysStateContext } from "../context.svelte"
@@ -23,6 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { advancedKeysQueryContext } from "../queries/advanced-keys-query.svelte"
   import { keymapQueryContext } from "../queries/keymap-query.svelte"
 
+  const keyboard = keyboardContext.get()
   const advancedKeysState = advancedKeysStateContext.get()
   const { layer, index, create } = $derived(advancedKeysState)
 
@@ -78,6 +81,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         disabled={create === null
           ? indexMatrix[layer][key] === null
           : indexMatrix[layer][key] !== null ||
+            (create.type === HMK_AKType.DYNAMIC_KEYSTROKE &&
+              !isAnalogKey(keyboard.metadata, key)) ||
             (!create.keys.includes(key) &&
               create.keys.every((key) => key !== null))}
         oncontextmenu={(e) => {

@@ -117,6 +117,7 @@ export const keyboardMetadataSchema = z
     numLayers: z.int().min(1).max(HMK_MAX_NUM_LAYERS),
     numKeys: z.int().min(1).max(HMK_MAX_NUM_KEYS),
     numAdvancedKeys: z.int().min(1).max(HMK_MAX_NUM_ADVANCED_KEYS),
+    analogKeys: z.array(uint8Schema).optional(),
     encoders: z
       .array(
         z.object({
@@ -186,6 +187,17 @@ export const keyboardMetadataSchema = z
   })
 
 export type KeyboardMetadata = z.infer<typeof keyboardMetadataSchema>
+
+export function isAnalogKey(metadata: KeyboardMetadata, key: number): boolean {
+  if (metadata.analogKeys !== undefined) {
+    return metadata.analogKeys.includes(key)
+  }
+  const encoders = metadata.encoders ?? metadata.layout.encoders ?? []
+  for (const enc of encoders) {
+    if (enc.keys.includes(key) || enc.buttonKey === key) return false
+  }
+  return true
+}
 
 export const oldDemoMetadata = keyboardMetadataSchema.parse({
   name: "Sando4",

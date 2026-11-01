@@ -22,16 +22,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import * as Tabs from "$lib/components/ui/tabs"
   import * as Tooltip from "$lib/components/ui/tooltip"
   import { nullBindBehaviorMetadata } from "$lib/configurator/lib/advanced-keys"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import {
     DEFAULT_BOTTOM_OUT_POINT,
+    HMK_NullBindBehavior,
     type HMK_AKNullBind,
   } from "$lib/libhmk/advanced-keys"
   import { configMenuStateContext } from "../context.svelte"
   import KeyTesterTab from "../key-tester-tab.svelte"
   import NullBindPerformanceTab from "./null-bind-performance-tab.svelte"
 
+  const keyboard = keyboardContext.get()
   const configMenuState = configMenuStateContext.get()
+  const { key } = $derived(configMenuState.advancedKey)
   const action = $derived(configMenuState.advancedKey.action as HMK_AKNullBind)
+  const bothAnalog = $derived(
+    isAnalogKey(keyboard.metadata, key) &&
+      isAnalogKey(keyboard.metadata, action.secondaryKey),
+  )
 </script>
 
 <FixedScrollArea class="flex flex-col gap-4 p-4 pt-0">
@@ -49,8 +58,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     }
   >
     {#each nullBindBehaviorMetadata as { behavior, title, description } (behavior)}
-      <div class="flex items-center gap-3">
-        <RadioGroup.Item id={String(behavior)} value={String(behavior)} />
+      {@const behaviorDisabled =
+        !bothAnalog && behavior === HMK_NullBindBehavior.DISTANCE}
+      <div class="flex items-center gap-3" class:opacity-50={behaviorDisabled}>
+        <RadioGroup.Item
+          disabled={behaviorDisabled}
+          id={String(behavior)}
+          value={String(behavior)}
+        />
         <div class="flex flex-1 items-center gap-2">
           <Label class="flex-1" for={String(behavior)}>{title}</Label>
           <Tooltip.Root>
@@ -74,6 +89,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         })
     }
     description="Enable this option to register both key presses when keys are fully pressed simultaneously, bypassing the resolution behavior."
+    disabled={!bothAnalog}
     id="alternative-fully-pressed-behavior"
     title="Alternative Fully Pressed Behavior"
   />

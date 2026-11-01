@@ -16,7 +16,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 <script lang="ts">
   import AreaSelect from "$lib/components/area-select.svelte"
   import { KeyboardEditorKeyboard } from "$lib/components/keyboard-editor"
+  import * as KeyButton from "$lib/components/key-button"
   import * as KeycodeButton from "$lib/components/keycode-button"
+  import { keyboardContext } from "$lib/keyboard"
+  import { isAnalogKey } from "$lib/keyboard/metadata"
   import { ToggleGroup } from "bits-ui"
   import { switchStateContext } from "../context.svelte"
   import { calibrationQueryContext } from "../queries/calibration.query.svelte"
@@ -24,6 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   import { getKeycodeMetadata } from "$lib/keycodes"
   import SwitchKeyButton from "./switch-key-button.svelte"
 
+  const keyboard = keyboardContext.get()
   const switchState = switchStateContext.get()
   const keymapQuery = keymapQueryContext.get()
   const calibrationQuery = calibrationQueryContext.get()
@@ -53,6 +57,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         {#snippet keyGenerator(key)}
           {#if !keymap}
             <KeycodeButton.Skeleton />
+          {:else if !isAnalogKey(keyboard.metadata, key)}
+            <KeyButton.Root disabled class="opacity-45 cursor-not-allowed">
+              <span class="text-[10px] text-muted-foreground">DIGITAL</span>
+            </KeyButton.Root>
           {:else}
             <ToggleGroup.Item
               data-selectable
