@@ -130,6 +130,12 @@ export const keyboardMetadataSchema = z
         }),
       )
       .optional(),
+    rgb: z
+      .object({
+        numLeds: z.int().min(1).max(256),
+        keyMap: z.array(uint8Schema.nullable()),
+      })
+      .optional(),
     layout: keyboardLayoutSchema,
     defaultKeymap: z.array(z.array(keycodeSchema)).optional(),
     defaultKeymaps: z.array(z.array(z.array(keycodeSchema))).optional(),
@@ -252,6 +258,10 @@ export const demoMetadata = keyboardMetadataSchema.parse({
   "numLayers": 4,
   "numKeys": 7,
   "numAdvancedKeys": 8,
+  "rgb": {
+    "numLeds": 4,
+    "keyMap": [0, 1, 2, 3]
+  },
   "layout": {
     "keymap": [
       [

@@ -15,10 +15,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 <script lang="ts">
   import * as Sidebar from "$lib/components/ui/sidebar"
+  import { keyboardContext } from "$lib/keyboard"
   import { Tabs } from "bits-ui"
   import { globalStateContext } from "../context.svelte"
   import { sidebarTabGroups } from "../lib/layout"
 
+  const keyboard = keyboardContext.get()
   const { tab } = $derived(globalStateContext.get())
 </script>
 
@@ -28,7 +30,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
       {group}
     </Sidebar.GroupLabel>
     <Sidebar.Menu>
-      {#each tabs as { label, value, icon: Icon } (value)}
+      {#each tabs.filter((t) => t.value !== "rgb" || keyboard.metadata.rgb !== undefined) as { label, value, icon: Icon } (value)}
         <Sidebar.MenuItem>
           <Tabs.Trigger {value}>
             {#snippet child({ props })}

@@ -32,6 +32,7 @@ import { GamepadQuery, gamepadQueryContext } from "./gamepad-query.svelte"
 import { KeymapQuery, keymapQueryContext } from "./keymap-query.svelte"
 import { OptionsQuery, optionsQueryContext } from "./options-query.svelte"
 import { ProfileQuery, profileQueryContext } from "./profile-query.svelte"
+import { RGBQuery, rgbQueryContext } from "./rgb-query.svelte"
 import { ScanRateQuery, scanRateQueryContext } from "./scan-rate-query.svelte"
 import { TickRateQuery, tickRateQueryContext } from "./tick-rate-query.svelte"
 
@@ -63,6 +64,7 @@ export function setConfiguratorQueryContext() {
   actuationQueryContext.set(new ActuationQuery())
   advancedKeysQueryContext.set(new AdvancedKeysQuery())
   gamepadQueryContext.set(new GamepadQuery())
+  rgbQueryContext.set(new RGBQuery())
   tickRateQueryContext.set(new TickRateQuery())
   scanRateQueryContext.set(new ScanRateQuery())
   // Profile query depends on all other queries.

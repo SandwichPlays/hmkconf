@@ -59,6 +59,12 @@ import {
 } from "$lib/libhmk/commands/profile"
 import { reboot } from "$lib/libhmk/commands/reboot"
 import { getSerial } from "$lib/libhmk/commands/serial"
+import {
+  getRGBColors,
+  getRGBOptions,
+  setRGBColors,
+  setRGBOptions,
+} from "$lib/libhmk/commands/rgb"
 import { getSwitchLut, setSwitchLut } from "$lib/libhmk/commands/switch-lut"
 import { getTickRate, setTickRate } from "$lib/libhmk/commands/tick-rate"
 import { displayVersion, isWebHIDSSupported } from "$lib/utils"
@@ -69,6 +75,8 @@ import type {
   GetGamepadButtonsParams,
   GetGamepadOptionsParams,
   GetKeymapParams,
+  GetRGBColorsParams,
+  GetRGBOptionsParams,
   GetTickRateParams,
   Keyboard,
   ResetProfileParams,
@@ -80,6 +88,8 @@ import type {
   SetGamepadOptionsParams,
   SetKeymapParams,
   SetOptionsParams,
+  SetRGBColorsParams,
+  SetRGBOptionsParams,
   SetTickRateParams,
 } from "."
 import { Commander } from "./commander"
@@ -219,6 +229,18 @@ class HMKKeyboard implements Keyboard {
   }
   setGamepadOptions(params: SetGamepadOptionsParams) {
     return setGamepadOptions(this.commander, params)
+  }
+  getRGBOptions(params: GetRGBOptionsParams) {
+    return getRGBOptions(this.commander, params)
+  }
+  setRGBOptions(params: SetRGBOptionsParams) {
+    return setRGBOptions(this.commander, params)
+  }
+  getRGBColors(params: GetRGBColorsParams) {
+    return getRGBColors(this.commander, this.metadata, params)
+  }
+  setRGBColors(params: SetRGBColorsParams) {
+    return setRGBColors(this.commander, params)
   }
 }
 

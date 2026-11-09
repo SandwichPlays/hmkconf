@@ -23,6 +23,12 @@ import {
   type HMK_AdvancedKey,
 } from "$lib/libhmk/advanced-keys"
 import { HMK_GamepadButton, type HMK_GamepadOptions } from "$lib/libhmk/gamepad"
+import {
+  defaultRGBColor,
+  defaultRGBOptions,
+  type HMK_RGBColor,
+  type HMK_RGBOptions,
+} from "$lib/libhmk/rgb"
 import type {
   DuplicateProfileParams,
   GetActuationMapParams,
@@ -30,6 +36,8 @@ import type {
   GetGamepadButtonsParams,
   GetGamepadOptionsParams,
   GetKeymapParams,
+  GetRGBColorsParams,
+  GetRGBOptionsParams,
   GetTickRateParams,
   Keyboard,
   ResetProfileParams,
@@ -41,12 +49,15 @@ import type {
   SetGamepadOptionsParams,
   SetKeymapParams,
   SetOptionsParams,
+  SetRGBColorsParams,
+  SetRGBOptionsParams,
   SetTickRateParams,
 } from "."
 import { demoMetadata } from "./metadata"
 
 const { adcResolution, numProfiles, numKeys, numAdvancedKeys, defaultKeymaps } =
   demoMetadata
+const numRgbColors = Math.max(numKeys, demoMetadata.rgb?.numLeds ?? 0)
 
 type DemoKeyboardProfileState = {
   keymap: number[][]
@@ -55,6 +66,8 @@ type DemoKeyboardProfileState = {
   gamepadButtons: number[]
   gamepadOptions: HMK_GamepadOptions
   tickRate: number
+  rgbOptions: HMK_RGBOptions
+  rgbColors: HMK_RGBColor[]
 }
 
 function defaultProfile(profile: number): DemoKeyboardProfileState {
@@ -71,6 +84,10 @@ function defaultProfile(profile: number): DemoKeyboardProfileState {
       snappyJoystick: true,
     },
     tickRate: DEFAULT_TICK_RATE,
+    rgbOptions: structuredClone(defaultRGBOptions),
+    rgbColors: Array.from({ length: numRgbColors }, () => ({
+      ...defaultRGBColor,
+    })),
   }
 }
 
@@ -203,5 +220,19 @@ export class DemoKeyboard implements Keyboard {
   }
   async setTickRate({ profile, data }: SetTickRateParams) {
     this.#state.profiles[profile].tickRate = data
+  }
+  async getRGBOptions({ profile }: GetRGBOptionsParams) {
+    return this.#state.profiles[profile].rgbOptions
+  }
+  async setRGBOptions({ profile, data }: SetRGBOptionsParams) {
+    this.#state.profiles[profile].rgbOptions = data
+  }
+  async getRGBColors({ profile }: GetRGBColorsParams) {
+    return this.#state.profiles[profile].rgbColors
+  }
+  async setRGBColors({ profile, offset, data }: SetRGBColorsParams) {
+    for (let i = 0; i < data.length; i++) {
+      this.#state.profiles[profile].rgbColors[offset + i] = data[i]
+    }
   }
 }

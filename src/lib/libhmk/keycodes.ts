@@ -199,6 +199,13 @@ export enum Keycode {
   SP_PROFILE_SWAP = 0xd2,
   SP_PROFILE_NEXT = 0xd3,
   SP_BOOT = 0xd4,
+  SP_RGB_TOG = 0xd5,
+  SP_RGB_MOD = 0xd6,
+  SP_RGB_RMOD = 0xd7,
+  SP_RGB_VAI = 0xd8,
+  SP_RGB_VAD = 0xd9,
+  SP_RGB_SPI = 0xda,
+  SP_RGB_SPD = 0xdb,
 
   XXXXXXX = KC_NO,
   _______ = KC_TRANSPARENT,
@@ -307,6 +314,13 @@ export enum Keycode {
   LY_LOCK = SP_LAYER_LOCK,
   PF_SWAP = SP_PROFILE_SWAP,
   PF_NEXT = SP_PROFILE_NEXT,
+  RGB_TOG = SP_RGB_TOG,
+  RGB_MOD = SP_RGB_MOD,
+  RGB_RMOD = SP_RGB_RMOD,
+  RGB_VAI = SP_RGB_VAI,
+  RGB_VAD = SP_RGB_VAD,
+  RGB_SPI = SP_RGB_SPI,
+  RGB_SPD = SP_RGB_SPD,
 
   // Advanced key keycodes (for UI only)
   AK_NULL_BIND_PRIMARY = 0x100,

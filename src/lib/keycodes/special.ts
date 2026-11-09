@@ -186,6 +186,55 @@ export const specialKeycodeMetadata: KeycodeMetadata[] = [
     webCodes: [],
     category: "Special",
   },
+  {
+    name: "RGB\nToggle",
+    tooltip: "Toggle RGB Lighting On/Off",
+    keycode: Keycode.SP_RGB_TOG,
+    webCodes: [],
+    category: "Special",
+  },
+  {
+    name: "RGB\nMode +",
+    tooltip: "Next RGB Lighting Effect",
+    keycode: Keycode.SP_RGB_MOD,
+    webCodes: [],
+    category: "Special",
+  },
+  {
+    name: "RGB\nMode -",
+    tooltip: "Previous RGB Lighting Effect",
+    keycode: Keycode.SP_RGB_RMOD,
+    webCodes: [],
+    category: "Special",
+  },
+  {
+    name: "RGB\nBri +",
+    tooltip: "Increase RGB Brightness",
+    keycode: Keycode.SP_RGB_VAI,
+    webCodes: [],
+    category: "Special",
+  },
+  {
+    name: "RGB\nBri -",
+    tooltip: "Decrease RGB Brightness",
+    keycode: Keycode.SP_RGB_VAD,
+    webCodes: [],
+    category: "Special",
+  },
+  {
+    name: "RGB\nSpd +",
+    tooltip: "Increase RGB Effect Speed",
+    keycode: Keycode.SP_RGB_SPI,
+    webCodes: [],
+    category: "Special",
+  },
+  {
+    name: "RGB\nSpd -",
+    tooltip: "Decrease RGB Effect Speed",
+    keycode: Keycode.SP_RGB_SPD,
+    webCodes: [],
+    category: "Special",
+  },
 ]
 
 export function getSpecialKeycodes(numLayers: number) {
@@ -210,5 +259,12 @@ export function getSpecialKeycodes(numLayers: number) {
     ...[...Array(numLayers)].map((_, i) => MO(i)),
     Keycode.SP_LAYER_LOCK,
     Keycode.SP_BOOT,
+    Keycode.SP_RGB_TOG,
+    Keycode.SP_RGB_MOD,
+    Keycode.SP_RGB_RMOD,
+    Keycode.SP_RGB_VAI,
+    Keycode.SP_RGB_VAD,
+    Keycode.SP_RGB_SPI,
+    Keycode.SP_RGB_SPD,
   ]
 }

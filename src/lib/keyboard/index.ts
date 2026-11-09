@@ -18,6 +18,7 @@ import type { HMK_Actuation } from "$lib/libhmk/actuation"
 import type { HMK_AdvancedKey } from "$lib/libhmk/advanced-keys"
 import type { HMK_AnalogInfo, HMK_ScanRate } from "$lib/libhmk/commands"
 import type { HMK_GamepadOptions } from "$lib/libhmk/gamepad"
+import type { HMK_RGBColor, HMK_RGBOptions } from "$lib/libhmk/rgb"
 import { Context } from "runed"
 import type { KeyboardMetadata } from "./metadata"
 
@@ -51,6 +52,11 @@ export type GetGamepadButtonsParams = GetProfileParams
 export type SetGamepadButtonsParams = SetProfileArrayParams<number>
 export type GetGamepadOptionsParams = GetProfileParams
 export type SetGamepadOptionsParams = SetProfileParams<HMK_GamepadOptions>
+
+export type GetRGBOptionsParams = GetProfileParams
+export type SetRGBOptionsParams = SetProfileParams<HMK_RGBOptions>
+export type GetRGBColorsParams = GetProfileParams
+export type SetRGBColorsParams = SetProfileArrayParams<HMK_RGBColor>
 
 export type KeyboardState = {
   id: string
@@ -97,6 +103,10 @@ export type KeyboardAction = {
     params: GetGamepadOptionsParams,
   ): Promise<HMK_GamepadOptions>
   setGamepadOptions(params: SetGamepadOptionsParams): Promise<void>
+  getRGBOptions(params: GetRGBOptionsParams): Promise<HMK_RGBOptions>
+  setRGBOptions(params: SetRGBOptionsParams): Promise<void>
+  getRGBColors(params: GetRGBColorsParams): Promise<HMK_RGBColor[]>
+  setRGBColors(params: SetRGBColorsParams): Promise<void>
 }
 
 export type Keyboard = KeyboardState & KeyboardAction

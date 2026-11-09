@@ -28,6 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const switchTab = import("./switch-selector/switch-tab.svelte")
   const advancedKeysTab = import("./advanced-keys/advanced-keys-tab.svelte")
   const gamepadTab = import("./gamepad/gamepad-tab.svelte")
+  const rgbTab = import("./rgb/rgb-tab.svelte")
   const calibrationTab = import("./calibration/calibration-tab.svelte")
   const settingsTab = import("./settings/settings-tab.svelte")
 
@@ -77,6 +78,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <Tabs.Content value="gamepad" class="outline-none">
       {#snippet child({ props })}
         <GamepadTab {...props} />
+      {/snippet}
+    </Tabs.Content>
+  {/await}
+  {#await rgbTab then { default: RGBTab }}
+    <Tabs.Content value="rgb" class="outline-none">
+      {#snippet child({ props })}
+        <RGBTab {...props} />
       {/snippet}
     </Tabs.Content>
   {/await}

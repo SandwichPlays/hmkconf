@@ -156,6 +156,20 @@ export const gamepadStateContext = new Context<ConfiguratorGamepadState>(
   "hmk-gamepad-state",
 )
 
+export class ConfiguratorRGBState {
+  leds = new SvelteSet<number>()
+  showKeymap = $state(true)
+
+  reset() {
+    this.leds.clear()
+    this.showKeymap = true
+  }
+}
+
+export const rgbStateContext = new Context<ConfiguratorRGBState>(
+  "hmk-rgb-state",
+)
+
 export type ConfiguratorTabs =
   | "profiles"
   | "remap"
@@ -163,6 +177,7 @@ export type ConfiguratorTabs =
   | "switch-selector"
   | "advanced-keys"
   | "gamepad"
+  | "rgb"
   | "calibration"
   | "settings"
 
@@ -175,6 +190,7 @@ export class ConfiguratorGlobalState {
   #switchState: ConfiguratorSwitchState
   #advancedKeysState: ConfiguratorAdvancedKeysState
   #gamepadState: ConfiguratorGamepadState
+  #rgbState: ConfiguratorRGBState
 
   constructor() {
     this.#remapState = remapStateContext.get()
@@ -182,6 +198,7 @@ export class ConfiguratorGlobalState {
     this.#switchState = switchStateContext.get()
     this.#advancedKeysState = advancedKeysStateContext.get()
     this.#gamepadState = gamepadStateContext.get()
+    this.#rgbState = rgbStateContext.get()
   }
 
   setProfile(profile: number) {
@@ -191,6 +208,7 @@ export class ConfiguratorGlobalState {
     this.#switchState.reset()
     this.#advancedKeysState.reset()
     this.#gamepadState.reset()
+    this.#rgbState.reset()
   }
 }
 
@@ -368,6 +386,7 @@ export function setConfiguratorStateContext() {
   switchStateContext.set(new ConfiguratorSwitchState())
   advancedKeysStateContext.set(new ConfiguratorAdvancedKeysState())
   gamepadStateContext.set(new ConfiguratorGamepadState())
+  rgbStateContext.set(new ConfiguratorRGBState())
   calibrationStateContext.set(new ConfiguratorCalibrationState())
   // Global state depends on all other states.
   globalStateContext.set(new ConfiguratorGlobalState())
