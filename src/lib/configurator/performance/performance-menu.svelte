@@ -182,7 +182,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           calibration={calibration}
           description="Set point to activate keypress"
           {disabled}
-          min={0.01}
+          min={0.001}
           title="Actuation Point"
         />
       </div>

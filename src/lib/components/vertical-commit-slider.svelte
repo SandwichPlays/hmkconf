@@ -65,7 +65,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   const isInteractionDisabled = $derived(disabled || locked)
   const minVal = $derived(min ?? 0)
   const maxVal = $derived(max ?? 4.0)
-  const stepVal = $derived(step ?? 0.01)
+  const stepVal = $derived(step ?? 0.001)
 
   const range = $derived(maxVal > minVal ? maxVal - minVal : 1)
   const pct = $derived(Math.max(0, Math.min(100, ((value - minVal) / range) * 100)))
@@ -147,7 +147,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           }
         }}
         class={cn(
-          "w-14 text-center bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          "w-16 text-center bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
           locked && "cursor-not-allowed opacity-75"
         )}
       />

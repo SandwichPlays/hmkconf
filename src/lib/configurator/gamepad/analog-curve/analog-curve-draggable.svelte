@@ -45,7 +45,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   let isDragging = $state(false)
   let tooltipOpen = $state(false)
 
-  const pointMM = $derived(((analogCurve[index].x / 255) * travel).toFixed(2))
+  const pointMM = $derived(((analogCurve[index].x / 255) * travel).toFixed(3))
 
   const onmousemove = (e: MouseEvent) => {
     if (!isDragging) return

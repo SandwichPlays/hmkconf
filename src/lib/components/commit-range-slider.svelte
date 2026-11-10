@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     description,
     min = 0,
     max = 4.0,
-    step = 0.01,
+    step = 0.001,
     committed = $bindable([0, 4.0]),
     display,
     mode = "sensitivity",
@@ -182,7 +182,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               onCommit?.([value[0], value[1]])
             }
           }}
-          class="w-12 text-right bg-transparent text-xs font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          class="w-14 text-right bg-transparent text-xs font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <span class="text-muted-foreground">mm</span>
       </div>
@@ -206,7 +206,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
               onCommit?.([value[0], value[1]])
             }
           }}
-          class="w-12 text-right bg-transparent text-xs font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          class="w-14 text-right bg-transparent text-xs font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <span class="text-muted-foreground">mm</span>
       </div>

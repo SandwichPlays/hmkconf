@@ -291,12 +291,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.font = "10px ui-monospace, monospace"
     ctx.textAlign = "left"
     ctx.fillText(
-      `${currentMode === "distance" ? smoothMin.toFixed(2) + " mm" : smoothMin.toFixed(0)}`,
+      `${currentMode === "distance" ? smoothMin.toFixed(3) + " mm" : smoothMin.toFixed(0)}`,
       8,
       14,
     )
     ctx.fillText(
-      `${currentMode === "distance" ? smoothMax.toFixed(2) + " mm" : smoothMax.toFixed(0)}`,
+      `${currentMode === "distance" ? smoothMax.toFixed(3) + " mm" : smoothMax.toFixed(0)}`,
       8,
       h - 6,
     )
@@ -403,7 +403,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
           <span class="font-mono text-base font-bold {noisePeakToPeak <= 3 ? 'text-emerald-400' : noisePeakToPeak <= 8 ? 'text-amber-400' : 'text-rose-400'}">
             {currentMode === "adc"
               ? `±${(noisePeakToPeak / 2).toFixed(1)} counts`
-              : `±${(noisePeakToPeak / 2).toFixed(2)} mm`}
+              : `±${(noisePeakToPeak / 2).toFixed(3)} mm`}
           </span>
         </div>
       {/if}
