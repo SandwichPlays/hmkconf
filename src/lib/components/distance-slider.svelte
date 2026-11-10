@@ -28,7 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     committed = $bindable(),
     min,
     max,
-    step = 0.001,
+    step = 0.01,
     onCommit,
     keyIndex,
     calibration,
@@ -39,7 +39,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
   } = $props()
 
   const travel = $derived(getSwitchDistanceMM(keyIndex, calibration))
-  const sliderMin = $derived(min ?? 0.001)
+  const sliderMin = $derived(min ?? 0.01)
   const sliderMax = $derived(max ?? travel)
 </script>
 
@@ -48,7 +48,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     () => optMap(committed, (v) => distanceToMM(v, keyIndex, calibration)),
     (v) => (committed = optMap(v, (m) => mmToDistance(m, keyIndex, calibration)))
   }
-  display={(v) => `${v.toFixed(3)}mm`}
+  display={(v) => `${v.toFixed(2)}mm`}
   min={sliderMin}
   max={sliderMax}
   {step}

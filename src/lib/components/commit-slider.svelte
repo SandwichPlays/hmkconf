@@ -72,7 +72,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <div class="flex items-center gap-1 shrink-0 bg-muted/40 border rounded-md px-1.5 py-0.5">
       <input
         type="number"
-        step={step ?? 0.001}
+        step={step ?? 0.01}
         min={min ?? 0}
         max={max ?? 100}
         {disabled}
@@ -86,7 +86,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
             onCommit?.(value)
           }
         }}
-        class="w-16 text-right bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        class="w-14 text-right bg-transparent text-sm font-semibold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
     </div>
   </div>
