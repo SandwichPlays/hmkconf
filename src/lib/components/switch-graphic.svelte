@@ -223,7 +223,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     <!-- Travel readout -->
     <div class="mt-1 flex flex-col items-center">
       <span class="text-xs font-bold text-foreground">
-        {currentMM.toFixed(3)} <span class="text-[10px] text-muted-foreground font-normal">mm</span>
+        {currentMM.toFixed(2)} <span class="text-[10px] text-muted-foreground font-normal">mm</span>
       </span>
       <span class="text-[9px] uppercase tracking-wider text-muted-foreground">
         Stem Position

@@ -290,13 +290,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
     ctx.fillStyle = "#64748b"
     ctx.font = "10px ui-monospace, monospace"
     ctx.textAlign = "left"
+    const decimals = developerModeState.enabled ? 3 : 2
     ctx.fillText(
-      `${currentMode === "distance" ? smoothMin.toFixed(3) + " mm" : smoothMin.toFixed(0)}`,
+      `${currentMode === "distance" ? smoothMin.toFixed(decimals) + " mm" : smoothMin.toFixed(0)}`,
       8,
       14,
     )
     ctx.fillText(
-      `${currentMode === "distance" ? smoothMax.toFixed(3) + " mm" : smoothMax.toFixed(0)}`,
+      `${currentMode === "distance" ? smoothMax.toFixed(decimals) + " mm" : smoothMax.toFixed(0)}`,
       8,
       h - 6,
     )
@@ -389,7 +390,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
         <span class="font-mono text-base font-bold text-primary transition-all {isPressedLive ? 'brightness-125 drop-shadow-[0_0_8px_rgba(var(--app-accent-rgb),0.6)]' : 'opacity-85'}">
           {#if analogInfo && analogInfo[selectedKey]}
             {currentMode === "distance"
-              ? displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration)
+              ? displayDistance(analogInfo[selectedKey].distance, selectedKey, calibration, developerModeState.enabled ? 3 : 2)
               : analogInfo[selectedKey].adcValue}
           {:else}
             --
